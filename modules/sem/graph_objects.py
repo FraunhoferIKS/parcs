@@ -1,5 +1,5 @@
-from modules.utils import exp_prob, mask_matrix, is_acyclic, topological_sort
-from modules import mapping_functions
+from modules.sem.utils import exp_prob, mask_matrix, is_acyclic, topological_sort
+from modules.sem import mapping_functions
 import numpy as np
 import pandas as pd
 from scipy.special import comb

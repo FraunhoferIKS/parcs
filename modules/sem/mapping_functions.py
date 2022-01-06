@@ -1,4 +1,4 @@
-from modules.utils import *
+from modules.sem.utils import *
 import numpy as np
 from scipy.stats import beta, gamma
 from scipy.special import expit

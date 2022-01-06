@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from modules.utils import *
+from modules.sem.utils import *
 from sklearn.preprocessing import minmax_scale
 from sklearn.preprocessing import PolynomialFeatures
 
