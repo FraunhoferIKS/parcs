@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from scipy.special import comb
 from itertools import product
+from matplotlib import pyplot as plt
 
 # =====================================
 
@@ -603,8 +604,8 @@ class Structure:
             v.calc_output()
         self.data = pd.DataFrame({v: self.nodes[v].value['output'] for v in self.nodes})
         return self.data
-
-    def determinize_node(self, ):
+    # TODO: what is this down here?!
+    # def determinize_node(self, ):
 
 
 class AutoEncoderSimulator(Structure):
