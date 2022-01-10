@@ -5,19 +5,16 @@ import numpy as np
 
 class Edge:
     def __init__(self,
-                 parent=None,
-                 child=None,
-                 complexity=None):
+                 parent: str = 'dummy',
+                 child: str = 'dummy',
+                 complexity: float = 0):
         self.parent = parent
         self.child = child
-        if complexity is None:
-            self.complexity = 0
-        else:
-            self.complexity = complexity
+        self.complexity = complexity
 
         self.edge_function = {
             'name': None,
-            'function': None,
+            'function': mapping_functions.edge_empty,
             'params': {}
         }
         self.is_random = {
@@ -27,7 +24,7 @@ class Edge:
 
         # options list attributes
         self.function_list = {}
-        self.make_function_list()
+        self._make_function_list()
 
         # output values
         self.value = np.array([])
@@ -41,35 +38,33 @@ class Edge:
             'is_random': self.is_random
         }
 
-    def get_function_options(self):
+    def _get_function_options(self):
         return []
 
-    def get_param_options(self, function=None):
+    def _get_param_options(self, function=None):
         return {}
 
-    def make_function_list(self):
+    def _make_function_list(self):
         pass
 
-    def get_function_probs(self):
+    def _get_function_probs(self):
         return exp_prob(
             complexity=self.complexity,
-            num_categories=len(self.get_function_options())
+            num_categories=len(self._get_function_options())
         )
 
-    def set_random_function(self):
+    def _set_random_function(self):
         function_name = np.random.choice(
-            self.get_function_options(),
-            p=self.get_function_probs()
+            self._get_function_options(),
+            p=self._get_function_probs()
         )
         self.is_random['function'] = True
         self.edge_function['name'] = function_name
         self.edge_function['function'] = self.function_list[function_name]
         return self
 
-    def set_random_function_params(self):
-        param_options = self.get_param_options(
-            function=self.edge_function['name']
-        )
+    def _set_random_function_params(self):
+        param_options = self._get_param_options(function=self.edge_function['name'])
         for param in param_options:
             options = param_options[param]
             if isinstance(options, list):
@@ -97,8 +92,8 @@ class Edge:
         return self
 
     def random_initiate(self):
-        self.set_random_function()
-        self.set_random_function_params()
+        self._set_random_function()
+        self._set_random_function_params()
         return self
 
     def map(self, array=None):
@@ -120,13 +115,13 @@ class BinaryInputEdge(Edge):
             complexity=complexity
         )
 
-    def get_function_options(self):
+    def _get_function_options(self):
         return (
             'identity',
             'beta_noise'
         )
 
-    def get_param_options(self, function=None):
+    def _get_param_options(self, function=None):
         options = {
             'identity': {},
             'beta_noise': {
@@ -135,7 +130,7 @@ class BinaryInputEdge(Edge):
         }
         return options[function]
 
-    def make_function_list(self):
+    def _make_function_list(self):
         self.function_list = {
             'identity': mapping_functions.edge_binary_identity,
             'beta_noise': mapping_functions.edge_binary_beta
@@ -153,13 +148,13 @@ class ContinuousInputEdge(Edge):
             complexity=complexity
         )
 
-    def get_function_options(self):
+    def _get_function_options(self):
         return (
             'sigmoid',
             'gaussian_rbf'
         )
 
-    def get_param_options(self, function=None):
+    def _get_param_options(self, function=None):
         options = {
             'sigmoid': {
                 'alpha': [1, 6],
@@ -178,7 +173,7 @@ class ContinuousInputEdge(Edge):
         }
         return options[function]
 
-    def make_function_list(self):
+    def _make_function_list(self):
         self.function_list = {
             'sigmoid': mapping_functions.edge_sigmoid,
             'gaussian_rbf': mapping_functions.edge_gaussian_rbf

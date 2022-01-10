@@ -3,7 +3,7 @@ import pandas as pd
 from modules.univariate_timeseries.tsn import (
     trend_functions, seasonality_functions, noise_functions
 )
-from modules.sem.graph_objects import Structure
+from modules.sem.structures import SimpleStructure
 
 
 class TSNCore:
@@ -88,7 +88,7 @@ class TSN:
         }
         self.param_constraints = {**t_param_constraints, **s_param_constraints, **n_param_constraints}
 
-        self.sem_sim = Structure(
+        self.sem_sim = SimpleStructure(
             adj_matrix=pd.DataFrame(
                 np.zeros(shape=(num_params, num_params)),
                 index=params,
