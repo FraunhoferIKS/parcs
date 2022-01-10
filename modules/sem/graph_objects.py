@@ -6,7 +6,6 @@ from scipy.special import comb
 from itertools import product
 from matplotlib import pyplot as plt
 
-# =====================================
 
 class Edge:
     def __init__(self,
@@ -16,9 +15,9 @@ class Edge:
         self.parent = parent
         self.child = child
         if complexity is None:
-            self.complexity = complexity
-        else:
             self.complexity = 0
+        else:
+            self.complexity = complexity
 
         self.edge_function = {
             'name': None,
@@ -659,18 +658,21 @@ class AutoEncoderSimulator(Structure):
         return self.data
 
 
+# if __name__ == '__main__':
+#     a = AutoEncoderSimulator(
+#         num_latent_vars=2,
+#         num_nodes_in_hidden_layers=[2, 5, 10],
+#         output_layer_dtype_list=['continuous']*20,
+#         complexity=0
+#     )
+#     a.sample(size=1000)
+#     plt.scatter(a.data.x1, a.data.x2, c=a.data.x3)
+#     plt.show()
+
+
 if __name__ == '__main__':
-    a = AutoEncoderSimulator(
-        num_latent_vars=2,
-        num_nodes_in_hidden_layers=[2, 5, 10],
-        output_layer_dtype_list=['continuous']*20,
-        complexity=0
-    )
-    a.sample(size=1000)
-    plt.scatter(a.data.x1, a.data.x2, c=a.data.x3)
-    plt.show()
-
-
+    e = Edge(complexity=0.8)
+    print(e.complexity)
 
 # if __name__ == '__main__':
 #     from pprint import pprint
