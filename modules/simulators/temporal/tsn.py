@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
-from modules.univariate_timeseries.tsn import (
-    trend_functions, seasonality_functions, noise_functions
+from modules.simulators.temporal.utils import (
+    seasonality_functions
 )
+from modules.simulators.temporal.utils import noise_functions, trend_functions
 from modules.sem.structures import SimpleStructure
 
 
