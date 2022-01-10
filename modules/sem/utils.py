@@ -14,10 +14,6 @@ def exp_prob(complexity=None, num_categories=None):
     ]
     return [p / sum(P) for p in P]
 
-def get_random_cut(array: np.ndarray = None, lower_bound=0.1, upper_bound=0.9):
-    range_ = array.max() - array.min()
-    cut = np.random.uniform(low=lower_bound, high=upper_bound)
-    return range_ * cut + array.min()
 
 def mask_matrix(matrix=None, mask=None, mask_value=0):
 
@@ -28,6 +24,7 @@ def mask_matrix(matrix=None, mask=None, mask_value=0):
             else mask_value for j in range(n)
         ] for i in range(n)
     ])
+
 
 def topological_sort(adj_matrix: pd.DataFrame = None):
     adjm = adj_matrix.copy(deep=True).values
@@ -49,6 +46,7 @@ def topological_sort(adj_matrix: pd.DataFrame = None):
         adjm[:, parent_inds] = 10
     return [adj_matrix.columns.tolist()[idx] for idx in ordered_list]
 
+
 def is_acyclic(adj_matrix=None):
     try:
         topological_sort(adj_matrix=adj_matrix)
@@ -56,8 +54,9 @@ def is_acyclic(adj_matrix=None):
     except AssertionError:
         return False
 
+
 if __name__ == '__main__':
     import pandas as pd
     x = pd.DataFrame([[1, 1], [2, 0], [1, 0]], columns=('a','b'))
-    x['c'] = x['a'].mask(x['b']==0, np.nan)
+    x['c'] = x['a'].mask(x['b'] == 0, np.nan)
     print(x)

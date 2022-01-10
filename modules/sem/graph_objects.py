@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 from scipy.special import comb
 from itertools import product
-from matplotlib import pyplot as plt
 
 
 class Edge:
@@ -553,7 +552,7 @@ class Structure:
             'continuous': ContinuousInputEdge,
             'binary': BinaryInputEdge
         }
-        self.complexity=complexity
+        self.complexity = complexity
 
         self.data = pd.DataFrame([], columns=adj_matrix.columns)
 
@@ -565,7 +564,7 @@ class Structure:
         self.nodes = {
             c: self.node_dict[node_types[c]](
                 name=c,
-                parents=adjm[adjm[c]==1].index.tolist(),
+                parents=adjm[adjm[c] == 1].index.tolist(),
                 complexity=self.complexity
             ) for c in adjm.columns
         }
