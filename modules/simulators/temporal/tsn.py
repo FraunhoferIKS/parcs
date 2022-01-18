@@ -1,9 +1,10 @@
 import numpy as np
 import pandas as pd
-from modules.univariate_timeseries.tsn import (
-    trend_functions, seasonality_functions, noise_functions
+from modules.simulators.temporal.utils import (
+    seasonality_functions
 )
-from modules.sem.graph_objects import Structure
+from modules.simulators.temporal.utils import noise_functions, trend_functions
+from modules.sem.structures import SimpleStructure
 
 
 class TSNCore:
@@ -88,7 +89,7 @@ class TSN:
         }
         self.param_constraints = {**t_param_constraints, **s_param_constraints, **n_param_constraints}
 
-        self.sem_sim = Structure(
+        self.sem_sim = SimpleStructure(
             adj_matrix=pd.DataFrame(
                 np.zeros(shape=(num_params, num_params)),
                 index=params,
@@ -104,7 +105,7 @@ class TSN:
         )
 
     @staticmethod
-    def _recale_param(values=None, ranges=None):
+    def _rescale_param(values=None, ranges=None):
         [min_f, max_f] = ranges
         [min_i, max_i] = [values.min(), values.max()]
         # rescale-locate
@@ -118,10 +119,8 @@ class TSN:
         self.param_samples = self.sem_sim.sample(size=size)
         # re-scale
         for c in self.param_samples.columns:
-            self.param_samples[c] = self._recale_param(
-                values=self.param_samples[c].values,
-                ranges=self.param_constraints[c]
-            )
+            self.param_samples[c] = self._rescale_param(values=self.param_samples[c].values,
+                                                        ranges=self.param_constraints[c])
 
         # prep param samples
         param_samples = {
@@ -146,15 +145,21 @@ class TSN:
 
 
 if __name__ == '__main__':
+    from matplotlib import pyplot as plt
+    from numpy import linspace
+
     tsn = TSN(
         trend_function='linear',
         seasonality_function='sine',
-        noise_function='gaussian_1',
-        composition='multiplicative'
+        noise_function='gaussian_0',
+        composition='additive'
     )
-    from numpy import linspace
-    ts_samples = tsn.sample(size=3, time_range=linspace(0, 10, 50))
-    from matplotlib import pyplot as plt
+    ts_samples = tsn.sample(size=4, time_range=linspace(0, 10, 50))
+    print('TSN params:')
+    print(tsn.sem_sim.data)
+    print('=======================')
+    print('timeseries data:')
+    print(ts_samples)
     for ts in ts_samples:
         plt.plot(linspace(0, 10, 50), ts)
     plt.show()

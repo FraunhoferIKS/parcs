@@ -1,4 +1,4 @@
-from modules.sem.graph_objects import AutoEncoderSimulator
+from modules.sem.structures import AutoEncoderSimulator
 import numpy as np
 
 

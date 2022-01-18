@@ -1,9 +1,6 @@
-from modules.sem.utils import *
 import numpy as np
 from scipy.stats import beta, gamma
 from scipy.special import expit
-from matplotlib import pyplot as plt
-from sklearn.preprocessing import minmax_scale
 from sklearn.preprocessing import PolynomialFeatures
 
 # TODO: std_V and var_V should be checked, both in paper and code
@@ -11,6 +8,13 @@ from sklearn.preprocessing import PolynomialFeatures
 # TODO: should gamma noise += (min + 1) to fix support to (0, inf) (in paper)
 # TODO: no-parent nodes launched only by Gaussian normal distribution
 # TODO: Catch Overflow warning for exponent
+
+
+def edge_empty(**kwargs):
+    assert kwargs
+    print('edge function not implemented')
+    raise ValueError
+
 
 def edge_sigmoid(array=None,
                  alpha=1.0, beta=0.0, gamma=1, tau=1,
@@ -23,9 +27,10 @@ def edge_sigmoid(array=None,
     V += noise
 
     # 4. CALCULATE A (negative for using expit instead of numpy exponential)
-    expon = -( (-1)**gamma ) * 2 * alpha * ( (V - beta)**tau)
+    expon = -((-1)**gamma) * 2 * alpha * ((V - beta)**tau)
 
     return expit(expon)
+
 
 def edge_gaussian_rbf(array=None,
                       alpha=1, beta=0, gamma=0, tau=2,
@@ -38,9 +43,10 @@ def edge_gaussian_rbf(array=None,
     V += noise
 
     # 4. CALCULATE A
-    expon = -alpha * ( (V - beta)**tau )
+    expon = -alpha * ((V - beta)**tau)
 
-    return gamma + ( (-1)**gamma ) * np.exp(expon)
+    return gamma + ((-1)**gamma) * np.exp(expon)
+
 
 def edge_binary_beta(array=None,
                      rho=None):
@@ -49,7 +55,8 @@ def edge_binary_beta(array=None,
     e_1 = beta(100-99*rho, 1)
 
     # perturb the binary input
-    return np.array([e_0.rvs(1)[0] if i==0 else e_1.rvs(1)[0] for i in array])
+    return np.array([e_0.rvs(1)[0] if i == 0 else e_1.rvs(1)[0] for i in array])
+
 
 def edge_binary_identity(array=None):
     return array
@@ -63,6 +70,7 @@ def state_linear(inputs=None, parents_order=None, coefs=None):
         data.values,
         coefs
     )
+
 
 def state_poly2(inputs=None, parents_order=None, coefs=None):
     poly2 = PolynomialFeatures(
@@ -78,6 +86,7 @@ def state_poly2(inputs=None, parents_order=None, coefs=None):
         coefs
     )
 
+
 def state_poly1_interactions(inputs=None, parents_order=None, coefs=None):
     poly2 = PolynomialFeatures(
         degree=2,
@@ -92,14 +101,18 @@ def state_poly1_interactions(inputs=None, parents_order=None, coefs=None):
         coefs
     )
 
-def state_empty(inputs=None, parents_order=None, **kwargs):
+
+def state_empty(**kwargs):
+    assert kwargs
     print('state function not implemented')
     raise ValueError
+
 
 def output_gaussian_noise(array=None,
                           rho=0.2):
     noise = np.random.normal(loc=0, scale=rho * np.std(array), size=len(array))
     return array + noise
+
 
 def output_gamma_noise(array=None,
                        rho=0.2):
@@ -110,6 +123,7 @@ def output_gamma_noise(array=None,
         gamma((i ** 2) / (rho * std2), scale=(rho * std2) / i).rvs(1)[0]
         for i in array
     ])
+
 
 def output_binary(array=None,
                   mean_=None,
@@ -137,6 +151,7 @@ def output_binary(array=None,
     V = a * V + b
     return [np.random.choice([0, 1], p=[1-i, i]) for i in V]
 
+
 def output_multinomial(array=None,
                        centers=None,
                        gamma=None,
@@ -146,11 +161,19 @@ def output_multinomial(array=None,
     V = edge_sigmoid(array=array, gamma=gamma, percentiles=percentiles, rho=rho)
 
     # FIX MEAN
-    return [np.random.choice([i for i in range(len(centers))], p=np.nan_to_num(1/np.abs(v-centers)/(1/np.abs(v-centers)).sum(), nan=1)) for v in V]
+    return [
+        np.random.choice(
+            [i for i in range(len(centers))],
+            p=np.nan_to_num(1/np.abs(v-centers)/(1/np.abs(v-centers)).sum(), nan=1)
+        ) for v in V
+    ]
 
-def output_empty(array=None, std=None, **kwargs):
+
+def output_empty(**kwargs):
+    assert kwargs
     print('output function not implemented')
     raise ValueError
+
 
 # === HELPERS ===
 def scale_V(array=None, percentiles=None):
