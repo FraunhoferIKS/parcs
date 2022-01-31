@@ -9,8 +9,10 @@ from scipy.special import comb
 class Node:
     def __init__(self,
                  name=None,
+                 node_type=None,
                  parents=None):
         # basic attributes
+        self.node_type = node_type
         self.name = name
         self.parents = parents
 
@@ -44,6 +46,7 @@ class Node:
     def get_configs(self):
         return {
             'name': self.name,
+            'node_type': self.node_type,
             'state_function': self.state_function,
             'output_function': self.output_function
         }
@@ -115,7 +118,7 @@ class Node:
 
 class ContinuousNode(Node):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(node_type='continuous', **kwargs)
 
     def get_function_options(self, function_type=None):
         options = {
@@ -161,7 +164,7 @@ class ContinuousNode(Node):
 
 class BinaryNode(Node):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(node_type='binary', **kwargs)
 
     def get_function_options(self, function_type=None):
         options = {
@@ -205,7 +208,7 @@ class BinaryNode(Node):
 
 class CategoricalNode(Node):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(node_type='categorical', **kwargs)
 
     def get_function_options(self, function_type=None):
         options = {
