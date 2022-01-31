@@ -6,17 +6,13 @@ from itertools import product
 import pandas as pd
 
 
-class SimpleStructure:
-    def __init__(self,
-                 adj_matrix: pd.DataFrame = None,
-                 node_types=None,
-                 complexity=None):
-        if complexity is None:
-            complexity = 0
+class BaseStructure:
+    def __init__(self):
         self.nodes = {}
         self.edges = {}
-        assert adj_matrix.columns.tolist() == adj_matrix.index.tolist()
-        self.adj_matrix = adj_matrix
+        self.adj_matrix = pd.DataFrame([])
+        self.data = {}
+
         self.node_dict = {
             'continuous': ContinuousNode,
             'binary': BinaryNode,
@@ -26,44 +22,49 @@ class SimpleStructure:
             'continuous': ContinuousInputEdge,
             'binary': BinaryInputEdge
         }
-        self.complexity = complexity
 
-        self.data = pd.DataFrame([], columns=adj_matrix.columns)
-
-        self._set_nodes(node_types=node_types)._set_edges(node_types=node_types)._random_initiate()
-
-    def _set_nodes(self, node_types=None):
-        adjm = self.adj_matrix
-
-        self.nodes = {
-            c: self.node_dict[node_types[c]](
-                name=c,
-                parents=adjm[adjm[c] == 1].index.tolist(),
-                complexity=self.complexity
-            ) for c in adjm.columns
-        }
+    def set_nodes(self, nodes_list=None):
+        for item in nodes_list:
+            node = self.node_dict[item['output_type']](
+                name=item['name'],
+                parents=item['parents']
+            )
+            node.set_state_function(
+                function_name=item['state_function_name']
+            ).set_output_function(
+                function_name=item['output_function_name']
+            ).set_state_params(
+                params=item['state_params']
+            ).set_output_params(
+                params=item['output_params']
+            )
+            self.nodes[item['name']] = node
         return self
 
-    def _set_edges(self, node_types=None):
-        adjm = self.adj_matrix
-        self.edges = {
-            '{}->{}'.format(c[0], c[1]): self.edge_dict[node_types[c[0]]](
-                parent=c[0],
-                child=c[1],
-                complexity=self.complexity
-            ) for c in product(adjm.index, adjm.columns)
-            if adjm.loc[c[0], c[1]] == 1
-        }
-        return self
+    def set_edges(self, info_matrix: pd.DataFrame = None):
+        self.adj_matrix = (info_matrix != 0).astype(int)
+        for node_pair in product(info_matrix.index, info_matrix.columns):
+            try:
+                info = info_matrix.loc[node_pair[0], node_pair[1]]
+                # TODO: this must be implemented better
+                assert info != 0
+                parent_node_type = self.nodes[node_pair[0]].get_configs()['node_type']
 
-    def _random_initiate(self):
-        for n in self.nodes:
-            self.nodes[n].random_initiate()
-        for e in self.edges:
-            self.edges[e].random_initiate()
-        return self
+                edge = self.edge_dict[parent_node_type](
+                    parent=node_pair[0],
+                    child=node_pair[1]
+                )
+                edge.set_function(
+                    function_name=info['function_name']
+                ).set_function_params(
+                    params=info['function_params']
+                )
+                self.edges['{}->{}'.format(node_pair[0], node_pair[1])] = edge
+            except AssertionError:
+                continue
 
     def sample(self, size=None):
+        # TODO: add a "check-all" step for all the info if they match
         assert size is not None, 'Specify size for sample'
         for node in topological_sort(adj_matrix=self.adj_matrix):
             v = self.nodes[node]
@@ -79,34 +80,48 @@ class SimpleStructure:
 
 
 if __name__ == '__main__':
-    from pprint import pprint
-    node_names = ['x{}'.format(i) for i in range(6)]
-    adjm = pd.DataFrame(
+    structure = BaseStructure()
+    structure.set_nodes(nodes_list=[
+        {
+            'name': 'A1',
+            'parents': [],
+            'output_type': 'continuous',
+            'state_function_name': 'linear',
+            'output_function_name': 'gaussian_noise',
+            'state_params': {},
+            'output_params': {'rho': 0.02}
+        },
+        {
+            'name': 'A2',
+            'parents': [],
+            'output_type': 'continuous',
+            'state_function_name': 'linear',
+            'output_function_name': 'gaussian_noise',
+            'state_params': {},
+            'output_params': {'rho': 0.02}
+        },
+        {
+            'name': 'B1',
+            'parents': ['A1', 'A2'],
+            'output_type': 'binary',
+            'state_function_name': 'linear',
+            'output_function_name': 'bernoulli',
+            'state_params': {'coefs': np.array([1, 1])},
+            'output_params': {'rho': 0.02, 'gamma': 0}
+        }
+    ])
+    edge_param = {'alpha': 1, 'beta': 0, 'gamma': 0, 'tau': 1, 'rho': 0.02}
+    structure.set_edges(info_matrix=pd.DataFrame(
         [
-            [0, 1, 0, 1, 1, 1],
-            [0, 0, 0, 1, 1, 1],
-            [0, 0, 0, 1, 1, 1],
-            [0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0]
-
+            [0, 0, {'function_name': 'sigmoid', 'function_params': edge_param}],
+            [0, 0, {'function_name': 'sigmoid', 'function_params': edge_param}],
+            [0, 0, 0]
         ],
-        index=node_names,
-        columns=node_names
-    )
-    node_types = {
-        'x0': 'continuous', 'x1': 'continuous', 'x2': 'continuous',
-        'x3': 'continuous', 'x4': 'continuous', 'x5': 'categorical'
-    }
-    s = SimpleStructure(adj_matrix=adjm, node_types=node_types)
-    for n in s.nodes:
-        print(n, '========')
-        pprint(s.nodes[n].get_configs())
-    for e in s.edges:
-        print(e, '========')
-        pprint(s.edges[e].get_configs())
+        columns=['A1', 'A2', 'B1'],
+        index=['A1', 'A2', 'B1']
+    ))
+    data = structure.sample(size=3000)
+    print(data)
 
-    s.sample(size=1000)
-    print(s.nodes['x5'].get_configs())
-    plt.scatter(s.data.x3, s.data.x4, c=s.data.x5)
+    plt.scatter(data.A1, data.A2, c=data.B1)
     plt.show()

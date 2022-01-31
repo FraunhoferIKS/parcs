@@ -1,3 +1,5 @@
+import pandas as pd
+
 from modules.sem.utils import exp_prob
 from modules.sem import mapping_functions
 import numpy as np
@@ -7,12 +9,12 @@ from scipy.special import comb
 class Node:
     def __init__(self,
                  name=None,
-                 parents=None,
-                 complexity=None):
+                 node_type=None,
+                 parents=None):
         # basic attributes
+        self.node_type = node_type
         self.name = name
         self.parents = parents
-        self.complexity = complexity
 
         # selected activation functions attributes
         self.state_function = {
@@ -27,12 +29,6 @@ class Node:
         }
         # helper
         self.functions = {'state': self.state_function, 'output': self.output_function}
-        self.is_random = {
-            'state_function': False,
-            'state_params': False,
-            'output_function': False,
-            'output_params': False
-        }
 
         # value attributes
         self.value = {
@@ -50,10 +46,9 @@ class Node:
     def get_configs(self):
         return {
             'name': self.name,
-            'complexity': self.complexity,
+            'node_type': self.node_type,
             'state_function': self.state_function,
-            'output_function': self.output_function,
-            'is_random': self.is_random
+            'output_function': self.output_function
         }
 
     def get_function_options(self, function_type=None):
@@ -64,29 +59,6 @@ class Node:
 
     def make_function_list(self):
         pass
-
-    def get_function_probs(self, function_type=None):
-        return exp_prob(
-            complexity=self.complexity,
-            num_categories=len(self.get_function_options(function_type=function_type))
-        )
-
-    def _set_random_function(self, function_type=None):
-        name = np.random.choice(
-         self.get_function_options(function_type=function_type),
-         p=self.get_function_probs(function_type=function_type)
-        )
-        self.functions[function_type]['name'] = name
-        self.functions[function_type]['function'] = self.function_list[function_type][name]
-
-        self.is_random['{}_function'.format(function_type)] = True
-        return self
-
-    def set_random_state_function(self):
-        return self._set_random_function(function_type='state')
-
-    def set_random_output_function(self):
-        return self._set_random_function(function_type='output')
 
     @staticmethod
     def _get_param_size(num_parents=None, function_name=None, function_type=None):
@@ -101,48 +73,10 @@ class Node:
             else:
                 raise ValueError('Function {} not implemented'.format(function_name))
 
-    def _set_random_params(self, function_type=None):
-        param_options = self.get_param_options(
-            function_type=function_type,
-            function_name=self.functions[function_type]['name']
-        )
-        # for state functions, we need an array of random values
-        size_ = self._get_param_size(
-            num_parents=len(self.parents),
-            function_name=self.functions[function_type]['name'],
-            function_type=function_type
-        )
-        for param in param_options:
-            options = param_options[param]
-            if isinstance(options, list):
-                param_value = np.random.uniform(
-                    low=options[0],
-                    high=options[1],
-                    size=size_
-                )
-            elif isinstance(options, set):
-                param_value = np.random.choice(
-                    list(options),
-                    size=size_
-                )
-            else:
-                raise TypeError
-            self.functions[function_type]['params'][param] = param_value
-
-        self.is_random['{}_params'.format(function_type)] = True
-        return self
-
-    def set_random_state_params(self):
-        return self._set_random_params(function_type='state')
-
-    def set_random_output_params(self):
-        return self._set_random_params(function_type='output')
-
     def _set_function(self, function_type=None, function_name=None):
         self.functions[function_type]['name'] = function_name
         self.functions[function_type]['function'] = \
             self.function_list[function_type][function_name]
-        self.is_random['{}_function'] = False
         return self
 
     def set_state_function(self, function_name=None):
@@ -153,7 +87,6 @@ class Node:
 
     def _set_function_params(self, function_type=None, params=None):
         self.functions[function_type]['params'] = params
-        self.is_random['{}_params'] = False
         return self
 
     def set_state_params(self, params=None):
@@ -161,13 +94,6 @@ class Node:
 
     def set_output_params(self, params=None):
         return self._set_function_params(function_type='output', params=params)
-
-    def random_initiate(self):
-        self.set_random_state_function()
-        self.set_random_output_function()
-        self.set_random_state_params()
-        self.set_random_output_params()
-        return self
 
     def calc_state(self, inputs=None, size=None):
         try:
@@ -191,16 +117,8 @@ class Node:
 
 
 class ContinuousNode(Node):
-    def __init__(self,
-                 name=None,
-                 parents=None,
-                 complexity=None,
-                 **kwargs):
-        super().__init__(
-            name=name,
-            parents=parents,
-            complexity=complexity
-        )
+    def __init__(self, **kwargs):
+        super().__init__(node_type='continuous', **kwargs)
 
     def get_function_options(self, function_type=None):
         options = {
@@ -245,16 +163,8 @@ class ContinuousNode(Node):
 
 
 class BinaryNode(Node):
-    def __init__(self,
-                 name=None,
-                 parents=None,
-                 complexity=None,
-                 **kwargs):
-        super().__init__(
-            name=name,
-            parents=parents,
-            complexity=complexity
-        )
+    def __init__(self, **kwargs):
+        super().__init__(node_type='binary', **kwargs)
 
     def get_function_options(self, function_type=None):
         options = {
@@ -297,16 +207,8 @@ class BinaryNode(Node):
 
 
 class CategoricalNode(Node):
-    def __init__(self,
-                 name=None,
-                 parents=None,
-                 complexity=None,
-                 **kwargs):
-        super().__init__(
-            name=name,
-            parents=parents,
-            complexity=complexity
-        )
+    def __init__(self, **kwargs):
+        super().__init__(node_type='categorical', **kwargs)
 
     def get_function_options(self, function_type=None):
         options = {
@@ -346,3 +248,18 @@ class CategoricalNode(Node):
             }
         }
         return None
+
+
+if __name__ == '__main__':
+    # check continuous node
+    node = ContinuousNode(name='x0', parents=['x1', 'x2'])
+    node.set_state_function(function_name='linear')
+    node.set_output_function(function_name='gaussian_noise')
+
+    node.set_state_params(params={'coefs': np.array([1, 2])})
+    node.set_output_params(params={'rho': 0.02})
+
+    node.calc_state(inputs=pd.DataFrame([[1, 2], [2, 1], [1, 1], [0, 0]], columns=('x1', 'x2')))
+    print(node.value['state'])
+    node.calc_output()
+    print(node.value['output'])

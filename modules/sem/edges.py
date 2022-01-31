@@ -6,20 +6,14 @@ import numpy as np
 class Edge:
     def __init__(self,
                  parent: str = 'dummy',
-                 child: str = 'dummy',
-                 complexity: float = 0):
+                 child: str = 'dummy'):
         self.parent = parent
         self.child = child
-        self.complexity = complexity
 
         self.edge_function = {
             'name': None,
             'function': mapping_functions.edge_empty,
             'params': {}
-        }
-        self.is_random = {
-            'function': False,
-            'params': False
         }
 
         # options list attributes
@@ -33,9 +27,7 @@ class Edge:
         return {
             'parent': self.parent,
             'child': self.child,
-            'complexity': self.complexity,
-            'edge_function': self.edge_function,
-            'is_random': self.is_random
+            'edge_function': self.edge_function
         }
 
     def _get_function_options(self):
@@ -47,53 +39,15 @@ class Edge:
     def _make_function_list(self):
         pass
 
-    def _get_function_probs(self):
-        return exp_prob(
-            complexity=self.complexity,
-            num_categories=len(self._get_function_options())
-        )
-
-    def _set_random_function(self):
-        function_name = np.random.choice(
-            self._get_function_options(),
-            p=self._get_function_probs()
-        )
-        self.is_random['function'] = True
-        self.edge_function['name'] = function_name
-        self.edge_function['function'] = self.function_list[function_name]
-        return self
-
-    def _set_random_function_params(self):
-        param_options = self._get_param_options(function=self.edge_function['name'])
-        for param in param_options:
-            options = param_options[param]
-            if isinstance(options, list):
-                param_value = np.random.uniform(low=options[0], high=options[1])
-            elif isinstance(options, set):
-                param_value = np.random.choice(list(options))
-            else:
-                raise TypeError
-            self.edge_function['params'][param] = param_value
-
-        self.is_random['params'] = True
-        return self
-
     def set_function(self, function_name=None):
         self.edge_function = {
             'name': function_name,
             'function': self.function_list[function_name]
         }
-        self.is_random['function'] = False
         return self
 
     def set_function_params(self, params=None):
         self.edge_function['params'] = params
-        self.is_random['params'] = False
-        return self
-
-    def random_initiate(self):
-        self._set_random_function()
-        self._set_random_function_params()
         return self
 
     def map(self, array=None):
@@ -105,15 +59,8 @@ class Edge:
 
 
 class BinaryInputEdge(Edge):
-    def __init__(self,
-                 parent=None,
-                 child=None,
-                 complexity=None):
-        super().__init__(
-            parent=parent,
-            child=child,
-            complexity=complexity
-        )
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def _get_function_options(self):
         return (
@@ -138,15 +85,8 @@ class BinaryInputEdge(Edge):
 
 
 class ContinuousInputEdge(Edge):
-    def __init__(self,
-                 parent=None,
-                 child=None,
-                 complexity=None):
-        super().__init__(
-            parent=parent,
-            child=child,
-            complexity=complexity
-        )
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def _get_function_options(self):
         return (
@@ -178,3 +118,19 @@ class ContinuousInputEdge(Edge):
             'sigmoid': mapping_functions.edge_sigmoid,
             'gaussian_rbf': mapping_functions.edge_gaussian_rbf
         }
+
+
+if __name__ == '__main__':
+    # check binary input edge
+    edge = BinaryInputEdge(parent='a', child='b')
+    edge.set_function(function_name='beta_noise').set_function_params(params={'rho': 0.2})
+    output = edge.map(array=np.array([1, 0, 0, 0, 1, 0]))
+    print(np.round(output, 3))
+
+    # check continuous input edge
+    edge = ContinuousInputEdge(parent='a', child='b')
+    edge.set_function(function_name='sigmoid').set_function_params(
+        params={'alpha': 2, 'beta': -0.3, 'gamma': 0, 'tau': 1, 'rho': 0.07}
+    )
+    output = edge.map(array=np.array([1.8, 2, -1, 0.02, 1, 0]))
+    print(np.round(output, 3))
