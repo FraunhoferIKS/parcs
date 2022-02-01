@@ -8,10 +8,8 @@ from modules.sem.utils import topological_sort
 class Node:
     def __init__(self,
                  name=None,
-                 node_type=None,
                  parents=None):
         # basic attributes
-        self.node_type = node_type
         self.name = name
         self.parents = parents
 
@@ -57,7 +55,6 @@ class Node:
     def get_configs(self):
         return {
             'name': self.name,
-            'node_type': self.node_type,
             'state_function': self.state_function,
             'output_function': self.output_function
         }
@@ -72,8 +69,6 @@ class Node:
         return self._set_function(function_type='state', function_name=function_name)
 
     def set_output_function(self, function_name=None):
-        assert function_name in self.allowed_functions[self.node_type],\
-            '{} doesn\'t match with {} node output type'.format(function_name, self.node_type)
         return self._set_function(function_type='output', function_name=function_name)
 
     def _set_function_params(self, function_type=None, params=None):
@@ -110,11 +105,9 @@ class Node:
 class Edge:
     def __init__(self,
                  parent: str = 'dummy',
-                 child: str = 'dummy',
-                 edge_input_type: str = 'dummy'):
+                 child: str = 'dummy'):
         self.parent = parent
         self.child = child
-        self.edge_input_type = edge_input_type
 
         self.edge_function = {
             'name': None,
@@ -141,13 +134,10 @@ class Edge:
         return {
             'parent': self.parent,
             'child': self.child,
-            'edge_input_type': self.edge_input_type,
             'edge_function': self.edge_function
         }
 
     def set_function(self, function_name=None):
-        assert function_name in self.allowed_input_functions[self.edge_input_type],\
-            '{} doesn\'t match with {} edge type'.format(function_name, self.edge_input_type)
         self.edge_function = {
             'name': function_name,
             'function': self.function_list[function_name]
@@ -174,13 +164,10 @@ class BaseGraph:
         self.data = {}
 
     def set_nodes(self, nodes_list=None):
-        for item in nodes_list:
-            node = Node(
-                name=item['name'],
-                node_type=item['output_type'],
-                parents=item['parents']
-            )
-            node.set_state_function(
+        self.nodes = {
+            item['name']: Node(
+                name=item['name'], parents=item['parents']
+            ).set_state_function(
                 function_name=item['state_function_name']
             ).set_output_function(
                 function_name=item['output_function_name']
@@ -188,8 +175,8 @@ class BaseGraph:
                 params=item['state_params']
             ).set_output_params(
                 params=item['output_params']
-            )
-            self.nodes[item['name']] = node
+            ) for item in nodes_list
+        }
         return self
 
     def set_edges(self, info_matrix: pd.DataFrame = None):
@@ -199,15 +186,13 @@ class BaseGraph:
                 info = info_matrix.loc[node_pair[0], node_pair[1]]
                 # TODO: this must be implemented better
                 assert info != 0
-                parent_node_type = self.nodes[node_pair[0]].get_configs()['node_type']
-
-                edge = Edge(parent=node_pair[0], child=node_pair[1], edge_input_type=parent_node_type)
-                edge.set_function(
+                self.edges['{}->{}'.format(node_pair[0], node_pair[1])] = Edge(
+                    parent=node_pair[0], child=node_pair[1]
+                ).set_function(
                     function_name=info['function_name']
                 ).set_function_params(
                     params=info['function_params']
                 )
-                self.edges['{}->{}'.format(node_pair[0], node_pair[1])] = edge
             except AssertionError:
                 continue
 
@@ -230,13 +215,13 @@ class BaseGraph:
 if __name__ == '__main__':
     # =========== EDGE check ===========
     # check binary input edge
-    edge = Edge(parent='a', child='b', edge_input_type='binary')
+    edge = Edge(parent='a', child='b')
     edge.set_function(function_name='beta_noise').set_function_params(params={'rho': 0.2})
     output = edge.map(array=np.array([1, 0, 0, 0, 1, 0]))
     print(np.round(output, 3))
 
     # check continuous input edge
-    edge = Edge(parent='a', child='b', edge_input_type='continuous')
+    edge = Edge(parent='a', child='b')
     edge.set_function(function_name='sigmoid').set_function_params(
         params={'alpha': 2, 'beta': -0.3, 'gamma': 0, 'tau': 1, 'rho': 0.07}
     )
@@ -245,7 +230,7 @@ if __name__ == '__main__':
 
     # =========== NODE check ===========
     # check continuous node
-    node = Node(name='x0', node_type='continuous', parents=['x1', 'x2'])
+    node = Node(name='x0', parents=['x1', 'x2'])
     node.set_state_function(function_name='linear')
     node.set_output_function(function_name='gaussian_noise')
 
