@@ -37,11 +37,23 @@ class Node:
         }
 
         # options lists
+        # self.function_list = {
+        #     'state': {},
+        #     'output': {}
+        # }
+        # self.make_function_list()
         self.function_list = {
-            'state': {},
-            'output': {}
+            'state': {
+                'linear': mapping_functions.state_linear,
+                'poly1_interactions': mapping_functions.state_poly1_interactions
+            },
+            'output': {
+                'gaussian_noise': mapping_functions.output_gaussian_noise,
+                'gamma_noise': mapping_functions.output_gamma_noise,
+                'bernoulli': mapping_functions.output_binary,
+                'multinomial': mapping_functions.output_multinomial
+            }
         }
-        self.make_function_list()
 
     def get_configs(self):
         return {
@@ -51,27 +63,21 @@ class Node:
             'output_function': self.output_function
         }
 
-    def get_function_options(self, function_type=None):
-        return []
+    # def make_function_list(self):
+    #     pass
 
-    def get_param_options(self, function_type=None, function_name=None):
-        return {}
-
-    def make_function_list(self):
-        pass
-
-    @staticmethod
-    def _get_param_size(num_parents=None, function_name=None, function_type=None):
-        if function_type == 'output':
-            return None
-        else:
-            if function_name == 'linear':
-                return num_parents
-            elif function_name == 'poly1_interactions':
-                # interactions: True, Bias: True
-                return 1 + num_parents + comb(num_parents, 2, exact=True)
-            else:
-                raise ValueError('Function {} not implemented'.format(function_name))
+    # @staticmethod
+    # def _get_param_size(num_parents=None, function_name=None, function_type=None):
+    #     if function_type == 'output':
+    #         return None
+    #     else:
+    #         if function_name == 'linear':
+    #             return num_parents
+    #         elif function_name == 'poly1_interactions':
+    #             # interactions: True, Bias: True
+    #             return 1 + num_parents + comb(num_parents, 2, exact=True)
+    #         else:
+    #             raise ValueError('Function {} not implemented'.format(function_name))
 
     def _set_function(self, function_type=None, function_name=None):
         self.functions[function_type]['name'] = function_name
@@ -120,134 +126,52 @@ class ContinuousNode(Node):
     def __init__(self, **kwargs):
         super().__init__(node_type='continuous', **kwargs)
 
-    def get_function_options(self, function_type=None):
-        options = {
-            'state': ('linear', 'poly1_interactions'),
-            'output': ('gaussian_noise', 'gamma_noise')
-        }
-        return options[function_type]
-
-    def get_param_options(self, function_type=None, function_name=None):
-        options = {
-            'state': {
-                'linear': {
-                    'coefs': [0, 3]
-                },
-                'poly1_interactions': {
-                    'coefs': [0, 3]
-                }
-            },
-            'output': {
-                'gaussian_noise': {
-                    'rho': [0.01, 0.5]
-                },
-                'gamma_noise': {
-                    'rho': [0.01, 0.5]
-                }
-            }
-        }
-        return options[function_type][function_name]
-
-    def make_function_list(self):
-        self.function_list = {
-            'state': {
-                'linear': mapping_functions.state_linear,
-                'poly1_interactions': mapping_functions.state_poly1_interactions
-            },
-            'output': {
-                'gaussian_noise': mapping_functions.output_gaussian_noise,
-                'gamma_noise': mapping_functions.output_gamma_noise
-            }
-        }
-        return None
+    # def make_function_list(self):
+    #     self.function_list = {
+    #         'state': {
+    #             'linear': mapping_functions.state_linear,
+    #             'poly1_interactions': mapping_functions.state_poly1_interactions
+    #         },
+    #         'output': {
+    #             'gaussian_noise': mapping_functions.output_gaussian_noise,
+    #             'gamma_noise': mapping_functions.output_gamma_noise
+    #         }
+    #     }
+    #     return None
 
 
 class BinaryNode(Node):
     def __init__(self, **kwargs):
         super().__init__(node_type='binary', **kwargs)
 
-    def get_function_options(self, function_type=None):
-        options = {
-            'state': ('linear', 'poly1_interactions'),
-            'output': ('bernoulli', )
-        }
-        return options[function_type]
-
-    def get_param_options(self, function_type=None, function_name=None):
-        options = {
-            'state': {
-                'linear': {
-                    'coefs': [0, 3]
-                },
-                'poly1_interactions': {
-                    'coefs': [0, 3]
-                }
-            },
-            'output': {
-                'bernoulli': {
-                    'rho': [0.01, 0.07],
-                    'gamma': {0, 1},
-                    'mean_': [0.1, 0.9]
-                }
-            }
-        }
-        return options[function_type][function_name]
-
-    def make_function_list(self):
-        self.function_list = {
-            'state': {
-                'linear': mapping_functions.state_linear,
-                'poly1_interactions': mapping_functions.state_poly1_interactions
-            },
-            'output': {
-                'bernoulli': mapping_functions.output_binary
-            }
-        }
-        return None
+    # def make_function_list(self):
+    #     self.function_list = {
+    #         'state': {
+    #             'linear': mapping_functions.state_linear,
+    #             'poly1_interactions': mapping_functions.state_poly1_interactions
+    #         },
+    #         'output': {
+    #             'bernoulli': mapping_functions.output_binary
+    #         }
+    #     }
+    #     return None
 
 
 class CategoricalNode(Node):
     def __init__(self, **kwargs):
         super().__init__(node_type='categorical', **kwargs)
 
-    def get_function_options(self, function_type=None):
-        options = {
-            'state': ('linear', 'poly1_interactions'),
-            'output': ('multinomial', )
-        }
-        return options[function_type]
-
-    def get_param_options(self, function_type=None, function_name=None):
-        options = {
-            'state': {
-                'linear': {
-                    'coefs': [0, 3]
-                },
-                'poly1_interactions': {
-                    'coefs': [0, 3]
-                }
-            },
-            'output': {
-                'multinomial': {
-                    'rho': [0.01, 0.07],
-                    'gamma': {0, 1},
-                    'centers': {tuple(np.random.uniform(size=np.random.randint(low=3, high=9))) for _ in range(10)}
-                }
-            }
-        }
-        return options[function_type][function_name]
-
-    def make_function_list(self):
-        self.function_list = {
-            'state': {
-                'linear': mapping_functions.state_linear,
-                'poly1_interactions': mapping_functions.state_poly1_interactions
-            },
-            'output': {
-                'multinomial': mapping_functions.output_multinomial
-            }
-        }
-        return None
+    # def make_function_list(self):
+    #     self.function_list = {
+    #         'state': {
+    #             'linear': mapping_functions.state_linear,
+    #             'poly1_interactions': mapping_functions.state_poly1_interactions
+    #         },
+    #         'output': {
+    #             'multinomial': mapping_functions.output_multinomial
+    #         }
+    #     }
+    #     return None
 
 
 if __name__ == '__main__':

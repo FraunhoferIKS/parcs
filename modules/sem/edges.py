@@ -30,12 +30,6 @@ class Edge:
             'edge_function': self.edge_function
         }
 
-    def _get_function_options(self):
-        return []
-
-    def _get_param_options(self, function=None):
-        return {}
-
     def _make_function_list(self):
         pass
 
@@ -62,21 +56,6 @@ class BinaryInputEdge(Edge):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def _get_function_options(self):
-        return (
-            'identity',
-            'beta_noise'
-        )
-
-    def _get_param_options(self, function=None):
-        options = {
-            'identity': {},
-            'beta_noise': {
-                'rho': [0.05, 0.3]
-            }
-        }
-        return options[function]
-
     def _make_function_list(self):
         self.function_list = {
             'identity': mapping_functions.edge_binary_identity,
@@ -87,31 +66,6 @@ class BinaryInputEdge(Edge):
 class ContinuousInputEdge(Edge):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-    def _get_function_options(self):
-        return (
-            'sigmoid',
-            'gaussian_rbf'
-        )
-
-    def _get_param_options(self, function=None):
-        options = {
-            'sigmoid': {
-                'alpha': [1, 6],
-                'beta': [-0.8, 0.8],
-                'gamma': {0, 1},
-                'tau': {1, 3, 5},
-                'rho': [0.05, 0.2]
-            },
-            'gaussian_rbf': {
-                'alpha': [1, 6],
-                'beta': [-0.8, 0.8],
-                'gamma': {0, 1},
-                'tau': {2, 4, 6},
-                'rho': [0.05, 0.2]
-            }
-        }
-        return options[function]
 
     def _make_function_list(self):
         self.function_list = {
