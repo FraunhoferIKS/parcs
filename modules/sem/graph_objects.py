@@ -46,6 +46,12 @@ class Node:
             }
         }
 
+        self.allowed_functions = {
+            'continuous': ('gaussian_noise', 'gamma_noise'),
+            'binary': ('bernoulli', ),
+            'categorical': ('multinomial', )
+        }
+
     def get_configs(self):
         return {
             'name': self.name,
@@ -64,6 +70,8 @@ class Node:
         return self._set_function(function_type='state', function_name=function_name)
 
     def set_output_function(self, function_name=None):
+        assert function_name in self.allowed_functions[self.node_type],\
+            '{} doesn\'t match with {} node output type'.format(function_name, self.node_type)
         return self._set_function(function_type='output', function_name=function_name)
 
     def _set_function_params(self, function_type=None, params=None):
@@ -119,6 +127,10 @@ class Edge:
             'sigmoid': mapping_functions.edge_sigmoid,
             'gaussian_rbf': mapping_functions.edge_gaussian_rbf
         }
+        self.allowed_input_functions = {
+            'continuous': ('sigmoid', 'gaussian_rbf'),
+            'binary': ('identity', 'beta_noise')
+        }
 
         # output values
         self.value = np.array([])
@@ -131,10 +143,9 @@ class Edge:
             'edge_function': self.edge_function
         }
 
-    def _make_function_list(self):
-        pass
-
     def set_function(self, function_name=None):
+        assert function_name in self.allowed_input_functions[self.edge_input_type],\
+            '{} doesn\'t match with {} edge type'.format(function_name, self.edge_input_type)
         self.edge_function = {
             'name': function_name,
             'function': self.function_list[function_name]
