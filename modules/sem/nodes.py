@@ -1,9 +1,6 @@
 import pandas as pd
-
-from modules.sem.utils import exp_prob
 from modules.sem import mapping_functions
 import numpy as np
-from scipy.special import comb
 
 
 class Node:
@@ -36,12 +33,6 @@ class Node:
             'output': np.array([])
         }
 
-        # options lists
-        # self.function_list = {
-        #     'state': {},
-        #     'output': {}
-        # }
-        # self.make_function_list()
         self.function_list = {
             'state': {
                 'linear': mapping_functions.state_linear,
@@ -62,22 +53,6 @@ class Node:
             'state_function': self.state_function,
             'output_function': self.output_function
         }
-
-    # def make_function_list(self):
-    #     pass
-
-    # @staticmethod
-    # def _get_param_size(num_parents=None, function_name=None, function_type=None):
-    #     if function_type == 'output':
-    #         return None
-    #     else:
-    #         if function_name == 'linear':
-    #             return num_parents
-    #         elif function_name == 'poly1_interactions':
-    #             # interactions: True, Bias: True
-    #             return 1 + num_parents + comb(num_parents, 2, exact=True)
-    #         else:
-    #             raise ValueError('Function {} not implemented'.format(function_name))
 
     def _set_function(self, function_type=None, function_name=None):
         self.functions[function_type]['name'] = function_name
@@ -122,61 +97,9 @@ class Node:
         return self.value['output']
 
 
-class ContinuousNode(Node):
-    def __init__(self, **kwargs):
-        super().__init__(node_type='continuous', **kwargs)
-
-    # def make_function_list(self):
-    #     self.function_list = {
-    #         'state': {
-    #             'linear': mapping_functions.state_linear,
-    #             'poly1_interactions': mapping_functions.state_poly1_interactions
-    #         },
-    #         'output': {
-    #             'gaussian_noise': mapping_functions.output_gaussian_noise,
-    #             'gamma_noise': mapping_functions.output_gamma_noise
-    #         }
-    #     }
-    #     return None
-
-
-class BinaryNode(Node):
-    def __init__(self, **kwargs):
-        super().__init__(node_type='binary', **kwargs)
-
-    # def make_function_list(self):
-    #     self.function_list = {
-    #         'state': {
-    #             'linear': mapping_functions.state_linear,
-    #             'poly1_interactions': mapping_functions.state_poly1_interactions
-    #         },
-    #         'output': {
-    #             'bernoulli': mapping_functions.output_binary
-    #         }
-    #     }
-    #     return None
-
-
-class CategoricalNode(Node):
-    def __init__(self, **kwargs):
-        super().__init__(node_type='categorical', **kwargs)
-
-    # def make_function_list(self):
-    #     self.function_list = {
-    #         'state': {
-    #             'linear': mapping_functions.state_linear,
-    #             'poly1_interactions': mapping_functions.state_poly1_interactions
-    #         },
-    #         'output': {
-    #             'multinomial': mapping_functions.output_multinomial
-    #         }
-    #     }
-    #     return None
-
-
 if __name__ == '__main__':
     # check continuous node
-    node = ContinuousNode(name='x0', parents=['x1', 'x2'])
+    node = Node(name='x0', node_type='continuous', parents=['x1', 'x2'])
     node.set_state_function(function_name='linear')
     node.set_output_function(function_name='gaussian_noise')
 

@@ -1,7 +1,7 @@
 from modules.sem.utils import topological_sort
 from matplotlib import pyplot as plt
-from modules.sem.nodes import *
-from modules.sem.edges import *
+from modules.sem.nodes import Node
+from modules.sem.edges import Edge
 from itertools import product
 import pandas as pd
 
@@ -13,20 +13,11 @@ class BaseStructure:
         self.adj_matrix = pd.DataFrame([])
         self.data = {}
 
-        self.node_dict = {
-            'continuous': ContinuousNode,
-            'binary': BinaryNode,
-            'categorical': CategoricalNode
-        }
-        self.edge_dict = {
-            'continuous': ContinuousInputEdge,
-            'binary': BinaryInputEdge
-        }
-
     def set_nodes(self, nodes_list=None):
         for item in nodes_list:
-            node = self.node_dict[item['output_type']](
+            node = Node(
                 name=item['name'],
+                node_type=item['output_type'],
                 parents=item['parents']
             )
             node.set_state_function(
@@ -50,10 +41,7 @@ class BaseStructure:
                 assert info != 0
                 parent_node_type = self.nodes[node_pair[0]].get_configs()['node_type']
 
-                edge = self.edge_dict[parent_node_type](
-                    parent=node_pair[0],
-                    child=node_pair[1]
-                )
+                edge = Edge(parent=node_pair[0], child=node_pair[1], edge_input_type=parent_node_type)
                 edge.set_function(
                     function_name=info['function_name']
                 ).set_function_params(
