@@ -1,9 +1,9 @@
-from modules.sem.utils import topological_sort
-from matplotlib import pyplot as plt
-from modules.sem.nodes import Node
-from modules.sem.edges import Edge
-from itertools import product
+import numpy as np
 import pandas as pd
+from itertools import product
+from matplotlib import pyplot as plt
+from modules.sem.utils import topological_sort
+from modules.sem.graph_objects import Node, Edge
 
 
 class BaseStructure:
