@@ -3,7 +3,7 @@ import pandas as pd
 from itertools import product
 from modules.sem.utils import is_acyclic, mask_matrix
 from modules.sem.mapping_functions import get_output_function_options
-from modules.sem.graph_objects import NODE_OUTPUT_TYPES
+from modules.sem.graph_objects import NODE_OUTPUT_TYPES, ALLOWED_EDGE_FUNCTIONS
 
 
 def get_full_random_adj_matrix(num_nodes=None, connectivity_ratio=1):
@@ -21,6 +21,10 @@ def get_full_random_adj_matrix(num_nodes=None, connectivity_ratio=1):
     # create names
     names = ['X{}'.format(i) for i in range(1, num_nodes+1)]
     return pd.DataFrame(adj, index=names, columns=names)
+
+
+def get_full_random_edge_function(parent_type=None):
+    return np.random.choice(ALLOWED_EDGE_FUNCTIONS[parent_type])
 
 
 class GraphParam:
@@ -114,10 +118,18 @@ class GraphParam:
         assert self.is_defined['node']['output_types'], "node_types is not defined yet"
         if set_type == 'custom':
             assert 'functions' in kwargs, "custom set type requires edge_functions arg"
-            for edge in kwargs['functions']:
-                self.edge_function_specs[edge]['function_name'] = kwargs['functions'][edge]
+            funcs = kwargs['functions']
+        elif set_type == 'full_random':
+            funcs = {
+                '{} -> {}'.format(i, j): get_full_random_edge_function(
+                    parent_type=self._read_from_node_list(node_name=i, key='output_type')
+                )
+                for i, j in product(self._node_names, self._node_names) if self.adj_matrix.loc[i, j] == 1
+            }
         else:
             raise (ValueError, "set_type undefined")
+        for edge in funcs:
+            self.edge_function_specs[edge]['function_name'] = funcs[edge]
         self.is_defined['edge']['functions'] = True
         return self
 
@@ -200,6 +212,8 @@ if __name__ == '__main__':
         set_type='full_random', num_nodes=4
     ).set_node_output_types(
         set_type='full_random'
+    ).set_edge_functions(
+        set_type='full_random'
     )
 
     # adj = pd.DataFrame(
@@ -231,3 +245,4 @@ if __name__ == '__main__':
     from pprint import pprint
     pprint(param.is_defined)
     pprint(param.node_list)
+    pprint(param.edge_function_specs)

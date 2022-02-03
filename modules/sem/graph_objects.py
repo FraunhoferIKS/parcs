@@ -6,6 +6,11 @@ from modules.sem.utils import topological_sort
 
 
 NODE_OUTPUT_TYPES = ['continuous', 'binary', 'categorical']
+ALLOWED_EDGE_FUNCTIONS = {
+    'continuous': ('sigmoid', 'gaussian_rbf'),
+    'binary': ('identity', 'beta_noise'),
+    'categorical': ('identity', )
+}
 
 
 class Node:
