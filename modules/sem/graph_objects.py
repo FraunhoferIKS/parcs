@@ -179,19 +179,19 @@ class BaseGraph:
         }
         return self
 
-    def set_edges(self, info_matrix: pd.DataFrame = None):
-        self.adj_matrix = (info_matrix != 0).astype(int)
-        for node_pair in product(info_matrix.index, info_matrix.columns):
+    def set_edges(self, adj_matrix: pd.DataFrame = None, function_specs: dict = None):
+        self.adj_matrix = adj_matrix
+        for node_pair in product(adj_matrix.index, adj_matrix.columns):
             try:
-                info = info_matrix.loc[node_pair[0], node_pair[1]]
-                # TODO: this must be implemented better
+                info = adj_matrix.loc[node_pair[0], node_pair[1]]
+                edge_symbol = '{} -> {}'.format(node_pair[0], node_pair[1])
                 assert info != 0
-                self.edges['{}->{}'.format(node_pair[0], node_pair[1])] = Edge(
+                self.edges[edge_symbol] = Edge(
                     parent=node_pair[0], child=node_pair[1]
                 ).set_function(
-                    function_name=info['function_name']
+                    function_name=function_specs[edge_symbol]['function_name']
                 ).set_function_params(
-                    params=info['function_params']
+                    params=function_specs[edge_symbol]['function_params']
                 )
             except AssertionError:
                 continue
@@ -202,7 +202,7 @@ class BaseGraph:
         for node in topological_sort(adj_matrix=self.adj_matrix):
             v = self.nodes[node]
             inputs = pd.DataFrame({
-                p: self.edges['{}->{}'.format(p, v.name)].map(
+                p: self.edges['{} -> {}'.format(p, v.name)].map(
                     array=self.nodes[p].value['output']
                 ) for p in v.parents
             })
@@ -274,14 +274,20 @@ if __name__ == '__main__':
         }
     ])
     edge_param = {'alpha': 1, 'beta': 0, 'gamma': 0, 'tau': 1, 'rho': 0.02}
-    graph.set_edges(info_matrix=pd.DataFrame(
-        [
-            [0, 0, {'function_name': 'sigmoid', 'function_params': edge_param}],
-            [0, 0, {'function_name': 'sigmoid', 'function_params': edge_param}],
-            [0, 0, 0]
-        ],
-        columns=['A1', 'A2', 'B1'],
-        index=['A1', 'A2', 'B1']
-    ))
+    graph.set_edges(
+        adj_matrix=pd.DataFrame(
+            [
+                [0, 0, 1],
+                [0, 0, 1],
+                [0, 0, 0]
+            ],
+            columns=['A1', 'A2', 'B1'],
+            index=['A1', 'A2', 'B1']
+        ),
+        function_specs={
+            'A1 -> B1': {'function_name': 'sigmoid', 'function_params': edge_param},
+            'A2 -> B1': {'function_name': 'sigmoid', 'function_params': edge_param}
+        }
+    )
     data = graph.sample(size=3000)
     print(data)
