@@ -53,7 +53,7 @@ class GraphParam:
             self.node_list = [
                 {
                     'name': node_name,
-                    'parents': [],
+                    'parents': [i for i in adj_matrix if adj_matrix.loc[i, node_name] == 1],
                     'output_type': '',
                     'state_function': '',
                     'output_function': '',
