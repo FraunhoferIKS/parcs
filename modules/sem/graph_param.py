@@ -1,7 +1,25 @@
+import numpy as np
 import pandas as pd
 from itertools import product
-from modules.sem.utils import is_acyclic
+from modules.sem.utils import is_acyclic, mask_matrix
 from modules.sem.mapping_functions import get_output_function_options
+
+
+def get_full_random_adj_matrix(num_nodes=None, connectivity_ratio=1):
+    # create full UT matrix
+    adj = np.triu(np.ones(shape=(num_nodes, num_nodes)), k=1)
+    # create connectivity mask
+    mask = np.random.choice([0, 1], p=[1-connectivity_ratio, connectivity_ratio], size=adj.shape)
+    # mask
+    adj = mask_matrix(matrix=adj, mask=mask)
+    adj = adj.astype(int)
+    # shuffle
+    idx = np.random.permutation(num_nodes)
+    adj = adj[:, idx]
+    adj = adj[idx, :]
+    # create names
+    names = ['X{}'.format(i) for i in range(1, num_nodes+1)]
+    return pd.DataFrame(adj, index=names, columns=names)
 
 
 class GraphParam:
@@ -46,28 +64,31 @@ class GraphParam:
             assert 'adj_matrix' in kwargs, "custom set type requires adj_matrix arg"
             adj_matrix = kwargs['adj_matrix']
             assert adj_matrix.columns.to_list() == adj_matrix.index.to_list(), \
-                "index and columns of adj_matrix must be equal"
+                "index and columns of adj_matrix must be identical"
             assert is_acyclic(adj_matrix=adj_matrix), "graph is not acyclic"
-            self._node_names = adj_matrix.columns.to_list()
-            self.adj_matrix = adj_matrix
-            self.node_list = [
-                {
-                    'name': node_name,
-                    'parents': [i for i in adj_matrix if adj_matrix.loc[i, node_name] == 1],
-                    'output_type': '',
-                    'state_function': '',
-                    'output_function': '',
-                    'state_params': {},
-                    'output_params': {}
-                } for node_name in self._node_names
-            ]
+        elif set_type == 'full_random':
+            assert 'num_nodes' in kwargs, "full random set type requires num_nodes arg"
+            adj_matrix = get_full_random_adj_matrix(num_nodes=kwargs['num_nodes'])
         else:
             raise (ValueError, "set_type undefined")
+        self._node_names = adj_matrix.columns.to_list()
+        self.node_list = [
+            {
+                'name': node_name,
+                'parents': [i for i in adj_matrix if adj_matrix.loc[i, node_name] == 1],
+                'output_type': '',
+                'state_function': '',
+                'output_function': '',
+                'state_params': {},
+                'output_params': {}
+            } for node_name in self._node_names
+        ]
         self.edge_function_specs = {
             '{} -> {}'.format(i, j): {'function_name': '', 'function_params': {}}
             for i, j in product(self._node_names, self._node_names)
-            if self.adj_matrix.loc[i, j] == 1
+            if adj_matrix.loc[i, j] == 1
         }
+        self.adj_matrix = adj_matrix
         self.is_defined['adj_matrix'] = True
         return self
 
