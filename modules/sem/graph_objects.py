@@ -41,7 +41,7 @@ class Node:
             'output': {
                 'gaussian_noise': mapping_functions.output_gaussian_noise,
                 'gamma_noise': mapping_functions.output_gamma_noise,
-                'bernoulli': mapping_functions.output_binary,
+                'bernoulli': mapping_functions.output_bernoulli,
                 'multinomial': mapping_functions.output_multinomial
             }
         }
