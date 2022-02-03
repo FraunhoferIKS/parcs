@@ -29,6 +29,14 @@ def get_function_params_list(function=None):
     return
 
 
+def get_output_function_options(output_type=None):
+    lookup = {
+        'binary': ('bernoulli', ),
+        'continuous': ('gaussian_noise', 'gamma_noise')
+    }
+    return lookup[output_type]
+
+
 def edge_empty(**kwargs):
     assert kwargs
     print('edge function not implemented')
