@@ -5,6 +5,9 @@ from modules.sem import mapping_functions
 from modules.sem.utils import topological_sort
 
 
+NODE_OUTPUT_TYPES = ['continuous', 'binary', 'categorical']
+
+
 class Node:
     def __init__(self,
                  name=None,

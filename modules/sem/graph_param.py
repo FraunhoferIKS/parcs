@@ -3,6 +3,7 @@ import pandas as pd
 from itertools import product
 from modules.sem.utils import is_acyclic, mask_matrix
 from modules.sem.mapping_functions import get_output_function_options
+from modules.sem.graph_objects import NODE_OUTPUT_TYPES
 
 
 def get_full_random_adj_matrix(num_nodes=None, connectivity_ratio=1):
@@ -95,13 +96,17 @@ class GraphParam:
     def set_node_output_types(self, set_type=None, **kwargs):
         if set_type == 'custom':
             assert 'node_types_list' in kwargs, "custom set type requires node_types_list arg"
-            for name in kwargs['node_types_list']:
-                self._update_node_list(
-                    node_name=name, key='output_type',
-                    value=kwargs['node_types_list'][name]
-                )
+            types_list = kwargs['node_types_list']
+        elif set_type == 'full_random':
+            node_types = np.random.choice(NODE_OUTPUT_TYPES, size=len(self._node_names))
+            types_list = {name: type_ for name, type_ in zip(self._node_names, node_types)}
         else:
             raise (ValueError, "set_type undefined")
+        for name in types_list:
+            self._update_node_list(
+                node_name=name, key='output_type',
+                value=types_list[name]
+            )
         self.is_defined['node']['output_types'] = True
         return self
 
@@ -191,32 +196,38 @@ class GraphParam:
 
 if __name__ == '__main__':
     param = GraphParam()
-    adj = pd.DataFrame(
-        [
-            [0, 0, 1],
-            [0, 0, 1],
-            [0, 0, 0]
-        ],
-        columns=['A1', 'A2', 'B1'],
-        index=['A1', 'A2', 'B1']
-    )
     param.set_adj_matrix(
-        set_type='custom', adj_matrix=adj
+        set_type='full_random', num_nodes=4
     ).set_node_output_types(
-        set_type='custom', node_types_list={'A1': 'binary', 'A2': 'binary', 'B1': 'binary'}
-    ).set_edge_functions(
-        set_type='custom', functions={'A1 -> B1': 'sigmoid', 'A2 -> B1': 'sigmoid'}
-    ).set_edge_function_params(
-        set_type='custom', params={'A2 -> B1': {'a': 2}}
-    ).set_state_functions(
-        set_type='custom', functions={'A1': 'linear', 'A2': 'linear', 'B1': 'linear'}
-    ).set_output_functions(
-        set_type='custom', functions={'A1': 'bernoulli', 'A2': 'bernoulli', 'B1': 'bernoulli'}
-    ).set_state_params(
-        set_type='custom', params={'A1': {'a': 2}, 'A2': {}, 'B1': [1, 2]}
-    ).set_output_params(
-        set_type='custom', params={'A1': {'a': 6}, 'A2': {}, 'B1': [1, 2]}
+        set_type='full_random'
     )
+
+    # adj = pd.DataFrame(
+    #     [
+    #         [0, 0, 1],
+    #         [0, 0, 1],
+    #         [0, 0, 0]
+    #     ],
+    #     columns=['A1', 'A2', 'B1'],
+    #     index=['A1', 'A2', 'B1']
+    # )
+    # param.set_adj_matrix(
+    #     set_type='custom', adj_matrix=adj
+    # ).set_node_output_types(
+    #     set_type='custom', node_types_list={'A1': 'binary', 'A2': 'binary', 'B1': 'binary'}
+    # ).set_edge_functions(
+    #     set_type='custom', functions={'A1 -> B1': 'sigmoid', 'A2 -> B1': 'sigmoid'}
+    # ).set_edge_function_params(
+    #     set_type='custom', params={'A2 -> B1': {'a': 2}}
+    # ).set_state_functions(
+    #     set_type='custom', functions={'A1': 'linear', 'A2': 'linear', 'B1': 'linear'}
+    # ).set_output_functions(
+    #     set_type='custom', functions={'A1': 'bernoulli', 'A2': 'bernoulli', 'B1': 'bernoulli'}
+    # ).set_state_params(
+    #     set_type='custom', params={'A1': {'a': 2}, 'A2': {}, 'B1': [1, 2]}
+    # ).set_output_params(
+    #     set_type='custom', params={'A1': {'a': 6}, 'A2': {}, 'B1': [1, 2]}
+    # )
     from pprint import pprint
     pprint(param.is_defined)
     pprint(param.node_list)
