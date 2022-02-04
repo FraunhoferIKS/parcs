@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from itertools import product
+from scipy.special import comb
 from modules.utils import read_yaml_config
 from modules.sem.utils import is_acyclic, mask_matrix
 from modules.sem.mapping_functions import get_output_function_options
@@ -36,7 +37,20 @@ def pick_param(range_val=None):
             pass
         return np.random.choice(vals)
     else:
-        raise ValueError("invalid parameter range")
+        raise ValueError("invalid parameter range {}".format(range_val))
+
+
+def get_random_state_coefs(state_function=None, num_parents=None, range_val=None):
+    assert num_parents > 0
+    if state_function == 'linear':
+        num_coefs = num_parents
+    elif state_function == 'poly1_interactions':
+        num_coefs = 1 + num_parents + comb(num_parents, 2, exact=True)
+    else:
+        raise ValueError("invalid state function {}".format(state_function))
+    return np.array([
+        pick_param(range_val=range_val) for _ in range(num_coefs)
+    ])
 
 
 class GraphParam:
@@ -217,11 +231,20 @@ class GraphParam:
             params = kwargs['params']
         elif set_type == 'full_random':
             assert 'config_dir' in kwargs, "specify the YAML config file for param ranges"
-            print(self.node_list)
-            # raise
-            # params = {
-            #     'coefs': 1
-            # }
+            params = {}
+            for node in self._node_names:
+                state_func = self._read_from_node_list(node_name=node, key='state_function')
+                num_parents = len(self._read_from_node_list(node_name=node, key='parents'))
+                range_val = read_yaml_config(config_dir=kwargs['config_dir'])['node']['state'][state_func]['coefs']
+                try:
+                    coefs = get_random_state_coefs(
+                        state_function=state_func,
+                        num_parents=num_parents,
+                        range_val=range_val
+                    )
+                except AssertionError:
+                    continue
+                params[node] = {'coefs': coefs}
         else:
             raise (ValueError, "set_type undefined")
         for name in params:
@@ -260,10 +283,9 @@ if __name__ == '__main__':
         set_type='full_random', config_dir='../../configs/params/default.yml'
     ).set_state_functions(
         set_type='full_random'
+    ).set_state_params(
+        set_type='full_random', config_dir='../../configs/params/default.yml'
     )
-        # .set_state_params(
-    #     set_type='full_random', config_dir='../../configs/params/default.yml'
-    # )
 
     # adj = pd.DataFrame(
     #     [
@@ -292,6 +314,6 @@ if __name__ == '__main__':
     #     set_type='custom', params={'A1': {'a': 6}, 'A2': {}, 'B1': [1, 2]}
     # )
     from pprint import pprint
-    pprint(param.is_defined)
+    # pprint(param.is_defined)
     pprint(param.node_list)
-    pprint(param.edge_function_specs)
+    # pprint(param.edge_function_specs)
