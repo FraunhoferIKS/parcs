@@ -12,6 +12,11 @@ ALLOWED_EDGE_FUNCTIONS = {
     'categorical': ('identity', )
 }
 ALLOWED_STATE_FUNCTIONS = ['linear', 'poly1_interactions']
+ALLOWED_OUTPUT_FUNCTIONS = {
+    'continuous': ('gaussian_noise', 'gamma_noise'),
+    'binary': ('bernoulli',),
+    'categorical': ('multinomial',)
+}
 
 
 class Node:

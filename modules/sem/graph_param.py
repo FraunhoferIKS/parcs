@@ -5,7 +5,10 @@ from scipy.special import comb
 from modules.utils import read_yaml_config
 from modules.sem.utils import is_acyclic, mask_matrix
 from modules.sem.mapping_functions import get_output_function_options
-from modules.sem.graph_objects import NODE_OUTPUT_TYPES, ALLOWED_EDGE_FUNCTIONS, ALLOWED_STATE_FUNCTIONS
+from modules.sem.graph_objects import (
+    NODE_OUTPUT_TYPES, ALLOWED_EDGE_FUNCTIONS, ALLOWED_STATE_FUNCTIONS,
+    ALLOWED_OUTPUT_FUNCTIONS
+)
 from pprint import pprint
 
 
@@ -209,18 +212,27 @@ class GraphParam:
         assert self.is_defined['adj_matrix'], "adj_matrix is not defined yet"
         if set_type == 'custom':
             assert 'functions' in kwargs, "custom set type requires functions arg"
-            for name in kwargs['functions']:
-                func = kwargs['functions'][name]
-                o_type = self._read_from_node_list(node_name=name, key='output_type')
-                assert func in get_output_function_options(
-                    output_type=o_type
-                ), "node {}: function {} doesn't match the output type {}".format(name, func, o_type)
-                self._update_node_list(
-                    node_name=name, key='output_function',
-                    value=kwargs['functions'][name]
-                )
+            funcs = kwargs['functions']
+        elif set_type == 'full_random':
+            funcs = {
+                i: np.random.choice(
+                    ALLOWED_OUTPUT_FUNCTIONS[
+                        self._read_from_node_list(node_name=i, key='output_type')
+                    ]
+                ) for i in self._node_names
+            }
         else:
             raise (ValueError, "set_type undefined")
+        for name in funcs:
+            func = funcs[name]
+            o_type = self._read_from_node_list(node_name=name, key='output_type')
+            assert func in get_output_function_options(
+                output_type=o_type
+            ), "node {}: function {} doesn't match the output type {}".format(name, func, o_type)
+            self._update_node_list(
+                node_name=name, key='output_function',
+                value=func
+            )
         self.is_defined['node']['output_functions'] = True
         return self
 
@@ -285,6 +297,8 @@ if __name__ == '__main__':
         set_type='full_random'
     ).set_state_params(
         set_type='full_random', config_dir='../../configs/params/default.yml'
+    ).set_output_functions(
+        set_type='full_random'
     )
 
     # adj = pd.DataFrame(
