@@ -4,7 +4,7 @@ from itertools import product
 from modules.utils import read_yaml_config
 from modules.sem.utils import is_acyclic, mask_matrix
 from modules.sem.mapping_functions import get_output_function_options
-from modules.sem.graph_objects import NODE_OUTPUT_TYPES, ALLOWED_EDGE_FUNCTIONS
+from modules.sem.graph_objects import NODE_OUTPUT_TYPES, ALLOWED_EDGE_FUNCTIONS, ALLOWED_STATE_FUNCTIONS
 from pprint import pprint
 
 
@@ -175,13 +175,19 @@ class GraphParam:
         assert self.is_defined['adj_matrix'], "adj_matrix is not defined yet"
         if set_type == 'custom':
             assert 'functions' in kwargs, "custom set type requires functions arg"
-            for name in kwargs['functions']:
-                self._update_node_list(
-                    node_name=name, key='state_function',
-                    value=kwargs['functions'][name]
-                )
+            funcs = kwargs['functions']
+        elif set_type == 'full_random':
+            funcs = {
+                i: np.random.choice(ALLOWED_STATE_FUNCTIONS)
+                for i in self._node_names
+            }
         else:
             raise (ValueError, "set_type undefined")
+        for name in funcs:
+            self._update_node_list(
+                node_name=name, key='state_function',
+                value=funcs[name]
+            )
         self.is_defined['node']['state_functions'] = True
         return self
 
@@ -209,6 +215,13 @@ class GraphParam:
         if set_type == 'custom':
             assert 'params' in kwargs, "custom set type requires params arg"
             params = kwargs['params']
+        elif set_type == 'full_random':
+            assert 'config_dir' in kwargs, "specify the YAML config file for param ranges"
+            print(self.node_list)
+            # raise
+            # params = {
+            #     'coefs': 1
+            # }
         else:
             raise (ValueError, "set_type undefined")
         for name in params:
@@ -245,7 +258,12 @@ if __name__ == '__main__':
         set_type='full_random'
     ).set_edge_function_params(
         set_type='full_random', config_dir='../../configs/params/default.yml'
+    ).set_state_functions(
+        set_type='full_random'
     )
+        # .set_state_params(
+    #     set_type='full_random', config_dir='../../configs/params/default.yml'
+    # )
 
     # adj = pd.DataFrame(
     #     [

@@ -11,6 +11,7 @@ ALLOWED_EDGE_FUNCTIONS = {
     'binary': ('identity', 'beta_noise'),
     'categorical': ('identity', )
 }
+ALLOWED_STATE_FUNCTIONS = ['linear', 'poly1_interactions']
 
 
 class Node:
