@@ -1,9 +1,11 @@
 import numpy as np
 import pandas as pd
 from itertools import product
+from modules.utils import read_yaml_config
 from modules.sem.utils import is_acyclic, mask_matrix
 from modules.sem.mapping_functions import get_output_function_options
 from modules.sem.graph_objects import NODE_OUTPUT_TYPES, ALLOWED_EDGE_FUNCTIONS
+from pprint import pprint
 
 
 def get_full_random_adj_matrix(num_nodes=None, connectivity_ratio=1):
@@ -23,8 +25,18 @@ def get_full_random_adj_matrix(num_nodes=None, connectivity_ratio=1):
     return pd.DataFrame(adj, index=names, columns=names)
 
 
-def get_full_random_edge_function(parent_type=None):
-    return np.random.choice(ALLOWED_EDGE_FUNCTIONS[parent_type])
+def pick_param(range_val=None):
+    if isinstance(range_val, list):
+        return np.random.uniform(range_val[0], range_val[1])
+    elif isinstance(range_val, str):
+        vals = [val.strip() for val in range_val.split(',')]
+        try:
+            vals = [int(val) for val in vals]
+        except TypeError:
+            pass
+        return np.random.choice(vals)
+    else:
+        raise ValueError("invalid parameter range")
 
 
 class GraphParam:
@@ -89,7 +101,7 @@ class GraphParam:
             } for node_name in self._node_names
         ]
         self.edge_function_specs = {
-            '{} -> {}'.format(i, j): {'function_name': '', 'function_params': {}}
+            '{} -> {}'.format(i, j): {'function_name': '', 'params': {}}
             for i, j in product(self._node_names, self._node_names)
             if adj_matrix.loc[i, j] == 1
         }
@@ -121,10 +133,11 @@ class GraphParam:
             funcs = kwargs['functions']
         elif set_type == 'full_random':
             funcs = {
-                '{} -> {}'.format(i, j): get_full_random_edge_function(
-                    parent_type=self._read_from_node_list(node_name=i, key='output_type')
-                )
-                for i, j in product(self._node_names, self._node_names) if self.adj_matrix.loc[i, j] == 1
+                '{} -> {}'.format(i, j): np.random.choice(
+                    ALLOWED_EDGE_FUNCTIONS[
+                        self._read_from_node_list(node_name=i, key='output_type')
+                    ]
+                ) for i, j in product(self._node_names, self._node_names) if self.adj_matrix.loc[i, j] == 1
             }
         else:
             raise (ValueError, "set_type undefined")
@@ -137,10 +150,24 @@ class GraphParam:
         assert self.is_defined['edge']['functions'], "edge functions are not defined yet"
         if set_type == 'custom':
             assert 'params' in kwargs, "custom set type requires params arg"
-            for edge in kwargs['params']:
-                self.edge_function_specs[edge]['params'] = kwargs['params'][edge]
+            params = kwargs['params']
+        elif set_type == 'full_random':
+            assert 'config_dir' in kwargs, "specify the YAML config file for param ranges"
+            ranges = read_yaml_config(config_dir=kwargs['config_dir'])['edge']
+            params = {}
+            for edge in self.edge_function_specs:
+                func = self.edge_function_specs[edge]['function_name']
+                try:
+                    params[edge] = {
+                        item: pick_param(range_val=ranges[func][item])
+                        for item in ranges[func]
+                    }
+                except KeyError:
+                    continue
         else:
             raise (ValueError, "set_type undefined")
+        for edge in params:
+            self.edge_function_specs[edge]['params'] = params[edge]
         self.is_defined['edge']['params'] = True
         return self
 
@@ -181,13 +208,14 @@ class GraphParam:
         assert self.is_defined['node']['state_functions'], "state functions are not defined yet"
         if set_type == 'custom':
             assert 'params' in kwargs, "custom set type requires params arg"
-            for name in kwargs['params']:
-                self._update_node_list(
-                    node_name=name, key='state_params',
-                    value=kwargs['params'][name]
-                )
+            params = kwargs['params']
         else:
             raise (ValueError, "set_type undefined")
+        for name in params:
+            self._update_node_list(
+                node_name=name, key='state_params',
+                value=params[name]
+            )
         self.is_defined['node']['state_params'] = True
         return self
 
@@ -195,13 +223,14 @@ class GraphParam:
         assert self.is_defined['node']['output_functions'], "output functions are not defined yet"
         if set_type == 'custom':
             assert 'params' in kwargs, "custom set type requires params arg"
-            for name in kwargs['params']:
-                self._update_node_list(
-                    node_name=name, key='output_params',
-                    value=kwargs['params'][name]
-                )
+            params = kwargs['params']
         else:
             raise (ValueError, "set_type undefined")
+        for name in params:
+            self._update_node_list(
+                node_name=name, key='output_params',
+                value=params[name]
+            )
         self.is_defined['node']['output_params'] = True
         return self
 
@@ -214,6 +243,8 @@ if __name__ == '__main__':
         set_type='full_random'
     ).set_edge_functions(
         set_type='full_random'
+    ).set_edge_function_params(
+        set_type='full_random', config_dir='../../configs/params/default.yml'
     )
 
     # adj = pd.DataFrame(
