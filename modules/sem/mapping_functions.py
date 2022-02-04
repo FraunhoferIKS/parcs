@@ -32,7 +32,8 @@ def get_function_params_list(function=None):
 def get_output_function_options(output_type=None):
     lookup = {
         'binary': ('bernoulli', ),
-        'continuous': ('gaussian_noise', 'gamma_noise')
+        'continuous': ('gaussian_noise', 'gamma_noise'),
+        'categorical': ('multinomial', )
     }
     return lookup[output_type]
 

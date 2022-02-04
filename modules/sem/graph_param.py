@@ -91,7 +91,7 @@ class GraphParam:
         for node_id in range(len(self.node_list)):
             if self.node_list[node_id]['name'] == node_name:
                 return self.node_list[node_id][key]
-        raise (NameError, "node name not found")
+        raise NameError("node name {} not found".format(node_name))
 
     def set_adj_matrix(self, set_type=None, **kwargs):
         if set_type == 'custom':
@@ -272,6 +272,19 @@ class GraphParam:
         if set_type == 'custom':
             assert 'params' in kwargs, "custom set type requires params arg"
             params = kwargs['params']
+        elif set_type == 'full_random':
+            assert 'config_dir' in kwargs, "specify the YAML config file for param ranges"
+            ranges = read_yaml_config(config_dir=kwargs['config_dir'])['node']['output']
+            params = {}
+            for node in self.node_list:
+                func = node['output_function']
+                try:
+                    params[node['name']] = {
+                        item: pick_param(range_val=ranges[func][item])
+                        for item in ranges[func]
+                    }
+                except KeyError:
+                    continue
         else:
             raise (ValueError, "set_type undefined")
         for name in params:
@@ -299,6 +312,8 @@ if __name__ == '__main__':
         set_type='full_random', config_dir='../../configs/params/default.yml'
     ).set_output_functions(
         set_type='full_random'
+    ).set_output_params(
+        set_type='full_random', config_dir='../../configs/params/default.yml'
     )
 
     # adj = pd.DataFrame(
