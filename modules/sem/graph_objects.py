@@ -182,9 +182,9 @@ class BaseGraph:
             item['name']: Node(
                 name=item['name'], parents=item['parents']
             ).set_state_function(
-                function_name=item['state_function_name']
+                function_name=item['state_function']
             ).set_output_function(
-                function_name=item['output_function_name']
+                function_name=item['output_function']
             ).set_state_params(
                 params=item['state_params']
             ).set_output_params(
@@ -205,7 +205,7 @@ class BaseGraph:
                 ).set_function(
                     function_name=function_specs[edge_symbol]['function_name']
                 ).set_function_params(
-                    params=function_specs[edge_symbol]['function_params']
+                    params=function_specs[edge_symbol]['params']
                 )
             except AssertionError:
                 continue
@@ -215,14 +215,20 @@ class BaseGraph:
         # TODO: add a "check-all" step for all the info if they match
         assert size is not None, 'Specify size for sample'
         for node in topological_sort(adj_matrix=self.adj_matrix):
+            print('node is: ', node)
             v = self.nodes[node]
+            print('v is: ', v)
             inputs = pd.DataFrame({
                 p: self.edges['{} -> {}'.format(p, v.name)].map(
                     array=self.nodes[p].value['output']
                 ) for p in v.parents
             })
+            print('inputs are: ', inputs)
             v.calc_state(inputs=inputs, size=size)
+            print('state calculated')
             v.calc_output()
+            print('output calculated')
+            print('==========')
         self.data = pd.DataFrame({v: self.nodes[v].value['output'] for v in self.nodes})
         return self.data
 
@@ -264,8 +270,8 @@ if __name__ == '__main__':
             'name': 'A1',
             'parents': [],
             'output_type': 'continuous',
-            'state_function_name': 'linear',
-            'output_function_name': 'gaussian_noise',
+            'state_function': 'linear',
+            'output_function': 'gaussian_noise',
             'state_params': {},
             'output_params': {'rho': 0.02}
         },
@@ -273,8 +279,8 @@ if __name__ == '__main__':
             'name': 'A2',
             'parents': [],
             'output_type': 'continuous',
-            'state_function_name': 'linear',
-            'output_function_name': 'gaussian_noise',
+            'state_function': 'linear',
+            'output_function': 'gaussian_noise',
             'state_params': {},
             'output_params': {'rho': 0.02}
         },
@@ -282,8 +288,8 @@ if __name__ == '__main__':
             'name': 'B1',
             'parents': ['A1', 'A2'],
             'output_type': 'binary',
-            'state_function_name': 'linear',
-            'output_function_name': 'bernoulli',
+            'state_function': 'linear',
+            'output_function': 'bernoulli',
             'state_params': {'coefs': np.array([1, 1])},
             'output_params': {'rho': 0.02, 'gamma': 0}
         }
