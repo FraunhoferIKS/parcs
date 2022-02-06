@@ -209,6 +209,7 @@ class BaseGraph:
                 )
             except AssertionError:
                 continue
+        return self
 
     def sample(self, size=None):
         # TODO: add a "check-all" step for all the info if they match
