@@ -10,6 +10,34 @@ from sklearn.preprocessing import PolynomialFeatures
 # TODO: Catch Overflow warning for exponent
 
 
+def get_function_params_list(function=None):
+    lookup = {
+        'edge': {
+            'sigmoid': ('alpha', 'beta', 'gamma', 'tau', 'percentiles', 'rho'),
+            'gaussian_rbf': ('alpha', 'beta', 'gamma', 'tau', 'percentiles', 'rho'),
+            'beta_noise': ('rho', ),
+            'binary_identity': ()
+        },
+        'state': {
+        },
+        'output': {
+            'gaussian_noise': ('rho', ),
+            'gamma_noise': ('rho', ),
+            'bernoulli': ('mean_', 'gamma', 'percentiles', 'rho')
+        }
+    }
+    return
+
+
+def get_output_function_options(output_type=None):
+    lookup = {
+        'binary': ('bernoulli', ),
+        'continuous': ('gaussian_noise', 'gamma_noise'),
+        'categorical': ('multinomial', )
+    }
+    return lookup[output_type]
+
+
 def edge_empty(**kwargs):
     assert kwargs
     print('edge function not implemented')
@@ -125,10 +153,10 @@ def output_gamma_noise(array=None,
     ])
 
 
-def output_binary(array=None,
-                  mean_=None,
-                  gamma=None,
-                  percentiles=10, rho=0.2):
+def output_bernoulli(array=None,
+                     mean_=None,
+                     gamma=None,
+                     percentiles=10, rho=0.2):
     # scale
     V = edge_sigmoid(array=array, gamma=gamma, percentiles=percentiles, rho=rho)
 
