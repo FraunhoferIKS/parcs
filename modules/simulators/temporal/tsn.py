@@ -4,7 +4,7 @@ from modules.simulators.temporal.utils import (
     seasonality_functions
 )
 from modules.simulators.temporal.utils import noise_functions, trend_functions
-from modules.sem.structures import SimpleStructure
+from modules.sem.graph_objects import BaseGraph
 
 
 class TSNCore:
