@@ -295,6 +295,15 @@ class GraphParam:
         self.is_defined['node']['output_params'] = True
         return self
 
+    def get_node_list(self):
+        return self.node_list
+
+    def get_adj_matrix(self):
+        return self.adj_matrix
+
+    def get_edge_function_specs(self):
+        return self.edge_function_specs
+
 
 if __name__ == '__main__':
     param = GraphParam()
