@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from modules.sem.basic import IndependentUniformLatents, LatentLabelMaker
-from modules.simulators.temporal.deterministic import FourierSeries
+from rad_sim.sem.basic import IndependentUniformLatents, LatentLabelMaker
+from rad_sim.simulators.temporal.deterministic import FourierSeries
 
 sample_size = 200
 

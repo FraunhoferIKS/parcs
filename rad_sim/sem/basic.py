@@ -66,3 +66,12 @@ class LatentLabelMaker:
             np.random.choice([0, 1], p=[1-prob, prob])
             for prob in probs
         ])
+
+
+class WaveletLabelMaker:
+    def __init__(self,
+                 coef_min: float = 1.0,
+                 coef_max: float = 4.0,
+                 window_relative_size: float = 0.3,
+                 smoothing_degree: int = 2):
+        pass
