@@ -175,6 +175,7 @@ class LatentLabelMaker:
 
     def _sample_coefs(self, size=None):
         self.coefs = np.random.uniform(self.coef_min, self.coef_max, size=size)
+        self.coefs_sampled = True
         return self
 
     @staticmethod
@@ -199,7 +200,8 @@ class LatentLabelMaker:
         """
         if self.normalize_latent:
             sampled_latents = self._normalize(sampled_latents)
-        self._sample_coefs(size=sampled_latents.shape[1])
+        if not self.coefs_sampled:
+            self._sample_coefs(size=sampled_latents.shape[1])
         states = np.dot(sampled_latents, self.coefs)
         norm_states = self.offset + self._normalize(states)
         probs = expit(norm_states)
