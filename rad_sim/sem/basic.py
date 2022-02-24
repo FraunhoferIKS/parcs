@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 from dtaidistance import dtw
 import numpy as np
 import pandas as pd
