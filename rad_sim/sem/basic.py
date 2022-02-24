@@ -284,7 +284,7 @@ class ShapeletDTWLabelMaker:
         """
         if not self.is_ref_set:
             self.window_len = int(signals.shape[1] * self.window_ratio)
-            score_row = self._make_ref(shapelets=signals[:, -self.window_len])
+            score_row = self._make_ref(shapelets=signals[:, -self.window_len:])
         else:
             score_row = np.array([
                 dtw.distance_fast(self.ref_shapelet, signals[i, -self.window_len:], {'parallel': self.parallel})
