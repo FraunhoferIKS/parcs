@@ -8,7 +8,7 @@ setup(
     author_email='alireza.zamanian@iks.fraunhofer.de',
     license='BSD 2-clause',
     packages=find_packages(),
-    install_requires=['numpy', 'dtaidistance~=2.3.6'],
+    install_requires=['dtaidistance~=2.3.6'],
     classifiers=[
         'Development Status :: First Internal Release',
         'Intended Audience :: Science/Research',
