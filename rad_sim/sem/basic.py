@@ -4,6 +4,85 @@ import pandas as pd
 from scipy.special import expit
 
 
+class FrequencyLogNormalLatents:
+    """
+    Sample Frequencies from log normal distribution
+    by forcing less dominant frequencies to increase by a multiplicative factor
+
+    Parameters
+    ----------
+    num_freqs : int
+        number of frequencies to sample
+    first_freq_mean : float
+        The log normal mean value for the first (dominant) frequency
+    next_freq_ratio : float
+        The multiplicative factor, based on which the next frequencies increase
+    sigma : float
+        the scale of the log normal distribution
+    frequency_prefix : str, default='w'
+        the prefix of the data column names
+
+    Attributes
+    ----------
+    self.data : pd.DataFrame
+        the simulated data after calling the .sample() method
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> np.random.seed(1)
+    >>> fln = FrequencyLogNormalLatents(
+    ...     num_freqs=3,
+    ...     first_freq_mean=np.pi/5,
+    ...     next_freq_ratio=2.5,
+    ...     sigma=np.pi/5
+    ... )
+    >>> np.round(fln.sample(sample_size=5), 2)
+        w_0    w_1     w_2
+    0  5.20   1.13  127.19
+    1  1.28  14.40   13.91
+    2  1.35   2.98   41.45
+    3  0.96   5.88   39.87
+    4  3.23   4.11  103.48
+    """
+    def __init__(self,
+                 num_freqs: int = None,
+                 first_freq_mean: float = None,
+                 next_freq_ratio: float = None,
+                 sigma: float = None,
+                 frequency_prefix: str = 'str'):
+        self.data = None
+        self.num_freqs = num_freqs
+        self.first_freq_mean = first_freq_mean
+        self.next_freq_ratio = next_freq_ratio
+        self.sigma = sigma
+
+    def sample(self, sample_size: int = 100):
+        """
+        sample the latents
+
+        Parameters
+        ----------
+        sample_size : int, default=100
+            number of samples
+
+        Returns
+        -------
+        self.data : pd.DataFrame
+            the sampled values in a dataframe
+
+        """
+        means_ = [
+            np.log(self.first_freq_mean) + i * np.log(self.next_freq_ratio)
+            for i in range(self.num_freqs)
+        ]
+        self.data = pd.DataFrame({
+            'w_{}'.format(i): np.random.lognormal(means_[i], self.sigma, size=sample_size)
+            for i in range(self.num_freqs)
+        })
+        return self.data
+
+
 class IndependentNormalLatents:
     """
     simulate independent normally distributed latent variables
@@ -299,12 +378,5 @@ class ShapeletDTWLabelMaker:
 
 
 if __name__ == '__main__':
-    def func(x):
-        y = x.copy()
-        y = y + np.random.normal(0, 1)
-        print(x)
-        print(y)
-
-    x = np.array([1, 2, 3])
-    func(x)
-    print(x)
+    o = FrequencyLogNormalLatents(first_freq_mean=1, next_freq_ratio=2)
+    o.sample()
