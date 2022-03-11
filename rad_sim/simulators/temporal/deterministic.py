@@ -42,6 +42,7 @@ class FourierSeries:
     array([[0.37, 0.43, 0.49, 0.55, 0.61],
            [0.14, 0.33, 0.52, 0.69, 0.85]])
     """
+
     def __init__(self,
                  sampled_latents: pd.DataFrame = None,
                  dominant_amplitude: float = 1,
@@ -66,8 +67,8 @@ class FourierSeries:
 
         # setup amplitude
         num_freqs = len(self.frequency_columns)
-        self.amplitudes = dominant_amplitude * np.exp(-amplitude_exp_decay_rate * np.arange(num_freqs)) *\
-            np.ones(shape=(len(self.latents), num_freqs))
+        self.amplitudes = dominant_amplitude * np.exp(-amplitude_exp_decay_rate * np.arange(num_freqs)) * \
+                          np.ones(shape=(len(self.latents), num_freqs))
 
     def sample(self, seq_len: int = 10):
         """
@@ -116,6 +117,8 @@ class TSN:
         column name for frequency in `sampled_latents` dataframe
     phaseshift_column : str, default='phaseshift'
         column name for phaseshift in `sampled_latents` dataframe
+    noise_sigma : float, default=0.5
+        scale of additive Gaussian noise
 
     Examples
     --------
@@ -123,6 +126,7 @@ class TSN:
 
     >>> import numpy as np
     >>> from rad_sim.simulators.temporal.deterministic import TSN
+    >>> np.random.seed(1)
     >>> latents = pd.DataFrame(
     ...     [
     ...         [1, 0, 10, 1, 0],
@@ -131,22 +135,26 @@ class TSN:
     ... )
     >>> tsn = TSN(sampled_latents=latents)
     >>> np.round(tsn.sample(seq_len=4), 2)
-    array([[ 0.  ,  9.41, 11.09,  4.41],
-           [ 1.  , 11.29, -4.17,  1.81]])
+    array([[ 0.81,  9.11, 10.83,  3.87],
+           [ 1.43, 10.14, -3.3 ,  1.43]])
     """
+
     def __init__(self,
                  sampled_latents: pd.DataFrame = None,
                  slope_column: str = 'slope',
                  intercept_column: str = 'intercept',
                  amplitude_column: str = 'amplitude',
                  frequency_column: str = 'frequency',
-                 phaseshift_column: str = 'phaseshift'):
+                 phaseshift_column: str = 'phaseshift',
+                 noise_sigma: float = 0.5):
         self.latent = sampled_latents
+        self.n_sample = len(sampled_latents)
         self.theta = self.latent[slope_column].values.reshape(-1, 1)
         self.b = self.latent[intercept_column].values.reshape(-1, 1)
         self.a = self.latent[amplitude_column].values.reshape(-1, 1)
         self.w = self.latent[frequency_column].values.reshape(-1, 1)
         self.phi = self.latent[phaseshift_column].values.reshape(-1, 1)
+        self.noise_sigma = noise_sigma
 
     def sample(self, seq_len: int = 10):
         """
@@ -162,4 +170,6 @@ class TSN:
             matrix where rows are samples and columns are time points.
         """
         t = np.arange(seq_len)
-        return (self.theta * t + self.b) + (self.a * np.sin(self.w*t+self.phi))
+        return (self.theta * t + self.b) + \
+               (self.a * np.sin(self.w * t + self.phi)) + \
+               np.random.normal(0, self.noise_sigma, size=(self.n_sample, seq_len))
