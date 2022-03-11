@@ -138,10 +138,15 @@ class IndependentNormalLatents:
         df : pd.DataFrame
             `(n,p)` realizations for n samples and p latent variables
         """
-        self.data = pd.DataFrame({
+        normal_vars = {
             var['name']: np.random.normal(var['mean'], var['sigma'], size=sample_size)
-            for var in self.var_list
-        })
+            for var in self.var_list if not var['log']
+        }
+        log_normal_vars = {
+            var['name']: np.random.lognormal(np.log(var['mean']), var['sigma'], size=sample_size)
+            for var in self.var_list if var['log']
+        }
+        self.data = pd.DataFrame({**normal_vars, **log_normal_vars})
         return self.data
 
 
@@ -390,7 +395,7 @@ class ShapeletPlacementLabelMaker:
         class 1 to 0 ratio
     shapelet_num_sin: int, default=10
         number of sins in the fourier series for creating a random shapelet
-    shaplet_added_noise: float, default=0.1
+    shapelet_added_noise: float, default=0.1
         added noise for Fourier Series of the shapelet
 
     Attributes
@@ -429,13 +434,13 @@ class ShapeletPlacementLabelMaker:
                  window_ratio: float = 0.3,
                  class_ratio: float = 0.5,
                  shapelet_num_sin: int = 10,
-                 shaplet_added_noise: float = 0.1):
+                 shapelet_added_noise: float = 0.1):
         self.window_ratio = window_ratio
         self.is_shapelet_defined = False
         self.class_ratio = class_ratio
         self.shapelet = None
         self.shapelet_num_sin = shapelet_num_sin
-        self.shapelet_added_noise = shaplet_added_noise
+        self.shapelet_added_noise = shapelet_added_noise
 
         self.seq_len = None
         self.shap_len = None
@@ -485,6 +490,8 @@ class ShapeletPlacementLabelMaker:
 
         Returns
         -------
+        signals: array-like
+            same shape as input signals, but with shapelets placed for class 1
         labels: array-like
             array of length n the labels for samples
 
@@ -501,7 +508,7 @@ class ShapeletPlacementLabelMaker:
 
         labels = np.zeros(shape=(n,)).astype(int)
         labels[signal_inds] = 1
-        return labels
+        return signals, labels
 
 
 if __name__ == '__main__':
