@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 from rad_sim.sem.basic import *
 from rad_sim.simulators.temporal.deterministic import *
@@ -133,8 +134,18 @@ class FsLogNormalLatent2distYSimulator:
                  dist_0_dominant_amplitude=1, dist_1_dominant_amplitude=1,
                  dist_0_amplitude_exp_decay_rate=1, dist_1_amplitude_exp_decay_rate=1,
                  dist_0_added_noise_sigma_ratio=0.2, dist_1_added_noise_sigma_ratio=0.2,
-                 class_ratio=0.5
-                 ):
+                 class_ratio=0.5):
+        self.fs0_config = {
+            'dominant_amplitude': dist_0_dominant_amplitude,
+            'added_noise_sigma_ratio': dist_0_added_noise_sigma_ratio,
+            'amplitude_exp_decay_rate': dist_0_amplitude_exp_decay_rate
+        }
+        self.fs1_config = {
+            'dominant_amplitude': dist_1_dominant_amplitude,
+            'added_noise_sigma_ratio': dist_1_added_noise_sigma_ratio,
+            'amplitude_exp_decay_rate': dist_1_amplitude_exp_decay_rate
+        }
+        self.class_ratio = class_ratio
         # frequencies
         self.l0_freq_simulator = FrequencyLogNormalLatents(
             num_freqs=dist_0_num_sin,
@@ -160,22 +171,41 @@ class FsLogNormalLatent2distYSimulator:
             ])
         elif fs_phi_latent_type == 'normal':
             self.l0_phi_simulator = IndependentNormalLatents().set_nodes(var_list=[
-                {'name': 'phi_{}'.format(i), 'mean': dist_0_phi_config[0], 'sigma': dist_0_phi_config[1]}
+                {'name': 'phi_{}'.format(i), 'mean': dist_0_phi_config[0], 'sigma': dist_0_phi_config[1], 'log': False}
                 for i in range(dist_0_num_sin)
             ])
             self.l1_phi_simulator = IndependentNormalLatents().set_nodes(var_list=[
-                {'name': 'phi_{}'.format(i), 'mean': dist_1_phi_config[0], 'sigma': dist_1_phi_config[1]}
+                {'name': 'phi_{}'.format(i), 'mean': dist_1_phi_config[0], 'sigma': dist_1_phi_config[1], 'log': False}
                 for i in range(dist_1_num_sin)
             ])
         else:
             raise ValueError('unknown latent type')
 
     def sample(self, sample_size=None, seq_len=None):
-        l0_freqs = self.l0_freq_simulator.sample(sample_size=sample_size)
-        l1_freqs = self.l1_freq_simulator.sample(sample_size=sample_size)
-        l0_phis = self.l0_phi_simulator.sample(sample_size=sample_size)
-        l1_phis = self.l1_phi_simulator.sample(sample_size=sample_size)
+        n1 = int(sample_size * self.class_ratio)
+        n0 = sample_size - n1
+        l0_freqs = self.l0_freq_simulator.sample(sample_size=n0)
+        l1_freqs = self.l1_freq_simulator.sample(sample_size=n1)
+        l0_phis = self.l0_phi_simulator.sample(sample_size=n0)
+        l1_phis = self.l1_phi_simulator.sample(sample_size=n1)
 
-        l0 = 1# concatenate
+        fs0 = FourierSeries(
+            sampled_latents=pd.concat([l0_freqs, l0_phis], axis=1),
+            **self.fs0_config
+        )
+        fs1 = FourierSeries(
+            sampled_latents=pd.concat([l1_freqs, l1_phis], axis=1),
+            **self.fs1_config
+        )
+        signals = np.concatenate([fs0.sample(seq_len=seq_len), fs1.sample(seq_len=seq_len)], axis=0)
+        # make labels
+        labels = np.concatenate([np.zeros(shape=(n0,)), np.ones(shape=(n1,))]).astype(int)
+        # shuffle
+        idx = np.arange(signals.shape[0])
+        np.random.shuffle(idx)
+        signals = signals[idx]
+        labels = labels[idx]
+        return signals, labels
+
 
 
