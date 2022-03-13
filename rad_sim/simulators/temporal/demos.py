@@ -37,10 +37,7 @@ class TsnLatentLogisticYSimulator:
         # sample latents
         l = self.latent_simulator.sample(sample_size=sample_size)
         # initiate tsn
-        tsn = TSN(sampled_latents=l, noise_sigma=self.tsn_noise_sigma)
-        # run tsn
-        signals = tsn.sample(seq_len=seq_len)
-
+        signals = TSN(sampled_latents=l, noise_sigma=self.tsn_noise_sigma).sample(seq_len=seq_len)
         # make labels
         labels = self.label_maker.make_label(sampled_latents=l[self.latent_subset_column])
 
@@ -208,4 +205,99 @@ class FsLogNormalLatent2distYSimulator:
         return signals, labels
 
 
+class FsLogNormalLatentLogisticYSimulator:
+    def __init__(self,
+                 fs_num_sin=10,
+                 fs_frequency_mean=None,
+                 fs_frequency_sigma=None,
+                 fs_phi_mean=None,
+                 fs_phi_sigma=None,
+                 fs_next_frequency_ratio=1.5,
+                 fs_dominant_amplitude=1,
+                 fs_amplitude_exp_decay_rate=1.5,
+                 fs_added_noise_sigma_ratio=0,
+                 y_beta_coef_range=None,
+                 y_sigmoid_offset=None,
+                 latent_subset_for_label=None):
+        self.l_freq = FrequencyLogNormalLatents(
+            num_freqs=fs_num_sin,
+            first_freq_mean=fs_frequency_mean,
+            next_freq_ratio=fs_next_frequency_ratio,
+            sigma=fs_frequency_sigma
+        )
+        self.l_phi = IndependentNormalLatents().set_nodes([
+            {'name': 'phi_{}'.format(i), 'mean': fs_phi_mean, 'sigma': fs_phi_sigma, 'log': False}
+            for i in range(fs_num_sin)
+        ])
+        self.dominant_amplitude = fs_dominant_amplitude
+        self.amplitude_exp_decay_rate = fs_amplitude_exp_decay_rate
+        self.added_noise_sigma_ratio = fs_added_noise_sigma_ratio
 
+        # labels
+        self.label_maker = LatentLabelMaker(
+            coef_min=y_beta_coef_range[0],
+            coef_max=y_beta_coef_range[1],
+            sigmoid_offset=y_sigmoid_offset
+        )
+        self.latent_subset_column = latent_subset_for_label
+
+    def sample(self, sample_size=None, seq_len=None):
+        # sample latents
+        latents = pd.concat([
+                self.l_freq.sample(sample_size=sample_size),
+                self.l_phi.sample(sample_size=sample_size)
+            ], axis=1)
+        signals = FourierSeries(
+            sampled_latents=latents,
+            dominant_amplitude=self.dominant_amplitude,
+            amplitude_exp_decay_rate=self.amplitude_exp_decay_rate,
+            added_noise_sigma_ratio=self.added_noise_sigma_ratio
+        ).sample(seq_len=seq_len)
+        labels = self.label_maker.make_label(sampled_latents=latents[self.latent_subset_column])
+
+        return signals, labels
+
+
+class FsUniformLatentLogisticYSimulator:
+    def __init__(self,
+                 fs_num_sin=10,
+                 fs_frequency_range=None,
+                 fs_phi_range=None,
+                 fs_dominant_amplitude=1,
+                 fs_amplitude_exp_decay_rate=1.5,
+                 fs_added_noise_sigma_ratio=0,
+                 y_beta_coef_range=None,
+                 y_sigmoid_offset=None,
+                 latent_subset_for_label=None):
+        self.l_simulator = IndependentUniformLatents().set_nodes(
+            [
+                {'name': 'w_{}'.format(i), 'low': fs_frequency_range[0], 'high': fs_frequency_range[1]}
+                for i in range(fs_num_sin)
+            ] + [
+                {'name': 'phi_{}'.format(i), 'low': fs_phi_range[0], 'high': fs_phi_range[1]}
+                for i in range(fs_num_sin)
+            ]
+        )
+        self.dominant_amplitude = fs_dominant_amplitude
+        self.amplitude_exp_decay_rate = fs_amplitude_exp_decay_rate
+        self.added_noise_sigma_ratio = fs_added_noise_sigma_ratio
+
+        # labels
+        self.label_maker = LatentLabelMaker(
+            coef_min=y_beta_coef_range[0],
+            coef_max=y_beta_coef_range[1],
+            sigmoid_offset=y_sigmoid_offset
+        )
+        self.latent_subset_column = latent_subset_for_label
+
+    def sample(self, sample_size=None, seq_len=None):
+        latents = self.l_simulator.sample(sample_size=sample_size)
+        signals = FourierSeries(
+            sampled_latents=latents,
+            dominant_amplitude=self.dominant_amplitude,
+            amplitude_exp_decay_rate=self.amplitude_exp_decay_rate,
+            added_noise_sigma_ratio=self.added_noise_sigma_ratio
+        ).sample(seq_len=seq_len)
+        labels = self.label_maker.make_label(sampled_latents=latents[self.latent_subset_column])
+
+        return signals, labels
