@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='rad_sim',
-    version='0.0.1',
+    version='0.0.2',
     description='Simulation package',
     author='RAD-IKS@FhG',
     author_email='alireza.zamanian@iks.fraunhofer.de',
@@ -10,7 +10,7 @@ setup(
     packages=find_packages(),
     install_requires=['dtaidistance~=2.3.6'],
     classifiers=[
-        'Development Status :: First Internal Release',
+        'Development Status :: Internal Release',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: BSD License',
         'Operating System :: POSIX :: Linux',
