@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 from itertools import product
-from modules.sem import mapping_functions
-from modules.sem.utils import topological_sort
+from rad_sim.sem import mapping_functions
+from rad_sim.sem.utils import topological_sort
 
 
 NODE_OUTPUT_TYPES = ['continuous', 'binary', 'categorical']
@@ -95,7 +95,7 @@ class Node:
     def set_output_params(self, params=None):
         return self._set_function_params(function_type='output', params=params)
 
-    def calc_state(self, inputs=None, size=None):
+    def calc_state(self, inputs=[], size=None):
         try:
             assert len(inputs) != 0
             result = self.state_function['function'](
@@ -158,8 +158,8 @@ class Edge:
         }
         return self
 
-    def set_function_params(self, params=None):
-        self.edge_function['params'] = params
+    def set_function_params(self, function_params=None):
+        self.edge_function['params'] = function_params
         return self
 
     def map(self, array=None):
@@ -205,7 +205,7 @@ class BaseGraph:
                 ).set_function(
                     function_name=function_specs[edge_symbol]['function_name']
                 ).set_function_params(
-                    params=function_specs[edge_symbol]['params']
+                    function_params=function_specs[edge_symbol]['function_params']
                 )
             except AssertionError:
                 continue
@@ -215,20 +215,14 @@ class BaseGraph:
         # TODO: add a "check-all" step for all the info if they match
         assert size is not None, 'Specify size for sample'
         for node in topological_sort(adj_matrix=self.adj_matrix):
-            print('node is: ', node)
             v = self.nodes[node]
-            print('v is: ', v)
             inputs = pd.DataFrame({
                 p: self.edges['{} -> {}'.format(p, v.name)].map(
                     array=self.nodes[p].value['output']
                 ) for p in v.parents
             })
-            print('inputs are: ', inputs)
             v.calc_state(inputs=inputs, size=size)
-            print('state calculated')
             v.calc_output()
-            print('output calculated')
-            print('==========')
         self.data = pd.DataFrame({v: self.nodes[v].value['output'] for v in self.nodes})
         return self.data
 
