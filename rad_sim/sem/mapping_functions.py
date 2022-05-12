@@ -26,7 +26,7 @@ def get_function_params_list(function=None):
             'bernoulli': ('mean_', 'gamma', 'percentiles', 'rho')
         }
     }
-    return
+    return lookup[function]
 
 
 def get_output_function_options(output_type=None):
@@ -48,7 +48,7 @@ def edge_sigmoid(array=None,
                  alpha=1.0, beta=0.0, gamma=1, tau=1,
                  percentiles=10, rho=0.2):
     # 1,2. SCALE ARRAY
-    V = scale_V(array=array, percentiles=percentiles)
+    V = scale_V(array=array)
 
     # 3. PERTURB V
     noise = np.random.normal(loc=0, scale=rho*np.std(V), size=len(V))
@@ -64,7 +64,7 @@ def edge_gaussian_rbf(array=None,
                       alpha=1, beta=0, gamma=0, tau=2,
                       percentiles=10, rho=0.2):
     # 1,2. SCALE ARRAY
-    V = scale_V(array=array, percentiles=percentiles)
+    V = scale_V(array=array)
 
     # 3. PERTURB V
     noise = np.random.normal(loc=0, scale=rho*np.std(V), size=len(V))
@@ -92,7 +92,7 @@ def edge_binary_identity(array=None):
 
 def state_linear(inputs=None, parents_order=None, coefs=None):
     # assert on the number of coefs
-    assert len(inputs.columns) == len(coefs)
+    assert len(parents_order) == len(coefs)
     data = inputs[parents_order]
     return np.dot(
         data.values,
@@ -159,24 +159,27 @@ def output_bernoulli(array=None,
                      percentiles=10, rho=0.2):
     # scale
     V = edge_sigmoid(array=array, gamma=gamma, percentiles=percentiles, rho=rho)
-
     # FIX MEAN
-    # 1. current mean
-    E_V = np.mean(V)
-    if mean_ is None:
-        mean_ = E_V
-    # 2. Case:
-    if mean_ < E_V:
-        a = mean_ / E_V
-        b = 0
-    elif mean_ > E_V:
-        a = (1-mean_) / (max(V) - E_V)
-        b = 1 - a * max(V)
-    else:
-        a = 1
-        b = 0
-    # 3. apply
-    V = a * V + b
+    try:
+        assert mean_ is not None
+        # 1. current mean
+        E_V = np.mean(V)
+
+        # 2. Case:
+        if mean_ < E_V:
+            a = mean_ / E_V
+            b = 0
+        elif mean_ > E_V:
+            a = (1-mean_) / (max(V) - E_V)
+            b = 1 - a * max(V)
+        else:
+            a = 1
+            b = 0
+        # 3. apply
+        V = a * V + b
+    except AssertionError:
+        pass
+
     return [np.random.choice([0, 1], p=[1-i, i]) for i in V]
 
 
@@ -204,12 +207,8 @@ def output_empty(**kwargs):
 
 
 # === HELPERS ===
-def scale_V(array=None, percentiles=None):
-    # percentiles
-    P_n = np.percentile(array, q=percentiles)
-    P_100n = np.percentile(array, q=100-percentiles)
-    # scale
-    return -1 + 2 * (array - P_n) / (P_100n - P_n)
+def scale_V(array=None):
+    return (array - array.mean()) / array.std()
 
 
 if __name__ == '__main__':

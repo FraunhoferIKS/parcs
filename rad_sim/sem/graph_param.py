@@ -2,10 +2,10 @@ import numpy as np
 import pandas as pd
 from itertools import product
 from scipy.special import comb
-from modules.utils import read_yaml_config
-from modules.sem.utils import is_acyclic, mask_matrix
-from modules.sem.mapping_functions import get_output_function_options
-from modules.sem.graph_objects import (
+from rad_sim.utils import read_yaml_config
+from rad_sim.sem.utils import is_acyclic, mask_matrix
+from rad_sim.sem.mapping_functions import get_output_function_options
+from rad_sim.sem.graph_objects import (
     NODE_OUTPUT_TYPES, ALLOWED_EDGE_FUNCTIONS, ALLOWED_STATE_FUNCTIONS,
     ALLOWED_OUTPUT_FUNCTIONS
 )
