@@ -511,6 +511,124 @@ class ShapeletPlacementLabelMaker:
         return signals, labels
 
 
+class DetShapeletPlacementLabelMaker:
+    """
+    make label based on placing a shapelet for a class of signals at a determined index
+
+    Parameters
+    ----------
+    shapelet_length: int,
+        length of the shapelet
+    shapelet_index: int,
+        index of the first point of shapelet in the signal
+    class_ratio: float, default=0.5
+        class 1 to 0 ratio
+    shapelet_num_sin: int, default=10
+        number of sins in the fourier series for creating a random shapelet
+    shapelet_added_noise: float, default=0.1
+        added noise for Fourier Series of the shapelet
+
+    Attributes
+    ----------
+    self.shapelet: array-like
+        the generated shapelet
+
+    Examples
+    --------
+    >>> from rad_sim.simulators.temporal.stochastic_processes import BrownianMotion
+    >>> from rad_sim.sem.basic import IndependentUniformLatents
+    >>> from rad_sim.sem.basic import DetShapeletPlacementLabelMaker
+    >>> import numpy as np
+    >>> np.random.seed(1)
+    >>> # define the base time series
+    >>> seq_len = 100
+    >>> inl = IndependentUniformLatents().set_nodes(var_list=[{'name': 'drift', 'low': -1, 'high': 1}])
+    >>> l = inl.sample(sample_size=10)
+    >>> l['scale'] = 1.7
+    >>> l['init'] = 0
+    >>> bm = BrownianMotion(sampled_latents=l, geometric=False)
+    >>> signals = bm.sample(seq_len=seq_len)
+    >>> # make labels
+    >>> lm = DetShapeletPlacementLabelMaker(shapelet_length=10, shapelet_index=4)
+    >>> signals, labels = lm.make_label(signals=signals)
+    >>> labels
+    array([0, 0, 1, 1, 0, 1, 0, 1, 0, 1])
+    """
+    def __init__(self,
+                 shapelet_length: int = None,
+                 shapelet_index: int = None,
+                 class_ratio: float = 0.5,
+                 shapelet_num_sin: int = 10,
+                 shapelet_added_noise: float = 0.1):
+
+        self.is_shapelet_defined = False
+        self.class_ratio = class_ratio
+        self.shapelet = None
+        self.shapelet_num_sin = shapelet_num_sin
+        self.shapelet_added_noise = shapelet_added_noise
+
+        self.seq_len = None
+        self.shap_len = shapelet_length
+        self.shap_idx = shapelet_index
+
+    def _make_shapelet(self):
+        f_range = [np.pi / self.shap_len, np.pi / 4]
+        p_range = [-np.pi / 4, np.pi / 4]
+        freqs = np.random.uniform(f_range[0], f_range[1], size=self.shapelet_num_sin)
+        phis = np.random.uniform(p_range[0], p_range[1], size=self.shapelet_num_sin)
+        l = np.concatenate([freqs, phis]).reshape(1, -1)
+        l = pd.DataFrame(
+            l,
+            columns=['w_{}'.format(i) for i in range(self.shapelet_num_sin)] +
+                    ['phi_{}'.format(i) for i in range(self.shapelet_num_sin)]
+        )
+        fs = FourierSeries(
+            sampled_latents=l,
+            amplitude_exp_decay_rate=0,
+            added_noise_sigma_ratio=self.shapelet_added_noise
+        )
+        self.shapelet = fs.sample(seq_len=self.shap_len)[0]
+        self.is_shapelet_defined = True
+
+    def _place_shapelet(self, signal: np.array = None):
+        assert self.is_shapelet_defined
+        pos = self.shap_idx
+        shap_offset = signal[pos]
+        shap = self.shapelet + (shap_offset - self.shapelet[0])
+        sig_offset = shap[-1]
+        signal[pos:pos + self.shap_len] = shap
+        signal[pos + self.shap_len:] += (sig_offset - signal[pos + self.shap_len])
+        return signal, pos
+
+    def make_label(self, signals: np.array = None):
+        """
+        make labels for signals
+
+        Parameters
+        ----------
+        signals: array-like
+            n x t array of signals to be labeled
+
+        Returns
+        -------
+        signals: array-like
+            same shape as input signals, but with shapelets placed for class 1
+        labels: array-like
+            array of length n the labels for samples
+
+        """
+        n, self.seq_len = signals.shape
+        if not self.is_shapelet_defined:
+            self._make_shapelet()
+        signal_inds = np.random.choice(range(n), size=int(n*self.class_ratio), replace=False)
+        for idx in signal_inds:
+            signals[idx], shapelet_pos = self._place_shapelet(signal=signals[idx])
+
+        labels = np.zeros(shape=(n,)).astype(int)
+        labels[signal_inds] = 1
+        return signals, labels
+
+
 if __name__ == '__main__':
     o = FrequencyLogNormalLatents(first_freq_mean=1, next_freq_ratio=2)
     o.sample()
