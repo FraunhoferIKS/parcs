@@ -75,16 +75,21 @@ class SigmoidCorrection:
             L = self.config['lower']
             # fixing the mean via another offset (find by GD)
             if self.target_mean is not None:
-                theta = array.mean()
-                lr = 10
-                target = (self.target_mean - L) / U
-                for i in range(10000):
-                    h = expit(array - theta)
-                    delta = (h.mean() - target) * (h * (1 - h)).mean() * lr
-                    theta += delta
-                self.config['offset_for_target_mean'] = theta
+                # min - I =  6 -> I = min - 6
+                # max - I = -6 -> I = max + 6
+                error = np.inf
+                theta = 0
+                for i in np.linspace(array.min() - 6, array.max() + 6, 1000):
+                    h = U * expit(array - i) + L
+                    new_error = abs(h.mean() - self.target_mean)
+                    if new_error < error:
+                        theta = i
+                        error = new_error
+                    else:
+                        break
+                self.config['offset'] = theta
             self.is_initialized = True
 
         return (self.config['upper'] - self.config['lower']) * \
-               expit(array - self.config['offset'] - self.config['offset_for_target_mean']) + \
+               expit(array - self.config['offset']) + \
                self.config['lower']
