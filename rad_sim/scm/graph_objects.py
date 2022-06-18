@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from itertools import product
 from rad_sim.scm import mapping_functions
-from rad_sim.scm.utils import topological_sort
+from rad_sim.scm.utils import topological_sort, EdgeCorrection
 from rad_sim.scm.output_distributions import GaussianDistribution, BernoulliDistribution
 
 
@@ -23,7 +23,8 @@ class Node:
                  name=None,
                  parents=None,
                  output_distribution=None,
-                 dist_configs=None,
+                 do_correction=True,
+                 dist_configs={},
                  dist_params_coefs=None):
         # basic attributes
         self.info = {
@@ -33,6 +34,7 @@ class Node:
         }
         self.output_distribution = OUTPUT_DISTRIBUTIONS[output_distribution](
             **dist_configs,
+            do_correction=do_correction,
             coefs=dist_params_coefs
         )
 
@@ -47,10 +49,14 @@ class Edge:
     def __init__(self,
                  parent=None,
                  child=None,
+                 do_correction=True,
                  function_name=None,
                  function_params=None):
         self.parent = parent
         self.child = child
+        self.do_correction = do_correction
+        if self.do_correction:
+            self.corrector = EdgeCorrection()
 
         self.edge_function = {
             'name': function_name,
@@ -59,6 +65,8 @@ class Edge:
         }
 
     def map(self, array=None):
+        if self.do_correction:
+            array = self.corrector.transform(array)
         return self.edge_function['function'](
             array=array,
             **self.edge_function['params']

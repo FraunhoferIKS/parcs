@@ -82,7 +82,7 @@ class SigmoidCorrection:
                 for i in np.linspace(array.min() - 6, array.max() + 6, 1000):
                     h = U * expit(array - i) + L
                     new_error = abs(h.mean() - self.target_mean)
-                    if new_error < error:
+                    if new_error <= error:
                         theta = i
                         error = new_error
                     else:
@@ -93,3 +93,21 @@ class SigmoidCorrection:
         return (self.config['upper'] - self.config['lower']) * \
                expit(array - self.config['offset']) + \
                self.config['lower']
+
+
+class EdgeCorrection:
+    def __init__(self, q_var=0.05):
+        self.q_var = q_var
+        self.is_initialized = False
+        self.offset = None
+        self.scale = None
+
+    def transform(self, array):
+        if not self.is_initialized:
+            # pick q quantiles
+            array_trunc = np.sort(array)[int(len(array)*self.q_var): int(len(array)*(1-self.q_var))]
+            self.offset = array_trunc.mean()
+            self.scale = array_trunc.std()
+            self.is_initialized = True
+
+        return (array - self.offset) / self.scale
