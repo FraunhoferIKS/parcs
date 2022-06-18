@@ -25,11 +25,6 @@ def edge_binary_identity(array=None):
     return array
 
 
-# === HELPERS ===
-def scale_V(array=None):
-    return (array - array.mean()) / array.std()
-
-
 if __name__ == '__main__':
     arr = np.array(range(100))
 
