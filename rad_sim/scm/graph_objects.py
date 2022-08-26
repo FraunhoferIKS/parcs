@@ -26,6 +26,30 @@ class Node:
                  do_correction=True,
                  dist_configs={},
                  dist_params_coefs=None):
+        """ **Node object in causal DAGs**
+
+        A node is defined by its names and parents, and an output distribution along with its parameters.
+        After being set, the node can be sampled by fetching data (``pd.DataFrame``) to the ``.sample()`` method.
+        if the node is source in graph (parents are not in columns of data), then ``size`` is used to sample with
+        random distribution parameters
+
+        Parameters
+        ----------
+        name : str, optional
+            name of the node. Optional unless the node is used in a graph
+        parents : list[str]
+            name of the node's parents, to be searched in data header
+        output_distribution : str
+            Selected from the available distributions. call ``graph_objects.OUTPUT_DISTRIBUTIONS`` to see the list.
+        do_correction : bool, default=True
+            **tbc**
+        dist_configs : dict
+            **tbc**
+        dist_params_coefs : dict
+            **tbc**
+
+
+        """
         # basic attributes
         self.info = {
             'name': name,
@@ -60,7 +84,7 @@ class Edge:
         name of the parent node. Optional if edge is not in a graph
     child : str, optional
         name of the child node. Optional if edge is not in a graph
-    do_correction : bool, default=False
+    do_correction : bool, default=True
         if ``True``, then batch normalization is done. Parameters of normalization are stored upon first run.
         if ``True``, then the length of the first batch must be ``>1000``.
     function_name : str
@@ -91,7 +115,7 @@ class Edge:
     def __init__(self,
                  parent=None,
                  child=None,
-                 do_correction=False,
+                 do_correction=True,
                  function_name=None,
                  function_params=None):
         self.parent = parent
