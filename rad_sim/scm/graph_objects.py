@@ -46,10 +46,52 @@ class Node:
 
 
 class Edge:
+    """ **Edge object in causal DAGs**
+
+    An edge is defined by its child-parent nodes, and the edge function (the node names are only for clarification.
+    they are not used in edge methods).
+    It receives the data from parent node, and maps it based on the edge function.
+    If ``do_correction = True`` Then batch normalization parameters are set upon the next data batch, and be used
+    in further transformations.
+
+    Parameters
+    ----------
+    parent : str, optional
+        name of the parent node. Optional if edge is not in a graph
+    child : str, optional
+        name of the child node. Optional if edge is not in a graph
+    do_correction : bool, default=False
+        if ``True``, then batch normalization is done. Parameters of normalization are stored upon first run.
+        if ``True``, then the length of the first batch must be ``>1000``.
+    function_name : str
+        Selected from the available edge functions. call ``graph_objects.EDGE_FUNCTIONS`` to see the list.
+    function_params : dict
+        a dictionary of function parameters, must fit the function name.
+        in case of empty dict ``{}`` it uses the default parameters of function.
+
+    Attributes
+    ----------
+    edge_function : dict
+        `name`, `function` and `params` of the edge function
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from rad_sim.scm.graph_objects import Edge
+    >>> # a standard Sigmoid activation
+    >>> edge = Edge(
+    ...     function_name='sigmoid',
+    ...     function_params={}
+    ... )
+    >>> x = np.array([-10, -1, 0, 1, 10])
+    >>> x_mapped = np.round( edge.map(x), 2)
+    >>> x_mapped
+    array([0.  , 0.12, 0.5 , 0.88, 1.  ])
+    """
     def __init__(self,
                  parent=None,
                  child=None,
-                 do_correction=True,
+                 do_correction=False,
                  function_name=None,
                  function_params=None):
         self.parent = parent
@@ -65,6 +107,21 @@ class Edge:
         }
 
     def map(self, array=None):
+        """ **maps an input array**
+
+        This method maps a given input array based on set `edge_function` and `do_correction` values.
+
+        Parameters
+        ----------
+        array : 1D numpy array, optional
+            input array
+
+        Returns
+        -------
+        1D numpy array
+            the transformed array
+
+        """
         if self.do_correction:
             array = self.corrector.transform(array)
         return self.edge_function['function'](
