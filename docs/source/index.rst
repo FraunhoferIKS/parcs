@@ -14,8 +14,11 @@ Welcome to PARCS's documentation!
 .. note::
    This project is under active development
 
+Table of Contents
+=================
+
 .. toctree::
-   :caption: Contents:
+   :maxdepth: 2
 
    usage
    causal_dag

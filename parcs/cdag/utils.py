@@ -42,11 +42,12 @@ def dot_prod(data, coef):
     if data.shape[0] == 0:
         data_augmented = [np.array([]) for _ in range(3)]
     else:
-        data_augmented = [data, get_poly(data, 2), get_interactions(data)]
+        # data_augmented = [data, get_poly(data, 2), get_interactions(data)]
+        data_augmented = [data, get_interactions(data)]
 
     return coef['bias'] + np.array([
         np.dot(d, coef[i])
-        for (i, d) in zip(['linear', 'poly2', 'interactions'], data_augmented)
+        for (i, d) in zip(['linear', 'interactions'], data_augmented)
     ]).sum(axis=0)
 
 

@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 from itertools import product
 from parcs.cdag import mapping_functions
@@ -23,7 +22,7 @@ class Node:
                  name=None,
                  parents=None,
                  output_distribution=None,
-                 do_correction=True,
+                 do_correction=False,
                  dist_configs={},
                  dist_params_coefs=None):
         """ **Node object in causal DAGs**
@@ -41,7 +40,7 @@ class Node:
             name of the node's parents, to be searched in data header
         output_distribution : str
             Selected from the available distributions. call ``graph_objects.OUTPUT_DISTRIBUTIONS`` to see the list.
-        do_correction : bool, default=True
+        do_correction : bool, default=False
             **tbc**
         dist_configs : dict
             **tbc**
@@ -62,7 +61,7 @@ class Node:
             coefs=dist_params_coefs
         )
 
-    def sample(self, data, size):
+    def sample(self, data, size=None):
         return self.output_distribution.calculate_output(
             data[self.info['parents']].values,
             size
@@ -101,7 +100,7 @@ class Edge:
     Examples
     --------
     >>> import numpy as np
-    >>> from parcs.cdag_examples.graph_objects import Edge
+    >>> from parcs.cdag.graph_objects import Edge
     >>> # a standard Sigmoid activation
     >>> edge = Edge(
     ...     function_name='sigmoid',

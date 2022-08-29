@@ -12,3 +12,14 @@ print(x)
 mapped_x = edge.map(x)
 print(mapped_x)
 # [ 1.62434536 -0.61175641 -0.52817175 -1.07296862  0.86540763]
+
+
+
+
+# declaring the name
+edge = Edge(
+    parent='Z_1',
+    child='Z_2',
+    function_name='identity',
+    function_params={}
+)
