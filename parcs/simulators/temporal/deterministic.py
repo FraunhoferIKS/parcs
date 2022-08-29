@@ -31,7 +31,7 @@ class FourierSeries:
     First signal has the frequencies :math:`\{\pi/50, \pi/70\}` and phase shifts :math:`\{0, \pi/2\}`.
     Second signal has the frequencies :math:`\{\pi/20, \pi/30\}` and phase shifts :math:`\{0, \pi/8\}`.
 
-    >>> from rad_sim.simulators.temporal.deterministic import FourierSeries
+    >>> from parcs.simulators.temporal.deterministic import FourierSeries
     >>> import numpy as np
     >>> latents = pd.DataFrame([
     ...     [np.pi / 50, np.pi / 70, 0, np.pi / 2],
@@ -125,7 +125,7 @@ class TSN:
     This code generates two samples and 4 timepoints, with the given TSN parameters given by a latent dataframe
 
     >>> import numpy as np
-    >>> from rad_sim.simulators.temporal.deterministic import TSN
+    >>> from parcs.simulators.temporal.deterministic import TSN
     >>> np.random.seed(1)
     >>> latents = pd.DataFrame(
     ...     [

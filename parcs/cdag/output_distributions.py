@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
-from rad_sim.sem import mapping_functions
-from rad_sim.scm.utils import dot_prod
-from rad_sim.scm.utils import SigmoidCorrection
+from parcs.sem import mapping_functions
+from parcs.cdag.utils import dot_prod
+from parcs.cdag.utils import SigmoidCorrection
 
 
 class GaussianDistribution:

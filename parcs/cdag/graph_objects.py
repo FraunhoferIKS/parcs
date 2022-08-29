@@ -1,9 +1,9 @@
 import numpy as np
 import pandas as pd
 from itertools import product
-from rad_sim.scm import mapping_functions
-from rad_sim.scm.utils import topological_sort, EdgeCorrection
-from rad_sim.scm.output_distributions import GaussianDistribution, BernoulliDistribution
+from parcs.cdag import mapping_functions
+from parcs.cdag.utils import topological_sort, EdgeCorrection
+from parcs.cdag.output_distributions import GaussianDistribution, BernoulliDistribution
 
 
 OUTPUT_DISTRIBUTIONS = {
@@ -101,7 +101,7 @@ class Edge:
     Examples
     --------
     >>> import numpy as np
-    >>> from rad_sim.scm.graph_objects import Edge
+    >>> from parcs.cdag.graph_objects import Edge
     >>> # a standard Sigmoid activation
     >>> edge = Edge(
     ...     function_name='sigmoid',

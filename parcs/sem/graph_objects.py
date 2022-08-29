@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 from itertools import product
-from rad_sim.sem import mapping_functions
-from rad_sim.sem.utils import topological_sort
+from parcs.sem import mapping_functions
+from parcs.sem.utils import topological_sort
 
 
 NODE_OUTPUT_TYPES = ['continuous', 'binary', 'categorical']

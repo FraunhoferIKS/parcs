@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from rad_sim.sem.basic import *
-from rad_sim.simulators.temporal.deterministic import *
+from parcs.sem.basic import *
+from parcs.simulators.temporal.deterministic import *
 
 
 # = TSN

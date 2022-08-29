@@ -2,7 +2,7 @@ from dtaidistance import dtw
 import numpy as np
 import pandas as pd
 from scipy.special import expit
-from rad_sim.simulators.temporal.deterministic import FourierSeries
+from parcs.simulators.temporal.deterministic import FourierSeries
 
 
 class FrequencyLogNormalLatents:
@@ -93,7 +93,7 @@ class IndependentNormalLatents:
     Examples
     --------
     >>> import numpy as np
-    >>> from rad_sim.sem.basic import IndependentNormalLatents
+    >>> from parcs.sem.basic import IndependentNormalLatents
     >>> np.random.seed(1)
     >>> inl = IndependentNormalLatents()
     >>> inl.set_nodes(var_list=[{'name': 'x', 'mean': 1, 'sigma': 2}, {'name': 'y', 'mean': -2, 'sigma': 1}])
@@ -159,7 +159,7 @@ class IndependentUniformLatents:
         Examples
         --------
         >>> import numpy as np
-        >>> from rad_sim.sem.basic import IndependentUniformLatents
+        >>> from parcs.sem.basic import IndependentUniformLatents
         >>> np.random.seed(1)
         >>> inl = IndependentUniformLatents()
         >>> inl.set_nodes(var_list=[{'name': 'x', 'low': 1, 'high': 2}, {'name': 'y', 'low': 50, 'high': 60}])
@@ -235,7 +235,7 @@ class LatentLabelMaker:
     Examples
     --------
     >>> import numpy as np
-    >>> from rad_sim.sem.basic import LatentLabelMaker
+    >>> from parcs.sem.basic import LatentLabelMaker
     >>> np.random.seed(1)
     >>> llm = LatentLabelMaker(coef_min=0, coef_max=4, sigmoid_offset=1)
     >>> latents = np.random.normal(0, 1, size=(10, 2))
@@ -409,9 +409,9 @@ class ShapeletPlacementLabelMaker:
 
     Examples
     --------
-    >>> from rad_sim.simulators.temporal.stochastic_processes import BrownianMotion
-    >>> from rad_sim.sem.basic import IndependentUniformLatents
-    >>> from rad_sim.sem.basic import ShapeletPlacementLabelMaker
+    >>> from parcs.simulators.temporal.stochastic_processes import BrownianMotion
+    >>> from parcs.sem.basic import IndependentUniformLatents
+    >>> from parcs.sem.basic import ShapeletPlacementLabelMaker
     >>> import numpy as np
     >>> np.random.seed(1)
     >>> # define the base time series
@@ -535,9 +535,9 @@ class DetShapeletPlacementLabelMaker:
 
     Examples
     --------
-    >>> from rad_sim.simulators.temporal.stochastic_processes import BrownianMotion
-    >>> from rad_sim.sem.basic import IndependentUniformLatents
-    >>> from rad_sim.sem.basic import DetShapeletPlacementLabelMaker
+    >>> from parcs.simulators.temporal.stochastic_processes import BrownianMotion
+    >>> from parcs.sem.basic import IndependentUniformLatents
+    >>> from parcs.sem.basic import DetShapeletPlacementLabelMaker
     >>> import numpy as np
     >>> np.random.seed(1)
     >>> # define the base time series

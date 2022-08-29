@@ -24,7 +24,7 @@ class BrownianMotion:
     Examples
     --------
     >>> import numpy as np
-    >>> from rad_sim.simulators.temporal.stochastic_processes import BrownianMotion
+    >>> from parcs.simulators.temporal.stochastic_processes import BrownianMotion
     >>> np.random.seed(1)
     >>> latents = pd.DataFrame(
     ...     [
