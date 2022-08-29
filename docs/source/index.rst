@@ -18,6 +18,7 @@ Welcome to PARCS's documentation!
    :caption: Contents:
 
    usage
+   causal_dag
    api
 
 

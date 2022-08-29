@@ -3,7 +3,7 @@ API
 
 This is edge
 
-.. autoclass:: rad_sim.scm.graph_objects.Edge
+.. autoclass:: parcs.cdag.graph_objects.Edge
     :members:
 
 

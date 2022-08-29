@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 import pandas as pd
 from scipy.special import expit
@@ -104,6 +105,16 @@ class EdgeCorrection:
 
     def transform(self, array):
         if not self.is_initialized:
+            try:
+                assert len(array) >= 500
+            except AssertionError:
+                warnings.warn(
+                    """
+                    PARCS calculate normalization statistics from the first input batch,
+                    This is the 1st batch, while size < 500. It might lead to instabilities.
+                    we recommend to run the first simulation run with greater size
+                    """
+                )
             # pick q quantiles
             array_trunc = np.sort(array)[int(len(array)*self.q_var): int(len(array)*(1-self.q_var))]
             self.offset = array_trunc.mean()

@@ -101,11 +101,12 @@ class Edge:
     Examples
     --------
     >>> import numpy as np
-    >>> from parcs.cdag.graph_objects import Edge
+    >>> from parcs.cdag_examples.graph_objects import Edge
     >>> # a standard Sigmoid activation
     >>> edge = Edge(
     ...     function_name='sigmoid',
-    ...     function_params={}
+    ...     function_params={},
+    ...     do_correction=False
     ... )
     >>> x = np.array([-10, -1, 0, 1, 10])
     >>> x_mapped = np.round( edge.map(x), 2)
@@ -115,7 +116,7 @@ class Edge:
     def __init__(self,
                  parent=None,
                  child=None,
-                 do_correction=True,
+                 do_correction=False,
                  function_name=None,
                  function_params=None):
         self.parent = parent

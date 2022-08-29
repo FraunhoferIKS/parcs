@@ -10,7 +10,7 @@ def edge_empty(**kwargs):
 
 def edge_sigmoid(array=None,
                  alpha=1.0, beta=0.0, gamma=1, tau=1):
-    expon = -((-1)**gamma) * 2 * alpha * ((array - beta)**tau)
+    expon = (-1)**gamma * 2 * alpha * ((array - beta)**tau)
 
     return expit(expon)
 
