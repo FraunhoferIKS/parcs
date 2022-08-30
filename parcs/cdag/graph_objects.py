@@ -18,37 +18,39 @@ EDGE_FUNCTIONS = {
 
 
 class Node:
+    """ **Node object in causal DAGs**
+            Use this class to create a node, independent of any graphs. If you want to construct a causal DAG, please use the ``parcs.cdag.graph_objects.BaseGraph`` class instead.
+        Node can be sampled by passing the data (``pd.DataFrame``) to the ``.sample()`` method.
+            if the node is source in graph (parents are not in columns of data), then ``size`` is used to sample with
+            random distribution parameters
+
+            Parameters
+            ----------
+            name : str, optional
+                name of the node. Optional unless the node is used in a graph
+            parents : list[str]
+                name of the node's parents, to be searched in data header
+            output_distribution : str
+                Selected from the available distributions. call ``graph_objects.OUTPUT_DISTRIBUTIONS`` to see the list.
+            do_correction : bool, default=False
+                perform correction over the result obtained from parent nodes in order to comply with distribution parameters restrictions. If ``do_correction=True``, then a ``correction_config`` must be included in the ``dist_config`` argument. The corresponding value is a dictionary of correction configs for each distribution parameter.
+            dist_config : dict
+                config dictionary for the chosen distribution. If ``do_correction=True``, then it must include ``correction_config``.
+            dist_params_coefs : dict
+                first-level keys are names of parameter distributions. for each parameter, three *bias*, *linear* and *interactions* key are given. The bias value is a float, while linear and interaction values are numpy arrays.
+
+            Examples
+            --------
+
+
+            """
     def __init__(self,
                  name=None,
                  parents=None,
                  output_distribution=None,
                  do_correction=False,
-                 dist_configs={},
+                 dist_config={},
                  dist_params_coefs=None):
-        """ **Node object in causal DAGs**
-
-        A node is defined by its names and parents, and an output distribution along with its parameters.
-        After being set, the node can be sampled by fetching data (``pd.DataFrame``) to the ``.sample()`` method.
-        if the node is source in graph (parents are not in columns of data), then ``size`` is used to sample with
-        random distribution parameters
-
-        Parameters
-        ----------
-        name : str, optional
-            name of the node. Optional unless the node is used in a graph
-        parents : list[str]
-            name of the node's parents, to be searched in data header
-        output_distribution : str
-            Selected from the available distributions. call ``graph_objects.OUTPUT_DISTRIBUTIONS`` to see the list.
-        do_correction : bool, default=False
-            **tbc**
-        dist_configs : dict
-            **tbc**
-        dist_params_coefs : dict
-            **tbc**
-
-
-        """
         # basic attributes
         self.info = {
             'name': name,
@@ -56,7 +58,7 @@ class Node:
             'parents': parents
         }
         self.output_distribution = OUTPUT_DISTRIBUTIONS[output_distribution](
-            **dist_configs,
+            **dist_config,
             do_correction=do_correction,
             coefs=dist_params_coefs
         )
@@ -71,11 +73,8 @@ class Node:
 class Edge:
     """ **Edge object in causal DAGs**
 
-    An edge is defined by its child-parent nodes, and the edge function (the node names are only for clarification.
-    they are not used in edge methods).
-    It receives the data from parent node, and maps it based on the edge function.
-    If ``do_correction = True`` Then batch normalization parameters are set upon the next data batch, and be used
-    in further transformations.
+    Use this class to create an edge, independent of any graphs. If you want to construct a causal DAG, please use the ``parcs.cdag.graph_objects.BaseGraph`` class instead.
+    Edge object receives an array, and maps it based on the edge function. If ``do_correction = True`` Then batch normalization parameters are set upon the next data batch, and be used in further transformations. :ref:`(read more) <edge_doc>`
 
     Parameters
     ----------
@@ -95,7 +94,7 @@ class Edge:
     Attributes
     ----------
     edge_function : dict
-        `name`, `function` and `params` of the edge function
+        A dictionary of the following values: `name`, `function` and `params` of the edge function
 
     Examples
     --------
@@ -137,7 +136,7 @@ class Edge:
 
         Parameters
         ----------
-        array : 1D numpy array, optional
+        array : 1D numpy array
             input array
 
         Returns

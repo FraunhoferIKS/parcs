@@ -2,8 +2,12 @@
 Causal DAGs in PARCS
 ====================
 
+.. warning::
+    General todo: write the distributions/edge functions docs and introduce the parameters, etc.
+
 In PARCS, Directed Acyclic Graph (DAG) is used to model the ground-truth of the synthesized data. Here we introduce 3 main PARCS objects related to DAGs: *nodes*, *edges* and *graphs*:
 
+.. _edge_doc:
 
 Edges
 =====
@@ -100,6 +104,9 @@ We can also declare the parent and child name of the edge upon instantiation. Th
 
 However, when an edge object is instantiated independently and outside a graph object, it is not necessary to give any node names
 
+.. seealso:: :ref:`Edge API reference <edge_api>`
+
+.. _node_doc:
 
 Nodes
 =====
@@ -148,7 +155,7 @@ Bernoulli distribution
 **tbc**
 
 Gaussian normal distribution
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 **tbc**
 
 Correction of distribution parameters
@@ -158,7 +165,7 @@ It is obvious that not all of the distribution parameters can be chosen freely. 
 .. literalinclude:: examples/cdag_examples/node_parents.py
     :lines: 26-39
 
-For this reason, either the data type and the support of the parents must follow the restrictions, or a correction must be done. Correction is possible via ``do_correction=True`` argument, which in return tells the node object to read the ``correction_config`` key out of a ``dist_configs`` argument. The ``correction_config`` then specifies the correction arguments for each distribution parameter. In our example, correction of the success probability is a *Sigmoid correction*, meaning that the sampled and calculated raw parameter value is transformed by a sigmoid function.
+For this reason, either the data type and the support of the parents must follow the restrictions, or a correction must be done. Correction is possible via ``do_correction=True`` argument, which in return tells the node object to read the ``correction_config`` key out of a ``dist_config`` argument. The ``correction_config`` then specifies the correction arguments for each distribution parameter. In our example, correction of the success probability is a *Sigmoid correction*, meaning that the sampled and calculated raw parameter value is transformed by a sigmoid function.
 
 .. literalinclude:: examples/cdag_examples/node_correction.py
     :lines: 6-26
