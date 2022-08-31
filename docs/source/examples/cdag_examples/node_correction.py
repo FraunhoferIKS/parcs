@@ -3,7 +3,8 @@ import pandas as pd
 from parcs.cdag.graph_objects import Node
 np.random.seed(1)
 
-data = pd.DataFrame(np.random.normal(0, 3, size=(100, 2)), columns=('Z_1', 'Z_2'))
+size_ = 100
+data = pd.DataFrame(np.random.normal(0, 3, size=(size_, 2)), columns=('Z_1', 'Z_2'))
 node = Node(
     name='Z_3',
     parents=['Z_1', 'Z_2'],
@@ -14,13 +15,14 @@ node = Node(
         }
     },
     do_correction=True,
-    dist_configs={
+    dist_config={
         'correction_config': {
             'p_': {'lower': 0, 'upper': 1}
         }
     }
 )
 
-samples = node.sample(data=data)
+errors = np.random.uniform(0, 1, size=size_)
+samples = node.calculate(data, errors)
 print(np.round(samples.mean(), 2))
 # 0.62

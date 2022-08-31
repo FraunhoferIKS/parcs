@@ -3,7 +3,8 @@ import pandas as pd
 from parcs.cdag.graph_objects import Node
 np.random.seed(1)
 
-data = pd.DataFrame(np.random.uniform(0, 1, size=(100, 2)), columns=('Z_1', 'Z_2'))
+size_ = 100
+data = pd.DataFrame(np.random.uniform(0, 1, size=(size_, 2)), columns=('Z_1', 'Z_2'))
 node = Node(
     name='Z_3',
     parents=['Z_1', 'Z_2'],
@@ -15,7 +16,8 @@ node = Node(
     }
 )
 
-samples = node.sample(data=data, size=500)
+errors = np.random.uniform(0, 1, size=size_)
+samples = node.calculate(data, errors)
 print(samples[:5])
 # [1 0 0 0 0]
 print(samples.mean())

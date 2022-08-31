@@ -14,7 +14,8 @@ node = Node(
     }
 )
 
-samples = node.sample(data = pd.DataFrame([]))
+errors = np.random.uniform(0, 1, 100)
+samples = node.calculate(pd.DataFrame([]), errors)
 print(samples[:5])
 # [1 1 0 1 0]
 print(samples.mean())

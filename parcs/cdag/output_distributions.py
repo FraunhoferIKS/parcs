@@ -3,6 +3,7 @@ import pandas as pd
 from parcs.sem import mapping_functions
 from parcs.cdag.utils import dot_prod
 from parcs.cdag.utils import SigmoidCorrection
+from scipy import stats as dists
 
 
 class GaussianDistribution:
@@ -21,16 +22,15 @@ class GaussianDistribution:
         sigma_ = self.sigma_correction.transform(sigma_)
         return mu_, sigma_
 
-    def calculate_output(self, data, size):
+    def calculate(self, data, errors):
         mu_ = dot_prod(data, self.coefs['mu_'])
         sigma_ = dot_prod(data, self.coefs['sigma_'])
         if self.do_correction:
             mu_, sigma_ = self._correct_param(mu_, sigma_)
-        if data.shape[0] == 0:
-            return np.random.normal(mu_, sigma_, size=size)
-        else:
-            return np.random.normal(mu_, sigma_)
 
+        samples = dists.norm.ppf(errors, loc=mu_, scale=sigma_)
+
+        return samples
 
 class BernoulliDistribution:
     def __init__(self,
@@ -47,11 +47,11 @@ class BernoulliDistribution:
     def _correct_param(self, p_):
         return self.sigma_correction.transform(p_)
 
-    def calculate_output(self, data, size):
+    def calculate(self, data, errors):
         p_ = dot_prod(data, self.coefs['p_'])
         if self.do_correction:
             p_ = self._correct_param(p_)
-        if data.shape[0] == 0:
-            return np.random.choice([0, 1], p=[1-p_, p_], size=size)
-        else:
-            return np.array([np.random.choice([0, 1], p=[1-i, i]) for i in p_])
+
+        samples = dists.bernoulli.ppf(errors, p_)
+
+        return samples

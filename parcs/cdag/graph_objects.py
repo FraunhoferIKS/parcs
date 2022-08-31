@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from itertools import product
 from parcs.cdag import mapping_functions
@@ -63,10 +64,28 @@ class Node:
             coefs=dist_params_coefs
         )
 
-    def sample(self, data, size=None):
-        return self.output_distribution.calculate_output(
+    def calculate(self, data, errors):
+        """ **samples the node**
+
+        If data is empty, the ``size`` is used to sample according to coefficient vector *biases*.
+        If data is non-empty, then ``size`` is ignored
+
+        Parameters
+        ----------
+        data : pd.DataFrame
+            even if the node is source, data must be an empty data frame
+        errors : np.array
+            sampled errors
+
+        Returns
+        -------
+        samples : np.array
+            calculated outputs based on parent samples and sampled errors
+
+        """
+        return self.output_distribution.calculate(
             data[self.info['parents']].values,
-            size
+            errors
         )
 
 
@@ -153,57 +172,81 @@ class Edge:
         )
 
 
-class BaseGraph:
-    def __init__(self):
-        self.nodes = {}
-        self.edges = {}
-        self.adj_matrix = pd.DataFrame([])
-        self.data = {}
+class Graph:
+    def __init__(self,
+                 nodes=None,
+                 edges=None):
 
-    def set_nodes(self, nodes_list=None):
-        self.nodes = {
-            item['name']: Node(
-                name=item['name'], parents=item['parents']
-            ).set_state_function(
-                function_name=item['state_function']
-            ).set_output_function(
-                function_name=item['output_function']
-            ).set_state_params(
-                params=item['state_params']
-            ).set_output_params(
-                params=item['output_params']
-            ) for item in nodes_list
-        }
-        return self
+        self.nodes = {kwargs['name']: Node(**kwargs) for kwargs in nodes}
+        self.edges = {'{}->{}'.format(kwargs['parent'], kwargs['child']): Edge(**kwargs) for kwargs in edges}
+        self.adj_matrix = self._set_adj_matrix()
+        self.cache = {}
 
-    def set_edges(self, adj_matrix: pd.DataFrame = None, function_specs: dict = None):
-        self.adj_matrix = adj_matrix
-        for node_pair in product(adj_matrix.index, adj_matrix.columns):
-            try:
-                info = adj_matrix.loc[node_pair[0], node_pair[1]]
-                edge_symbol = '{} -> {}'.format(node_pair[0], node_pair[1])
-                assert info != 0
-                self.edges[edge_symbol] = Edge(
-                    parent=node_pair[0], child=node_pair[1]
-                ).set_function(
-                    function_name=function_specs[edge_symbol]['function_name']
-                ).set_function_params(
-                    function_params=function_specs[edge_symbol]['function_params']
-                )
-            except AssertionError:
-                continue
-        return self
+    def _set_adj_matrix(self):
+        num_n = len(self.nodes)
+        n_names = self.nodes.keys()
+        self.adj_matrix = pd.DataFrame(
+            np.zeros(shape=(num_n, num_n)),
+            index=n_names, columns=n_names
+        )
+        for n in self.nodes:
+            self.adj_matrix.loc[self.nodes[n].info['parents'], n] = 1
 
-    def sample(self, size=None):
-        assert size is not None, 'Specify size for sample'
-        for node in topological_sort(adj_matrix=self.adj_matrix):
-            v = self.nodes[node]
+    def sample(self, size=200, return_errors=False, cache_sampling=False, cache_name=None):
+        data = pd.DataFrame([])
+        sampled_errors = pd.DataFrame([])
+        self._set_adj_matrix()
+
+        for node_name in topological_sort(self.adj_matrix):
+            # sample errors
+            sampled_errors[node_name] = np.random.uniform(0, 1, size=size)
+            # transform parents by edges
             inputs = pd.DataFrame({
-                p: self.edges['{} -> {}'.format(p, v.name)].map(
-                    array=self.nodes[p].value['output']
-                ) for p in v.parents
+                parent: self.edges['{}->{}'.format(parent, node_name)].map(array=data[parent].values)
+                for parent in self.nodes[node_name].info['parents']
             })
-            v.calc_state(inputs=inputs, size=size)
-            v.calc_output()
-        self.data = pd.DataFrame({v: self.nodes[v].value['output'] for v in self.nodes})
-        return self.data
+            # calculate node
+            data[node_name] = self.nodes[node_name].calculate(inputs, sampled_errors[node_name])
+        if cache_sampling:
+            self.cache[cache_name] = (data, sampled_errors)
+        if return_errors:
+            return data, sampled_errors
+        else:
+            return data
+
+
+if __name__ == '__main__':
+    g = Graph(
+        nodes=[
+            {
+                'name': 'x0', 'parents': [], 'output_distribution': 'gaussian',
+                'dist_params_coefs': {
+                    'mu_': {'bias': 0, 'linear': np.array([]), 'interactions': np.array([])},
+                    'sigma_': {'bias': 1, 'linear': np.array([]), 'interactions': np.array([])}
+                }
+            },
+            {
+                'name': 'x1', 'parents': ['x0'], 'output_distribution': 'gaussian',
+                'dist_params_coefs': {
+                    'mu_': {'bias': 0, 'linear': np.array([1]), 'interactions': np.array([])},
+                    'sigma_': {'bias': 1, 'linear': np.array([0]), 'interactions': np.array([])}
+                }
+            },
+            {
+                'name': 'x2', 'parents': ['x0', 'x1'], 'output_distribution': 'gaussian',
+                'dist_params_coefs': {
+                    'mu_': {'bias': 0, 'linear': np.array([1, 1]), 'interactions': np.array([0])},
+                    'sigma_': {'bias': 1, 'linear': np.array([0, 0]), 'interactions': np.array([0])}
+                }
+            },
+        ],
+        edges=[
+            {'parent': 'x0', 'child': 'x1', 'function_name': 'identity', 'function_params': {}},
+            {'parent': 'x0', 'child': 'x2', 'function_name': 'identity', 'function_params': {}},
+            {'parent': 'x1', 'child': 'x2', 'function_name': 'identity', 'function_params': {}}
+        ]
+    )
+    data, errors = g.sample(size=500, cache_sampling=True, cache_name='exp', return_errors=True)
+    from matplotlib import pyplot as plt
+    plt.scatter(data['x0'], data['x1'], c=data['x2'])
+    plt.show()
