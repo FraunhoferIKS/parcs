@@ -154,6 +154,7 @@ class ExtendRandomizer(ParamRandomizer):
                     'name': '{}->{}'.format(par, child),
                     **parsers.edge_parser('free')
                 })
+        print(self.adj_matrix)
 
     def _local_topological_sort(self):
         # local adj
@@ -176,73 +177,9 @@ class ExtendRandomizer(ParamRandomizer):
         return pd.DataFrame(adj_matrix, columns=self.node_names, index=self.node_names)
 
 
-# class FreeRandomizer:
-#     def __init__(self, guideline_dir):
-#         guide = utils.config_parser(guideline_dir)
-#         # 1. set num nodes
-#         self.num_nodes = self._guideline_sampler(guide['graph']['num_nodes'])
-#         # 2. set adj_matrix
-#
-#     @staticmethod
-#     def _guideline_sampler(item):
-#         if isinstance(item, list):
-#             if item[0] == 'i-range':
-#                 options = [i for i in range(item[1], item[2]+1)]
-#                 return np.random.choice(options, p=[1/len(options)]*options)
-#             elif item[0] == 'f-range':
-#                 return np.random.uniform(item[1], item[2])
-#             elif item[0] == 'choice':
-#                 options = item[1:]
-#                 return np.random.choice(options, p=[1 / len(options)] * options)
-#             else:
-#                 raise ValueError('first element is other than i-range/f-range/choice')
-#         else:
-#             return item
-
-
-# class OldRandomizer:
-#     def __init__(self):
-#         self.num_nodes = None
-#         self.node_names = []
-#         self.adj_matrix = pd.DataFrame([])
-#
-#         self.nodes = []
-#         self.edges = []
-#
-#     def randomize(self, guideline=None,
-#                   num_nodes=None, adj_matrix=None, nodes=None, edges=None,
-#                   randomize_num_nodes : bool=False):
-#         pass
-#
-#     def post_fix(self):
-#         pass
-#
-#     def _randomize_num_nodes(self, low=None, high=None, name_prefix=None):
-#         # sample a number
-#         self.num_nodes = np.random.uniform(low, high)
-#         # name list
-#         self.node_names = ['{}_{}'.format(name_prefix, i) for i in range(self.num_nodes)]
-#         return self
-#
-#     def randomize_adj_matrix(self, num_nodes=None, density=0.5):
-#         if self.num_nodes and num_nodes:
-#             warn(
-#                 'number of nodes already fixed (n={}), given num_nodes argument will be ignored'.format(self.num_nodes)
-#             )
-#         if not self.num_nodes and not num_nodes:
-#             raise KeyError('num_nodes must be given.')
-#
-#         # create a fully connected and then mask based on sparsity
-#         shape_ = (self.num_nodes, self.num_nodes)
-#         self.adj_matrix = pd.DataFrame(
-#             np.triu(np.ones(shape=shape_), k=1)
-#         )
-#         mask = np.random.choice([0, 1], p=[1-density, density], size=shape_)
-#         self.adj_matrix = np.multiply(self.adj_matrix, mask)
-#         return self
-#
-#     def randomize_edge_functions(self, guideline=None):
-#         pass
+class FreeRandomizer(ExtendRandomizer):
+    def __init__(self, guideline_dir=None):
+        super().__init__(graph_dir=None, guideline_dir=guideline_dir)
 
 
 if __name__ == '__main__':
@@ -251,5 +188,5 @@ if __name__ == '__main__':
         guideline_dir='../../guidelines/simple_guideline.yml'
     )
     nodes, edges = rand.get_graph_params()
-    print(edges)
+    print(nodes)
 
