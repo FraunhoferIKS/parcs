@@ -11,6 +11,13 @@ def node_parser(line, parents):
     # preliminary: get order of interactions
     # remove spaces
     line = line.replace(' ', '')
+    # First check: if dist = ?
+    if line == '?':
+        return {
+            'output_distribution': '?',
+            'do_correction': True
+        }
+
     # find the dist(p1=v1, ...) pattern
     output_params_pattern = re.compile(
         '({})\((.*)\)'.format('|'.join(DISTRIBUTION_PARAMS.keys()))
@@ -178,10 +185,10 @@ def graph_file_parser(file_dir):
         **node_parser(file[n], parent_dict[n])
     } for n in file if '->' not in n]
 
-    return {'nodes': nodes, 'edges': edges}
+    return nodes, edges
 
 
 if __name__ == '__main__':
-    # obj = node_parser('gaussian(mu_=-B+1-A, sigma_=1), correct[hi=1]', ['A', 'B', 'C'])
+    obj = node_parser('?', ['A', 'B', 'C'])
     # obj = edge_parser('sigmoid(alpha=2.0, beta=1.8), correct[]')
-    graph_file_parser('../../graph_templates/causal_triangle.yml')
+    # graph_file_parser('../../graph_templates/causal_triangle.yml')
