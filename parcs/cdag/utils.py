@@ -6,24 +6,35 @@ from itertools import combinations as comb
 
 
 def topological_sort(adj_matrix: pd.DataFrame = None):
-    adjm = adj_matrix.copy(deep=True).values
-    ordered_list = []
-    covered_nodes = 0
-    while covered_nodes < adjm.shape[0]:
-        # sum r/x -> r edges
-        sum_c = adjm.sum(axis=0)
-        # find nodes with no parents
-        parent_inds = list(np.where(sum_c == 0)[0])
-        assert len(parent_inds) != 0
+    try:
+        adjm = adj_matrix.copy(deep=True).values
+        ordered_list = []
+        covered_nodes = 0
+        while covered_nodes < adjm.shape[0]:
+            # sum r/x -> r edges
+            sum_c = adjm.sum(axis=0)
+            # find nodes with no parents
+            parent_inds = list(np.where(sum_c == 0)[0])
+            assert len(parent_inds) != 0
 
-        covered_nodes += len(parent_inds)
-        # add to the list
-        ordered_list += parent_inds
-        # remove parent edges
-        adjm[parent_inds, :] = 0
-        # eliminate from columns by assigning values
-        adjm[:, parent_inds] = 10
-    return [adj_matrix.columns.tolist()[idx] for idx in ordered_list]
+            covered_nodes += len(parent_inds)
+            # add to the list
+            ordered_list += parent_inds
+            # remove parent edges
+            adjm[parent_inds, :] = 0
+            # eliminate from columns by assigning values
+            adjm[:, parent_inds] = 10
+        return [adj_matrix.columns.tolist()[idx] for idx in ordered_list]
+    except AssertionError:
+        print('adj_matrix is not acyclic')
+        raise
+
+def is_adj_matrix_acyclic(adj_matrix):
+    try:
+        topological_sort(adj_matrix)
+        return True
+    except AssertionError:
+        return False
 
 
 def get_interactions(data):
@@ -33,6 +44,17 @@ def get_interactions(data):
         for row in data
     ])
 
+def get_interactions_length(len_):
+    dummy_data = np.ones(shape=(len_,))
+    return len([
+        np.prod(i)
+        for r in range(2, len_ + 1)
+        for i in comb(dummy_data, r)
+    ])
+
+def get_interactions_dict(parents):
+    len_ = len(parents)
+    return [set(i) for r in range(2, len_ + 1) for i in comb(parents, r)]
 
 def get_poly(data, n):
     return data ** n

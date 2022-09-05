@@ -1,10 +1,11 @@
-import numpy as np
-import pandas as pd
-from parcs.sem import mapping_functions
 from parcs.cdag.utils import dot_prod
 from parcs.cdag.utils import SigmoidCorrection
 from scipy import stats as dists
 
+DISTRIBUTION_PARAMS = {
+    'gaussian': ['mu_', 'sigma_'],
+    'bernoulli': ['p_']
+}
 
 class GaussianDistribution:
     def __init__(self,
@@ -16,7 +17,7 @@ class GaussianDistribution:
 
         self.do_correction = do_correction
         if do_correction:
-            self.sigma_correction = SigmoidCorrection(**correction_config['sigma_'])
+            self.sigma_correction = SigmoidCorrection(**correction_config)
 
     def _correct_param(self, mu_, sigma_):
         sigma_ = self.sigma_correction.transform(sigma_)
@@ -42,7 +43,7 @@ class BernoulliDistribution:
 
         self.do_correction = do_correction
         if do_correction:
-            self.sigma_correction = SigmoidCorrection(**correction_config['p_'])
+            self.sigma_correction = SigmoidCorrection(**correction_config)
 
     def _correct_param(self, p_):
         return self.sigma_correction.transform(p_)

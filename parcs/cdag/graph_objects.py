@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from itertools import product
 from parcs.cdag import mapping_functions
 from parcs.cdag.utils import topological_sort, EdgeCorrection
 from parcs.cdag.output_distributions import GaussianDistribution, BernoulliDistribution
@@ -20,7 +19,8 @@ EDGE_FUNCTIONS = {
 
 class Node:
     """ **Node object in causal DAGs**
-            Use this class to create a node, independent of any graphs. If you want to construct a causal DAG, please use the ``parcs.cdag.graph_objects.BaseGraph`` class instead.
+            Use this class to create a node, independent of any graphs.
+            If you want to construct a causal DAG, please use the ``parcs.cdag.graph_objects.BaseGraph`` class instead.
         Node can be sampled by passing the data (``pd.DataFrame``) to the ``.sample()`` method.
             if the node is source in graph (parents are not in columns of data), then ``size`` is used to sample with
             random distribution parameters
@@ -29,16 +29,20 @@ class Node:
             ----------
             name : str, optional
                 name of the node. Optional unless the node is used in a graph
-            parents : list[str]
-                name of the node's parents, to be searched in data header
             output_distribution : str
                 Selected from the available distributions. call ``graph_objects.OUTPUT_DISTRIBUTIONS`` to see the list.
             do_correction : bool, default=False
-                perform correction over the result obtained from parent nodes in order to comply with distribution parameters restrictions. If ``do_correction=True``, then a ``correction_config`` must be included in the ``dist_config`` argument. The corresponding value is a dictionary of correction configs for each distribution parameter.
-            dist_config : dict
-                config dictionary for the chosen distribution. If ``do_correction=True``, then it must include ``correction_config``.
+                perform correction over the result obtained from parent nodes
+                in order to comply with distribution parameters restrictions.
+                If ``do_correction=True``,then a ``correction_config`` must be included in the ``dist_config`` argument.
+                The corresponding value is a dictionary of correction configs for each distribution parameter.
+            correction_config : dict
+                config dictionary for correction.
+                If ``do_correction=True``, then it is read.
             dist_params_coefs : dict
-                first-level keys are names of parameter distributions. for each parameter, three *bias*, *linear* and *interactions* key are given. The bias value is a float, while linear and interaction values are numpy arrays.
+                first-level keys are names of parameter distributions.
+                for each parameter, three *bias*, *linear* and *interactions* key are given.
+                The bias value is a float, while linear and interaction values are numpy arrays.
 
             Examples
             --------
@@ -47,24 +51,22 @@ class Node:
             """
     def __init__(self,
                  name=None,
-                 parents=None,
                  output_distribution=None,
                  do_correction=False,
-                 dist_config={},
+                 correction_config=None,
                  dist_params_coefs=None):
         # basic attributes
         self.info = {
             'name': name,
-            'output_distribution': output_distribution,
-            'parents': parents
+            'output_distribution': output_distribution
         }
         self.output_distribution = OUTPUT_DISTRIBUTIONS[output_distribution](
-            **dist_config,
+            correction_config=correction_config,
             do_correction=do_correction,
             coefs=dist_params_coefs
         )
 
-    def calculate(self, data, errors):
+    def calculate(self, data, parents, errors):
         """ **samples the node**
 
         If data is empty, the ``size`` is used to sample according to coefficient vector *biases*.
@@ -74,7 +76,9 @@ class Node:
         ----------
         data : pd.DataFrame
             even if the node is source, data must be an empty data frame
-        errors : np.array
+        parents : list(str)
+            list of parents, the order of which corresponds to the given parameter coefficient vector
+        errors : numpy array
             sampled errors
 
         Returns
@@ -84,7 +88,7 @@ class Node:
 
         """
         return self.output_distribution.calculate(
-            data[self.info['parents']].values,
+            data[parents].values,
             errors
         )
 
@@ -92,15 +96,16 @@ class Node:
 class Edge:
     """ **Edge object in causal DAGs**
 
-    Use this class to create an edge, independent of any graphs. If you want to construct a causal DAG, please use the ``parcs.cdag.graph_objects.BaseGraph`` class instead.
-    Edge object receives an array, and maps it based on the edge function. If ``do_correction = True`` Then batch normalization parameters are set upon the next data batch, and be used in further transformations. :ref:`(read more) <edge_doc>`
+    Use this class to create an edge, independent of any graphs.
+    If you want to construct a causal DAG, please use the ``parcs.cdag.graph_objects.BaseGraph`` class instead.
+    Edge object receives an array, and maps it based on the edge function.
+    If ``do_correction = True`` Then batch normalization parameters are set upon the next data batch,
+    and be used in further transformations. :ref:`(read more) <edge_doc>`
 
     Parameters
     ----------
-    parent : str, optional
-        name of the parent node. Optional if edge is not in a graph
-    child : str, optional
-        name of the child node. Optional if edge is not in a graph
+    name : str, optional
+        a name in the form of 'X->Y' where X and Y are parent and chile dones respectively.
     do_correction : bool, default=True
         if ``True``, then batch normalization is done. Parameters of normalization are stored upon first run.
         if ``True``, then the length of the first batch must be ``>1000``.
@@ -131,13 +136,12 @@ class Edge:
     array([0.  , 0.12, 0.5 , 0.88, 1.  ])
     """
     def __init__(self,
-                 parent=None,
-                 child=None,
+                 name=None,
                  do_correction=False,
                  function_name=None,
                  function_params=None):
-        self.parent = parent
-        self.child = child
+        self.name = name
+        self.parent, self.child = self.name.split('->')
         self.do_correction = do_correction
         if self.do_correction:
             self.corrector = EdgeCorrection()
@@ -178,8 +182,10 @@ class Graph:
                  edges=None):
 
         self.nodes = {kwargs['name']: Node(**kwargs) for kwargs in nodes}
-        self.edges = {'{}->{}'.format(kwargs['parent'], kwargs['child']): Edge(**kwargs) for kwargs in edges}
-        self.adj_matrix = self._set_adj_matrix()
+        self.edges = {kwargs['name']: Edge(**kwargs) for kwargs in edges}
+        self.parent_sets = {}
+        self.adj_matrix = None
+        self._set_adj_matrix()
         self.cache = {}
 
     def _set_adj_matrix(self):
@@ -190,7 +196,8 @@ class Graph:
             index=n_names, columns=n_names
         )
         for n in self.nodes:
-            self.adj_matrix.loc[self.nodes[n].info['parents'], n] = 1
+            self.parent_sets[n] = [edge.split('->')[0] for edge in self.edges if edge.split('->')[1] == n]
+            self.adj_matrix.loc[self.parent_sets[n], n] = 1
 
     def sample(self, size=200, return_errors=False, cache_sampling=False, cache_name=None):
         data = pd.DataFrame([])
@@ -203,7 +210,7 @@ class Graph:
             # transform parents by edges
             inputs = pd.DataFrame({
                 parent: self.edges['{}->{}'.format(parent, node_name)].map(array=data[parent].values)
-                for parent in self.nodes[node_name].info['parents']
+                for parent in self.parent_sets[node_name]
             })
             # calculate node
             data[node_name] = self.nodes[node_name].calculate(inputs, sampled_errors[node_name])
