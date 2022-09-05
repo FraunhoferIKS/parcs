@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.special import expit
 
-
 def edge_empty(**kwargs):
     assert kwargs
     print('edge function not implemented')
@@ -23,6 +22,13 @@ def edge_gaussian_rbf(array=None,
 
 def edge_binary_identity(array=None):
     return array
+
+
+EDGE_FUNCTIONS = {
+    'identity': edge_binary_identity,
+    'sigmoid': edge_sigmoid,
+    'gaussian_rbf': edge_gaussian_rbf
+}
 
 
 if __name__ == '__main__':

@@ -56,3 +56,8 @@ class BernoulliDistribution:
         samples = dists.bernoulli.ppf(errors, p_)
 
         return samples
+
+OUTPUT_DISTRIBUTIONS = {
+    'gaussian': GaussianDistribution,
+    'bernoulli': BernoulliDistribution
+}

@@ -2,19 +2,7 @@ import numpy as np
 import pandas as pd
 from parcs.cdag import mapping_functions
 from parcs.cdag.utils import topological_sort, EdgeCorrection
-from parcs.cdag.output_distributions import GaussianDistribution, BernoulliDistribution
-
-
-OUTPUT_DISTRIBUTIONS = {
-    'gaussian': GaussianDistribution,
-    'bernoulli': BernoulliDistribution
-}
-
-EDGE_FUNCTIONS = {
-    'identity': mapping_functions.edge_binary_identity,
-    'sigmoid': mapping_functions.edge_sigmoid,
-    'gaussian_rbf': mapping_functions.edge_gaussian_rbf
-}
+from parcs.cdag.output_distributions import OUTPUT_DISTRIBUTIONS
 
 
 class Node:
@@ -148,7 +136,7 @@ class Edge:
 
         self.edge_function = {
             'name': function_name,
-            'function': EDGE_FUNCTIONS[function_name],
+            'function': mapping_functions.EDGE_FUNCTIONS[function_name],
             'params': function_params
         }
 
