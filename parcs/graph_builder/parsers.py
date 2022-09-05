@@ -186,6 +186,10 @@ def edge_parser(line):
     }
 
 def graph_file_parser(file_dir):
+    # if file is empty
+    if file_dir is None:
+        return [], []
+
     file = config_parser(file_dir)
     # edges
     edges = [{

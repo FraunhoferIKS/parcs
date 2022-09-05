@@ -6,4 +6,4 @@ Y: bernoulli(p_=-A+C), correction[mean_=0.3]
 # edges
 C->A: identity()
 C->Y: identity()
-A->Y: sigmoid(?)
+A->Y: free

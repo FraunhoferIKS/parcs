@@ -1,12 +1,12 @@
 graph:
-  node_name_prefix: X
+  node_name_prefix: H
   num_nodes: [i-range, 5, 10]
   graph_density: [f-range, 0.2, 0.9]
 nodes:
   bernoulli:
     p_: [ [f-range, 0.2, 0.9] , 0 , 0 ]
   gaussian:
-    mu_: [ [f-range, 1, 3] , 0 , 0 ]
+    mu_: [ [i-range, 100, 300] , 0 , 0 ]
     sigma_: [ [f-range, 1, 3] , 0 , 0 ]
 edges:
   identity: null
