@@ -30,6 +30,12 @@ EDGE_FUNCTIONS = {
     'gaussian_rbf': edge_gaussian_rbf
 }
 
+FUNCTION_PARAMS = {
+    'identity': [],
+    'sigmoid': ['alpha', 'beta', 'gamma', 'tau'],
+    'gaussian_rbf': ['alpha', 'beta', 'gamma', 'tau']
+}
+
 
 if __name__ == '__main__':
     arr = np.array(range(100))

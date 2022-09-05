@@ -2,13 +2,9 @@ import yaml
 import numpy as np
 from parcs.cdag.output_distributions import DISTRIBUTION_PARAMS
 
-
 def config_parser(dir_):
     with open(dir_, 'r') as stream:
-        try:
-            conf = yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
-            print(exc)
+        conf = yaml.safe_load(stream)
     return conf
 
 def dist_param_coefs_reader(obj, dist):

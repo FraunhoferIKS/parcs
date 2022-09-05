@@ -3,7 +3,7 @@ import numpy as np
 from pprint import pprint
 from parcs.graph_builder.utils import config_parser
 from parcs.cdag.output_distributions import DISTRIBUTION_PARAMS
-from parcs.cdag.mapping_functions import EDGE_FUNCTIONS
+from parcs.cdag.mapping_functions import EDGE_FUNCTIONS, FUNCTION_PARAMS
 from parcs.cdag.utils import get_interactions_length, get_interactions_dict
 
 
@@ -12,7 +12,7 @@ def node_parser(line, parents):
     # remove spaces
     line = line.replace(' ', '')
     # First check: if dist = ?
-    if line == '?':
+    if line == 'free':
         return {
             'output_distribution': '?',
             'do_correction': True
@@ -29,8 +29,15 @@ def node_parser(line, parents):
     except AttributeError:
         raise NameError('distribution "{}" unknown'.format(line.split('(')[0]))
     # split into param - value
-    keys_ = [p.split('=')[0] for p in params.split(',')]
-    values_ = [p.split('=')[1] for p in params.split(',')]
+    try:
+        keys_ = [p.split('=')[0] for p in params.split(',')]
+        values_ = [p.split('=')[1] for p in params.split(',')]
+    except IndexError:
+        # all ?
+        assert params == '?'
+        keys_ = DISTRIBUTION_PARAMS[dist]
+        values_ = ['?']*len(keys_)
+
     try:
         flag = 1
         assert set(keys_) == set(DISTRIBUTION_PARAMS[dist])
@@ -130,6 +137,12 @@ def node_parser(line, parents):
 
 def edge_parser(line):
     line = line.replace(' ', '')
+    # First check: if dist = ?
+    if line == 'free':
+        return {
+            'function_name': '?',
+            'do_correction': True
+        }
     # find the func(p1=v1, ...) pattern
     output_params_pattern = re.compile(
         '({})\((.*)\)'.format('|'.join(EDGE_FUNCTIONS.keys()))
@@ -140,15 +153,24 @@ def edge_parser(line):
         params = res.group(2)
     except AttributeError:
         raise NameError('edge function "{}" unknown'.format(line.split('(')[0]))
+
     # split into param - value
     try:
-        func_params = {
-            p.split('=')[0]: float(p.split('=')[1])
-            for p in params.split(',')
-        }
+        assert params != '?'
+        func_params = {}
+        for p in params.split(','):
+            try:
+                func_params[p.split('=')[0]] = float(p.split('=')[1])
+            except ValueError:
+                func_params[p.split('=')[0]] = p.split('=')[1]
     except IndexError:
         # function has no params
         func_params = {}
+    except AssertionError:
+        # all ?
+        func_params = {
+            k: '?' for k in FUNCTION_PARAMS[func]
+        }
     # do correction:
     correct = re.compile('correct\[]')
     res = correct.findall(line)
@@ -187,6 +209,8 @@ def graph_file_parser(file_dir):
 
     return nodes, edges
 
+def guideline_parser(file_dir):
+    return config_parser(file_dir)
 
 if __name__ == '__main__':
     obj = node_parser('?', ['A', 'B', 'C'])
