@@ -9,8 +9,7 @@ def config_parser(dir_):
             conf = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
             print(exc)
-
-    print(conf)
+    return conf
 
 def dist_param_coefs_reader(obj, dist):
     given_params = obj.keys()

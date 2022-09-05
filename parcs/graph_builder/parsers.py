@@ -177,9 +177,9 @@ def graph_file_parser(file_dir):
         'name': n,
         **node_parser(file[n], parent_dict[n])
     } for n in file if '->' not in n]
-    pprint(nodes)
-    print('--')
-    pprint(edges)
+
+    return {'nodes': nodes, 'edges': edges}
+
 
 if __name__ == '__main__':
     # obj = node_parser('gaussian(mu_=-B+1-A, sigma_=1), correct[hi=1]', ['A', 'B', 'C'])

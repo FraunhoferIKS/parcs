@@ -1,6 +1,35 @@
 import numpy as np
 import pandas as pd
 from warnings import warn
+from parcs.graph_builder import utils
+
+class FixedRandomizer:
+    def __init__(self, guideline_dir):
+
+class FreeRandomizer:
+    def __init__(self, guideline_dir):
+        guide = utils.config_parser(guideline_dir)
+        # 1. set num nodes
+        self.num_nodes = self._guideline_sampler(guide['graph']['num_nodes'])
+        # 2. set adj_matrix
+
+    @staticmethod
+    def _guideline_sampler(item):
+        if isinstance(item, list):
+            if item[0] is 'i-range':
+                options = [i for i in range(item[1], item[2]+1)]
+                return np.random.choice(options, p=[1/len(options)]*options)
+            elif item[0] is 'f-range':
+                return np.random.uniform(item[1], item[2])
+            elif item[0] is 'choice':
+                options = item[1:]
+                return np.random.choice(options, p=[1 / len(options)] * options)
+            else:
+                raise ValueError('first element is other than i-range/f-range/choice')
+        else:
+            return item
+
+
 
 
 class Randomizer:
@@ -12,14 +41,13 @@ class Randomizer:
         self.nodes = []
         self.edges = []
 
-    def randomize(self, guideline=None, start_from=None, **kwargs):
-        possibles = ['scratch', 'num_nodes', 'adj_matrix', 'incomplete_list']
-        requires = ['guideline_dir']
+    def randomize(self, guideline=None,
+                  num_nodes=None, adj_matrix=None, nodes=None, edges=None,
+                  randomize_num_nodes : bool=False):
+        pass
 
     def post_fix(self):
         pass
-
-
 
     def _randomize_num_nodes(self, low=None, high=None, name_prefix=None):
         # sample a number
@@ -47,3 +75,8 @@ class Randomizer:
 
     def randomize_edge_functions(self, guideline=None):
         pass
+
+
+if __name__ == '__main__':
+    rand = Randomizer()
+    rand.randomize(guideline='simple_guideline')
