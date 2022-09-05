@@ -1,6 +1,7 @@
 import re
 import numpy as np
 from pprint import pprint
+from parcs.graph_builder.utils import config_parser
 from parcs.cdag.output_distributions import DISTRIBUTION_PARAMS
 from parcs.cdag.mapping_functions import EDGE_FUNCTIONS
 from parcs.cdag.utils import get_interactions_length, get_interactions_dict
@@ -41,10 +42,18 @@ def node_parser(line, parents):
         eq = params[p].replace('-', '+-')
         if eq[0] == '+':
             eq = eq[1:]
-        # add coef 1 to -A, -B, ...
+        # resolve negative coefs -A, -2B, ... at the beginning
         for par in parents:
-            eq = eq.replace('-{}'.format(par), '-1*{}'.format(par))
-
+            coef = re.findall(r'-([0-9]*){}'.format(par), eq)
+            if len(coef) == 0:
+                # no instance
+                continue
+            else:
+                if coef[0] == '':
+                    # -C, -A, ...
+                    eq = eq.replace('-{}'.format(par), '-1*{}'.format(par))
+                else:
+                    eq = eq.replace('-{}{}'.format(coef[0], par), '-{}*{}'.format(coef[0], par))
         terms = re.split(r'[+]', eq)
         if len(terms) == 1:
             if terms[0] == '?':
@@ -125,10 +134,14 @@ def edge_parser(line):
     except AttributeError:
         raise NameError('edge function "{}" unknown'.format(line.split('(')[0]))
     # split into param - value
-    func_params = {
-        p.split('=')[0]: float(p.split('=')[1])
-        for p in params.split(',')
-    }
+    try:
+        func_params = {
+            p.split('=')[0]: float(p.split('=')[1])
+            for p in params.split(',')
+        }
+    except IndexError:
+        # function has no params
+        func_params = {}
     # do correction:
     correct = re.compile('correct\[]')
     res = correct.findall(line)
@@ -143,8 +156,32 @@ def edge_parser(line):
         'do_correction': do_correction
     }
 
+def graph_file_parser(file_dir):
+    file = config_parser(file_dir)
+    # edges
+    edges = [{
+        'name': e,
+        **edge_parser(file[e])
+    } for e in file if '->' in e]
+    # node list
+    node_list = [n for n in file if '->' not in n]
+    parent_dict = {
+        node: sorted([
+            e['name'].split('->')[0] for e in edges
+            if e['name'].split('->')[1] == node
+        ])
+        for node in node_list
+    }
+    # nodes
+    nodes = [{
+        'name': n,
+        **node_parser(file[n], parent_dict[n])
+    } for n in file if '->' not in n]
+    pprint(nodes)
+    print('--')
+    pprint(edges)
 
 if __name__ == '__main__':
     # obj = node_parser('gaussian(mu_=-B+1-A, sigma_=1), correct[hi=1]', ['A', 'B', 'C'])
-    obj = edge_parser('sigmoid(alpha=2.0, beta=1.8), correct[]')
-    pprint(obj)
+    # obj = edge_parser('sigmoid(alpha=2.0, beta=1.8), correct[]')
+    graph_file_parser('../../graph_templates/causal_triangle.yml')
