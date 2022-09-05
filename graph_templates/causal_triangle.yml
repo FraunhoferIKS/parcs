@@ -1,9 +1,8 @@
 # nodes
-#C: gaussian(mu_=?, sigma_=1)
-C: free
-A: gaussian(?)
-Y: bernoulli(p_=-A+C), correction[mean_=0.3]
+C: gaussian(mu_=?, sigma_=1)
+A: gaussian(mu_=2C+1, sigma_=1)
+Y: bernoulli(p_=-A+2C+3AC), correction[]
 # edges
 C->A: identity()
 C->Y: identity()
-A->Y: free
+A->Y: identity()

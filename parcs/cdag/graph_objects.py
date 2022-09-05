@@ -41,7 +41,7 @@ class Node:
                  name=None,
                  output_distribution=None,
                  do_correction=False,
-                 correction_config=None,
+                 correction_config={},
                  dist_params_coefs=None):
         # basic attributes
         self.info = {
@@ -193,6 +193,7 @@ class Graph:
         self._set_adj_matrix()
 
         for node_name in topological_sort(self.adj_matrix):
+            print(node_name)
             # sample errors
             sampled_errors[node_name] = np.random.uniform(0, 1, size=size)
             # transform parents by edges
@@ -201,7 +202,8 @@ class Graph:
                 for parent in self.parent_sets[node_name]
             })
             # calculate node
-            data[node_name] = self.nodes[node_name].calculate(inputs, sampled_errors[node_name])
+            parents = sorted(list(self.adj_matrix[self.adj_matrix[node_name]==1].index))
+            data[node_name] = self.nodes[node_name].calculate(inputs, parents, sampled_errors[node_name])
         if cache_sampling:
             self.cache[cache_name] = (data, sampled_errors)
         if return_errors:

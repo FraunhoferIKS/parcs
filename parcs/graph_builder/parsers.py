@@ -7,11 +7,40 @@ from parcs.cdag.mapping_functions import EDGE_FUNCTIONS, FUNCTION_PARAMS
 from parcs.cdag.utils import get_interactions_length, get_interactions_dict
 
 
+def term_parser(term, vars):
+    pars = []
+    for var in vars:
+        res = re.search(r'{}'.format(var), term)
+        if res is not None:
+            inds = res.span(0)
+            pars.append(var)
+            term = term[0:inds[0]] + term[inds[1]:]
+    if term == '-':
+        coef = -1
+    elif term == '':
+        coef = 1
+    else:
+        coef = float(term)
+    return pars, coef
+
+
+def equation_parser(eq, vars):
+    # 1. we split by +, so negative terms are + - ...
+    eq = eq.replace('-', '+-')
+    if eq[0] == '+':
+        eq = eq[1:]
+    eq = eq.split('+')
+    # 2. split by vars
+    eq = [term_parser(term, vars) for term in eq]
+    return eq
+
+
 def node_parser(line, parents):
     # preliminary: get order of interactions
+    interactions_dict = get_interactions_dict(parents)
     # remove spaces
     line = line.replace(' ', '')
-    # First check: if dist = ?
+    # First check: if dist = free
     if line == 'free':
         return {
             'output_distribution': '?',
@@ -39,100 +68,68 @@ def node_parser(line, parents):
         values_ = ['?']*len(keys_)
 
     try:
-        flag = 1
         assert set(keys_) == set(DISTRIBUTION_PARAMS[dist])
-        flag = 2
+    except AssertionError:
+        raise KeyError('params not valid')
+    try:
         assert len(set(keys_)) == len(keys_)
     except AssertionError:
-        if flag == 1: raise KeyError('params not valid')
-        else: raise KeyError('duplicate params')
-
+        raise KeyError('duplicate params')
     params = {
         k: v for k, v in zip(keys_, values_)
     }
+
     # process params
     for p in params:
-        # add leading + to negatives, to split with +
-        eq = params[p].replace('-', '+-')
-        if eq[0] == '+':
-            eq = eq[1:]
-        # resolve negative coefs -A, -2B, ... at the beginning
-        for par in parents:
-            coef = re.findall(r'-([0-9]*){}'.format(par), eq)
-            if len(coef) == 0:
-                # no instance
-                continue
-            else:
-                if coef[0] == '':
-                    # -C, -A, ...
-                    eq = eq.replace('-{}'.format(par), '-1*{}'.format(par))
-                else:
-                    eq = eq.replace('-{}{}'.format(coef[0], par), '-{}*{}'.format(coef[0], par))
-        terms = re.split(r'[+]', eq)
-        if len(terms) == 1:
-            if terms[0] == '?':
-                # aim to randomize
-                params[p] = {'bias': '?', 'linear': '?', 'interactions': '?'}
-            else:
-                # single number: must be bias
-                params[p] = {
-                    'bias': float(terms[0]),
-                    'linear': np.zeros(shape=(len(parents,))),
-                    'interactions': np.zeros(shape=get_interactions_length(len(parents)),)
-                }
-        else:
-            # term is given
-            # dict of interactions
-            interactions_dict = get_interactions_dict(parents)
-            # coefs placeholders
-            bias_coef = 0
-            linear_coef = np.zeros(shape=(len(parents),))
-            interactions_coef = np.zeros(shape=get_interactions_length(len(parents)),)
-            for term in terms:
-                pa = []
-                coef = 1
-                for comp in term.split('*'):
-                    if comp in parents:
-                        pa.append(comp)
-                    else:
-                        coef = float(comp)
-
-                if len(pa) == 0:
-                    # bias term
-                    bias_coef = coef
-                elif len(pa) == 1:
-                    # linear term
-                    ind = parents.index(pa[0])
-                    linear_coef[ind] = coef
-                else:
-                    # interaction term
-                    ind = interactions_dict.index(set(pa))
-                    interactions_coef[ind] = coef
+        if params[p] == '?':
             params[p] = {
-                'bias': bias_coef,
-                'linear': linear_coef,
-                'interactions': interactions_coef
+                'bias': '?', 'linear': '?', 'interactions': '?'
             }
+            continue
+        terms = equation_parser(params[p], parents)
+        params[p] = {
+            'bias': 0,
+            'linear': np.zeros(shape=(len(parents,))),
+            'interactions': np.zeros(shape=get_interactions_length(len(parents)),)
+        }
+
+        for term in terms:
+            pars, coef = term
+            if len(pars) == 0:
+                params[p]['bias'] = coef
+            elif len(pars) == 1:
+                ind = parents.index(pars[0])
+                params[p]['linear'][ind] = coef
+            else:
+                ind = interactions_dict.index(set(pars))
+                params[p]['interactions'][ind] = coef
+
     # do correction
-    pattern = re.compile('correct\[(.*)]')
+    pattern = re.compile('correction\[(.*)]')
     res = pattern.search(line)
+    # default values
+    do_correction = False
+    correction_config = {}
     try:
         corrs = res.group(1)
         correction_config = {
             conf.split('=')[0]: float(conf.split('=')[1])
             for conf in corrs.split(',')
         }
-        return {
-            'output_distribution': dist,
-            'dist_params_coefs': params,
-            'do_correction': True,
-            'correction_config': correction_config
-        }
+        do_correction = True
+    except IndexError:
+        # correction given but with default params
+        correction_config = {}
+        do_correction = True
     except AttributeError:
+        # default values
+        pass
+    finally:
         return {
             'output_distribution': dist,
             'dist_params_coefs': params,
-            'do_correction': False
+            'do_correction': do_correction,
+            'correction_config':correction_config
         }
 
 def edge_parser(line):
@@ -217,6 +214,7 @@ def guideline_parser(file_dir):
     return config_parser(file_dir)
 
 if __name__ == '__main__':
-    obj = node_parser('?', ['A', 'B', 'C'])
+    obj = node_parser('gaussian(mu_=?, sigma_=1)', ['A', 'B', 'C'])
+    print(obj)
     # obj = edge_parser('sigmoid(alpha=2.0, beta=1.8), correct[]')
     # graph_file_parser('../../graph_templates/causal_triangle.yml')

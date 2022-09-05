@@ -52,7 +52,6 @@ class BernoulliDistribution:
         p_ = dot_prod(data, self.coefs['p_'])
         if self.do_correction:
             p_ = self._correct_param(p_)
-
         samples = dists.bernoulli.ppf(errors, p_)
 
         return samples

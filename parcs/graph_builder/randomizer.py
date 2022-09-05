@@ -154,7 +154,6 @@ class ExtendRandomizer(ParamRandomizer):
                     'name': '{}->{}'.format(par, child),
                     **parsers.edge_parser('free')
                 })
-        print(self.adj_matrix)
 
     def _local_topological_sort(self):
         # local adj
@@ -183,10 +182,17 @@ class FreeRandomizer(ExtendRandomizer):
 
 
 if __name__ == '__main__':
+    from parcs.cdag.graph_objects import Graph
     rand = ExtendRandomizer(
         graph_dir='../../graph_templates/causal_triangle.yml',
         guideline_dir='../../guidelines/simple_guideline.yml'
     )
     nodes, edges = rand.get_graph_params()
-    print(nodes)
+
+    g = Graph(nodes=nodes, edges=edges)
+    data, errors = g.sample(size=500, cache_sampling=True, cache_name='exp_1', return_errors=True)
+    print(data)
+    from matplotlib import pyplot as plt
+    plt.scatter(data['A'], data['C'], c=data['Y'])
+    plt.show()
 
