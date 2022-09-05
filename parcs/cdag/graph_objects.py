@@ -178,7 +178,7 @@ class Graph:
 
     def _set_adj_matrix(self):
         num_n = len(self.nodes)
-        n_names = self.nodes.keys()
+        n_names = sorted(list(self.nodes.keys()))
         self.adj_matrix = pd.DataFrame(
             np.zeros(shape=(num_n, num_n)),
             index=n_names, columns=n_names
