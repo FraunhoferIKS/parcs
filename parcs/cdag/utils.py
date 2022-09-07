@@ -67,9 +67,6 @@ def dot_prod(data, coef):
         # data_augmented = [data, get_poly(data, 2), get_interactions(data)]
         data_augmented = [data, get_interactions(data)]
 
-    print(coef)
-    print('===')
-
     return coef['bias'] + np.array([
         np.dot(d, coef[i])
         for (i, d) in zip(['linear', 'interactions'], data_augmented)

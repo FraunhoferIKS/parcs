@@ -187,29 +187,116 @@ class Graph:
             self.parent_sets[n] = [edge.split('->')[0] for edge in self.edges if edge.split('->')[1] == n]
             self.adj_matrix.loc[self.parent_sets[n], n] = 1
 
-    def sample(self, size=200, return_errors=False, cache_sampling=False, cache_name=None):
-        data = pd.DataFrame([])
-        sampled_errors = pd.DataFrame([])
-        self._set_adj_matrix()
-
-        for node_name in topological_sort(self.adj_matrix):
-            print(node_name)
+    def _single_sample_round(self, use_sampled_errors=False, node_name=None, size=None, data=None, sampled_errors=None):
+        if not use_sampled_errors:
             # sample errors
             sampled_errors[node_name] = np.random.uniform(0, 1, size=size)
-            # transform parents by edges
-            inputs = pd.DataFrame({
-                parent: self.edges['{}->{}'.format(parent, node_name)].map(array=data[parent].values)
-                for parent in self.parent_sets[node_name]
-            })
-            # calculate node
-            parents = sorted(list(self.adj_matrix[self.adj_matrix[node_name]==1].index))
-            data[node_name] = self.nodes[node_name].calculate(inputs, parents, sampled_errors[node_name])
+        # transform parents by edges
+        inputs = pd.DataFrame({
+            parent: self.edges['{}->{}'.format(parent, node_name)].map(array=data[parent].values)
+            for parent in self.parent_sets[node_name]
+        })
+        # calculate node
+        parents = sorted(list(self.adj_matrix[self.adj_matrix[node_name] == 1].index))
+        data[node_name] = self.nodes[node_name].calculate(inputs, parents, sampled_errors[node_name])
+        return data
+
+    def sample(self, size=200, return_errors=False, cache_sampling=False, cache_name=None,
+               use_sampled_errors=False, sampled_errors=None):
+        # name should be sample observational
+        data = pd.DataFrame([])
+        self._set_adj_matrix()
+        if not use_sampled_errors:
+            sampled_errors = pd.DataFrame([])
+
+        for node_name in topological_sort(self.adj_matrix):
+            data = self._single_sample_round(
+                use_sampled_errors=use_sampled_errors, node_name=node_name, size=size, data=data,
+                sampled_errors=sampled_errors
+            )
+
         if cache_sampling:
             self.cache[cache_name] = (data, sampled_errors)
         if return_errors:
             return data, sampled_errors
         else:
             return data
+
+    def type_0_intervention(self, size=200, interventions=None, use_sampled_errors=False, sampled_errors=None,
+                            return_errors=False, cache_sampling=False, cache_name=None):
+        # hard intervention: do(X_0=x_0) over many columns
+        data = pd.DataFrame([])
+        self._set_adj_matrix()
+        if not use_sampled_errors:
+            sampled_errors = pd.DataFrame([])
+
+        for node_name in topological_sort(self.adj_matrix):
+            if node_name not in interventions:
+                data = self._single_sample_round(
+                    use_sampled_errors=use_sampled_errors, node_name=node_name, size=size, data=data,
+                    sampled_errors=sampled_errors
+                )
+            else:
+                data[node_name] = interventions[node_name]
+
+        if cache_sampling:
+            self.cache[cache_name] = (data, sampled_errors)
+        if return_errors:
+            return data, sampled_errors
+        else:
+            return data
+
+    def type_1_intervention(self, size=200, intervene_on=None, z_list=None, func=None,
+                            use_sampled_errors=False, sampled_errors=None,
+                            return_errors=False, cache_sampling=False, cache_name=None):
+        # soft intervention: do(X_0=f(z))
+        data = pd.DataFrame([])
+        self._set_adj_matrix()
+        if not use_sampled_errors:
+            sampled_errors = pd.DataFrame([])
+
+        for node_name in topological_sort(self.adj_matrix):
+            if node_name != intervene_on:
+                data = self._single_sample_round(
+                    use_sampled_errors=use_sampled_errors, node_name=node_name, size=size, data=data,
+                    sampled_errors=sampled_errors
+                )
+            else:
+                # TODO: warn if z is child of X_0
+                assert True
+                data[node_name] = data[z_list].apply(lambda x: func(*x.values))
+
+        if cache_sampling:
+            self.cache[cache_name] = (data, sampled_errors)
+        if return_errors:
+            return data, sampled_errors
+        else:
+            return data
+
+    def type_2_intervention(self, size=200, func=None, intervention=None,
+                            use_sampled_errors=False, sampled_errors=None,
+                            return_errors=False, cache_sampling=False, cache_name=None):
+        # based on self: do(X_0 = f(x_old))
+        data = pd.DataFrame([])
+        self._set_adj_matrix()
+        if not use_sampled_errors:
+            sampled_errors = pd.DataFrame([])
+
+        for node_name in topological_sort(self.adj_matrix):
+            data = self._single_sample_round(
+                use_sampled_errors=use_sampled_errors, node_name=node_name, size=size, data=data,
+                sampled_errors=sampled_errors
+            )
+            if intervention == node_name:
+                data[node_name] = data[node_name].apply(func)
+
+        if cache_sampling:
+            self.cache[cache_name] = (data, sampled_errors)
+        if return_errors:
+            return data, sampled_errors
+        else:
+            return data
+
 
 
 if __name__ == '__main__':
