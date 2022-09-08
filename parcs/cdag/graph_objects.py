@@ -222,8 +222,8 @@ class Graph:
         else:
             return data
 
-    def type_0_intervention(self, size=200, interventions=None, use_sampled_errors=False, sampled_errors=None,
-                            return_errors=False, cache_sampling=False, cache_name=None):
+    def do(self, size=200, interventions=None, use_sampled_errors=False, sampled_errors=None,
+           return_errors=False, cache_sampling=False, cache_name=None):
         # hard intervention: do(X_0=x_0) over many columns
         data = pd.DataFrame([])
         self._set_adj_matrix()
@@ -237,7 +237,7 @@ class Graph:
                     sampled_errors=sampled_errors
                 )
             else:
-                data[node_name] = interventions[node_name]
+                data[node_name] = np.ones(shape=(size,)) * interventions[node_name]
 
         if cache_sampling:
             self.cache[cache_name] = (data, sampled_errors)

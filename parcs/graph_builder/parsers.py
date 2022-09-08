@@ -40,8 +40,8 @@ def node_parser(line, parents):
     interactions_dict = get_interactions_dict(parents)
     # remove spaces
     line = line.replace(' ', '')
-    # First check: if dist = free
-    if line == 'free':
+    # First check: if dist = random
+    if line == 'random':
         return {
             'output_distribution': '?',
             'do_correction': True
@@ -135,7 +135,7 @@ def node_parser(line, parents):
 def edge_parser(line):
     line = line.replace(' ', '')
     # First check: if dist = ?
-    if line == 'free':
+    if line == 'random':
         return {
             'function_name': '?',
             'do_correction': True
