@@ -144,7 +144,7 @@ class ExtendRandomizer(ParamRandomizer):
                 parents = sorted(list(self.adj_matrix[self.adj_matrix[node_name]==1].index))
                 self.nodes.append({
                     'name': node_name,
-                    **parsers.node_parser('free', parents)
+                    **parsers.node_parser('random', parents)
                 })
         # extend edges
         current_edges = [e['name'] for e in self.edges]
@@ -152,7 +152,7 @@ class ExtendRandomizer(ParamRandomizer):
             if '{}->{}'.format(par, child) not in current_edges and self.adj_matrix.loc[par, child]==1:
                 self.edges.append({
                     'name': '{}->{}'.format(par, child),
-                    **parsers.edge_parser('free')
+                    **parsers.edge_parser('random')
                 })
 
     def _local_topological_sort(self):
@@ -183,7 +183,10 @@ class FreeRandomizer(ExtendRandomizer):
 
 if __name__ == '__main__':
     from parcs.cdag.graph_objects import Graph
-    rand = ExtendRandomizer(
+    import numpy as np
+    np.random.seed(1)
+
+    rand = ParamRandomizer(
         graph_dir='../../graph_templates/causal_triangle.yml',
         guideline_dir='../../guidelines/simple_guideline.yml'
     )
@@ -193,6 +196,6 @@ if __name__ == '__main__':
     data, errors = g.sample(size=500, cache_sampling=True, cache_name='exp_1', return_errors=True)
     print(data)
     from matplotlib import pyplot as plt
-    plt.scatter(data['A'], data['C'], c=data['Y'])
+    plt.scatter(data['C'], data['A'], c=data['Y'])
     plt.show()
 

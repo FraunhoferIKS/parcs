@@ -60,6 +60,32 @@ Considering the error terms, the :code:`.sample()` method receives the following
     :linenos:
     :lines: 15-35
 
+Node correction
+---------------
+The library provides a method to apply a standardizing *correction* to the distribution parameters. This option is available for all parameters that have a non-real numbers support, such as success probability of the Bernoulli distribution.
+
+.. literalinclude:: examples/correction_examples/graph_description.yml
+    :linenos:
+    :caption: graph_description.yml
+
+.. literalinclude:: examples/correction_examples/correction_1.py
+    :linenos:
+    :caption: graph.py
+
+To activate the correction, we can add an extra :code:`correction[...]` term to the line of the node.
+
+.. literalinclude:: examples/correction_examples/graph_description_correction.yml
+    :linenos:
+    :caption: graph_description_correction.yml
+    :emphasize-lines: 4
+
+.. literalinclude:: examples/correction_examples/correction_2.py
+    :linenos:
+    :caption: graph.py
+
+In this example, the correction transformation for Bernoulli distribution, is a Sigmoid function, mapping the real values to the [lower, upper] range. As a result, the success probability of the example has the form :math:`\sigma(10A+10C)`. see HERE for more details about blah blah.
+
+
 Observations, Interventions, Counterfactuals
 ============================================
 
@@ -68,9 +94,79 @@ In addition to the :code:`.sample()` method, which allows us to sample from the 
 Fixed-value intervention
 ------------------------
 
-This method sets the value of one or more nodes to a fixed value. As this is the most basic type of intervention in causal inference theory, we name the method simply `.do()`. Below is an example of a causal triangle graph, with two instances of fixed-value intervention.
+This method sets the value of one or more nodes to a fixed value. As this is the most basic type of intervention in causal inference theory, we name the method simply :code:`.do()`. Below is an example of a causal triangle graph, with fixed-value interventions applied.
 
 .. literalinclude:: examples/graph_example_2/fixed_value_do.py
     :linenos:
     :emphasize-lines: 17, 25-26, 32
 
+functional intervention
+-----------------------
+
+In this type of intervention which you do via :code:`.do_functional()`, you can set a node's value to a deterministic function of other nodes. The function is a Python function (defined by :code:`def` keyword or as a :code:`lambda` function). Using this method, you can induce the *soft (parametric) intervention* scenario, where the inputs of the intervention function are the parents of the node in the original DAG. Nevertheless, the inputs of the function can be any subset of the nodes, except for the descendants of the intervened node.
+
+.. literalinclude:: examples/graph_example_2/functional_do.py
+    :linenos:
+    :lines: 17-26
+    :emphasize-lines: 3-4
+
+self intervention
+-----------------
+
+Imagine the following causal question: *what if for every patient, we administer 1 unit of drug less than what we normally administer*. The "do" term for this intervention would be :math:`\text{do}(A=f(A_\text{old}))`. To simulate data for this type of intervention, we use the method :code:`.do_self()`
+
+.. literalinclude:: examples/graph_example_2/self_do.py
+    :linenos:
+    :lines: 17-35
+    :emphasize-lines: 12
+
+.. note:: In the example above, line 13 tells the method to reuse the samples. This decision can be made in previous types of intervention as well. Using this feature, we can simulate **counterfactual**  scenarios: *what would have happened had we changed our actions?* In this case, the intervention must be applied to the same sampled dataset, and this can be done by reusing the sampled errors.
+
+Partial Randomization
+=====================
+
+In simulations, sometimes we need to explore the graphs with certain restrictions; we need to fix some (not all) parameters that models our restrictions, while randomizing the rest of the parameters. As an example, for testing an ML or causal inference model with Gaussian assumption on the nodes, we want to simulate a graph with all Gaussian output distributions, while allowing the mean values to be selected randomly (because perhaps we want to test our model on MVG distributions with arbitrary means and variances).
+
+An important feature of PARCS, the *partial randomization*, allows us to simulate for such scenarios. In this section we explain how this can be done. For more details regarding the motivation and use-cases please see "here".
+
+Parameter Randomization
+-----------------------
+
+As before, simulation starts with a graph description file. However we can use two new values to activate randomization PARCS: :code:`?` for parameters, and :code:`random` for functions and distributions. Here is an example of the causal triangle where we randomize the mean of node A, and also the output distribution of Y:
+
+.. literalinclude:: examples/randomization_examples/graph_description_1.yml
+    :linenos:
+    :caption: graph_description.yml
+    :emphasize-lines: 3, 4
+
+.. literalinclude:: examples/randomization_examples/graph_1.py
+    :linenos:
+    :caption: graph.py
+    :emphasize-lines: 5-9
+
+In :code:`graph.py` file, instead of :code:`graph_file_parser`, we import :code:`parcs.graph_builder.randomizer.ParamRandomizer`. :code:`ParamRandomizer` takes the graph description directory, as well as a *guideline file*. This file tells the radomizer, what are the options for parameters and functions. Let's have a look at the guideline file:
+
+.. literalinclude:: examples/randomization_examples/simple_guideline.yml
+    :linenos:
+    :caption: simple_guideline.yml
+
+1. There are two main keys: :code:`nodes` and :code:`edges`
+2. the next-level keys determine the different possibilities for choosing the functions and distributions. For instance, in the example file we tell the randomizer to choose between :code:`bernoulli` and :code:`gaussian` for distributions, and between :code:`identity` and :code:`gaussian_rbf` for the edge functions.
+3. Each function/distribution option contains the corresponding parameters as keys. The value of these keys is a list of the length 3 which corresponds to *bias, linear,* and *interactions* coefficients (in the same order). Each component is a directive for the respective coefficient, i.e. first component is used to randomize the bias value, second one for linear coefficient, and third for the interaction coefficient. The directives follow the following convention:
+
+   a. a single value, means *fixed*, thus for all the randomization turns, randomizer picks the same value
+   b. :code:`[f-range, X, Y]` tells the randomizer to pick a float value between X and Y (uniformly).
+   c. :code:`[i-range, X, Y]` is similar to (a), except that the value is integer.
+   d. :code:`[choice, X_0, X_1, ...]` tells the randomizer to pick a value from the given list of options in the directive (element 2nd onward).
+
+In our example, therefore, mean of node A is selected according to line 5 of the guideline, and the distribution of Y is chosen between Bernoulli and Gaussian distributions.
+
+Edge correction
+---------------
+
+We can apply standardizing correction to the edge functions too, however, for a different reason. As a summary, enabling correction in the edge has a similar effect as batch normalization in neural networks. By correction:
+
+* In Sigmoid or Gaussian RBF edge functions, we align the input data with the active region of the function, such that the output data in the simulation does not lose variability
+* In Identity function, we normalize the input data. Normalizing input data prevents undesired simulation effects.
+
+Edge correction is especially important in graph randomization, which we will explain later. to see more details about the motivation and how-to of edge correction, see here.

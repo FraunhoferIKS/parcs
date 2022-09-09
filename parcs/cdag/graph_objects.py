@@ -246,15 +246,17 @@ class Graph:
         else:
             return data
 
-    def type_1_intervention(self, size=200, intervene_on=None, z_list=None, func=None,
-                            use_sampled_errors=False, sampled_errors=None,
-                            return_errors=False, cache_sampling=False, cache_name=None):
+    def do_functional(self, size=200, intervene_on=None, inputs=None, func=None,
+                      use_sampled_errors=False, sampled_errors=None,
+                      return_errors=False, cache_sampling=False, cache_name=None):
         # soft intervention: do(X_0=f(z))
         data = pd.DataFrame([])
         self._set_adj_matrix()
         if not use_sampled_errors:
             sampled_errors = pd.DataFrame([])
 
+        # TODO: we need to make sure z_list doesn't have items from descendant
+        # solution: do all sampling first, then sample again the node with intrv, and the downstreams too.
         for node_name in topological_sort(self.adj_matrix):
             if node_name != intervene_on:
                 data = self._single_sample_round(
@@ -264,7 +266,7 @@ class Graph:
             else:
                 # TODO: warn if z is child of X_0
                 assert True
-                data[node_name] = data[z_list].apply(lambda x: func(*x.values))
+                data[node_name] = data[inputs].apply(lambda x: func(*x.values), axis=1)
 
         if cache_sampling:
             self.cache[cache_name] = (data, sampled_errors)
@@ -273,9 +275,9 @@ class Graph:
         else:
             return data
 
-    def type_2_intervention(self, size=200, func=None, intervention=None,
-                            use_sampled_errors=False, sampled_errors=None,
-                            return_errors=False, cache_sampling=False, cache_name=None):
+    def do_self(self, size=200, func=None, intervention=None,
+                use_sampled_errors=False, sampled_errors=None, return_errors=False,
+                cache_sampling=False, cache_name=None):
         # based on self: do(X_0 = f(x_old))
         data = pd.DataFrame([])
         self._set_adj_matrix()

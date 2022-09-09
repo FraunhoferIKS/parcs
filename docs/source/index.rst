@@ -21,7 +21,7 @@ Table of Contents
    :maxdepth: 2
 
    usage
-   causal_dag
+   get_started
    api
 
 

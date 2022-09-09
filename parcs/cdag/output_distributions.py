@@ -1,6 +1,7 @@
 from parcs.cdag.utils import dot_prod
 from parcs.cdag.utils import SigmoidCorrection
 from scipy import stats as dists
+import numpy as np
 
 DISTRIBUTION_PARAMS = {
     'gaussian': ['mu_', 'sigma_'],
@@ -52,6 +53,8 @@ class BernoulliDistribution:
         p_ = dot_prod(data, self.coefs['p_'])
         if self.do_correction:
             p_ = self._correct_param(p_)
+        else:
+            assert (np.abs(p_)<=1).sum() == len(p_), 'Bern(p) probabilities are out of [0, 1] range'
         samples = dists.bernoulli.ppf(errors, p_)
 
         return samples

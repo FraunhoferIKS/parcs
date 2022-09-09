@@ -1,0 +1,8 @@
+# nodes
+C: gaussian(mu_=0, sigma_=1)
+A: gaussian(mu_=2C-1, sigma_=1)
+Y: bernoulli(p_=10A+10C), correction[lower=0, upper=1]
+# edges
+C->A: identity()
+C->Y: identity()
+A->Y: identity()
