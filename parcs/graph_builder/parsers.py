@@ -169,7 +169,7 @@ def edge_parser(line):
             k: '?' for k in FUNCTION_PARAMS[func]
         }
     # do correction:
-    correct = re.compile('correct\[]')
+    correct = re.compile('correction\[]')
     res = correct.findall(line)
     if len(res) == 0:
         do_correction = False

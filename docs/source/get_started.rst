@@ -164,9 +164,32 @@ In our example, therefore, mean of node A is selected according to line 5 of the
 Edge correction
 ---------------
 
-We can apply standardizing correction to the edge functions too, however, for a different reason. As a summary, enabling correction in the edge has a similar effect as batch normalization in neural networks. By correction:
+When randomizing the graph parameters, we potentially face two undesired issues:
 
-* In Sigmoid or Gaussian RBF edge functions, we align the input data with the active region of the function, such that the output data in the simulation does not lose variability
-* In Identity function, we normalize the input data. Normalizing input data prevents undesired simulation effects.
+1. For edge functions such as Sigmoid and Gaussian RBF, if the parent output is too far away from the active region of the function, we will end up with low variability in the transformed values. For example, If for a Sigmoid edge function, the output distribution of the parent node is :math:`\mathcal{N}(10, 2)`, then the transformed values of a Sigmoid edge function for 1000 samples are in the range of :math:`(0.9912\dots, 0.9999\dots)`.
+2. Take an example of a node with 3 parents, 2 of which are subjected to Sigmoid edge function and have a :math:`[0, 1]` support while calculating the child node's distribution parameters, while the remaining is subjected to the identity function and retain its original support. In this case, we have an imbalance when calculating the distribution coefficients, as we pick the distribution coefficients randomly from the same value range for all parents.
 
-Edge correction is especially important in graph randomization, which we will explain later. to see more details about the motivation and how-to of edge correction, see here.
+In general, both items indicate an issue similar to the issue of *sensitivity of calculations to unit of measurement*, and of course the remedy to that can be the same, which is normalization. In issue 1, normalization brings the values to the active region of the edge function, and in issue 2, it brings all the parents to the same scale.
+
+Such normalization can be done via activating the `correction` option for the edges (For more details blah blah). PARCS automatically activates edge correction when randomizing the parameters. But in general, we can do edge correction in any simulation, by modifying the graph description file.
+
+.. literalinclude:: examples/correction_examples/graph_description_edge.yml
+    :linenos:
+    :caption: graph_description.yml
+
+.. literalinclude:: examples/correction_examples/edge_correction.py
+    :linenos:
+    :caption: graph.py
+    :lines: 1-4, 6-10
+
+In this example, the variable Y has the mean of `1.0` because of the mean of A and C. Now we activate correction for `A->Y` and `C->Y` edges:
+
+.. literalinclude:: examples/correction_examples/graph_description_edge_2.yml
+    :linenos:
+    :caption: graph_description.yml
+    :emphasize-lines: 8-9
+
+.. literalinclude:: examples/correction_examples/edge_correction.py
+    :linenos:
+    :caption: graph.py
+    :lines: 5-9, 11

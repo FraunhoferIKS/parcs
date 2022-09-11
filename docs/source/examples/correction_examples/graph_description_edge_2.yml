@@ -5,5 +5,5 @@ A: gaussian(mu_=10, sigma_=1)
 Y: bernoulli(p_=C+A), correction[]
 # edges
 C->A: identity()
-C->Y: identity()
-A->Y: identity()
+C->Y: identity(), correction[]
+A->Y: identity(), correction[]

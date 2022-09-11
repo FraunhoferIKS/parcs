@@ -74,7 +74,7 @@ def dot_prod(data, coef):
 
 
 class SigmoidCorrection:
-    def __init__(self, lower=0, upper=1, target_mean=None, to_center=True):
+    def __init__(self, lower=0, upper=1, target_mean=None, to_center=False):
         assert upper > lower
         if target_mean is not None:
             assert lower < target_mean < upper
@@ -113,7 +113,6 @@ class SigmoidCorrection:
                         break
                 self.config['offset'] = theta
             self.is_initialized = True
-
         return (self.config['upper'] - self.config['lower']) * \
                expit(array - self.config['offset']) + \
                self.config['lower']
