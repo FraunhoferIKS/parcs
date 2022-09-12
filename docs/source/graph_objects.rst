@@ -1,11 +1,10 @@
-====================
-Causal DAGs in PARCS
-====================
+=============
+Graph objects
+=============
 
-.. warning::
-    General todo: write the distributions/edge functions docs and introduce the parameters, etc.
+In :ref:`Getting started document <get_started>` we explained how to make a graph using a graph description file, how to sample from observational and interventional distributions, and how to randomize it partially. This is the most efficient way to utilize PARCS. Nevertheless, it might be beneficial if we get to know the nuts and bolts of the graph object.
 
-In PARCS, Directed Acyclic Graph (DAG) is used to model the ground-truth of the synthesized data. Here we introduce 3 main PARCS objects related to DAGs: *nodes*, *edges* and *graphs*:
+In PARCS two main objects make DAGs: *nodes*, *edges*
 
 .. _edge_doc:
 
@@ -25,49 +24,13 @@ An edge object is declared via the following code:
 .. literalinclude:: examples/cdag_examples/edge_identity.py
     :lines: 1-14
 
-where ``function_name`` argument determines the selected edge function. The simplest function , ``identity`` , follows the identity transform:
+where ``function_name`` argument determines the selected edge function. Other examples are provided below.
 
-.. math::
-    z_i^* = z_i.
-
-Other available edge functions are introduced below.
-
-Edge functions
---------------
-
-Sigmoid function
-~~~~~~~~~~~~~~~~
-Sigmoid edge function is activated by ``function_name='sigmoid'`` and follows the transformation of
-
-.. math::
-    \begin{align}
-        z^*_i = \sigma\Big(
-            (-1)^\gamma.  2  \alpha  (z_i - \beta)^\tau
-        \Big),
-    \end{align}
-    :label: edge_sigmoid_1
-
-Parameters in Eq. :eq:`edge_sigmoid_1` are :math:`\gamma, \alpha, \beta` and :math:`\tau`, and they control the overall shape of the sigmoid function (Figure ?). Combined together, we can achieve different forms of sigmoid function using different parameter sets. The parameters are passed to the class as a dictionary:
-
-.. warning:: require Figure
+.. seealso::
+    List of :ref:`available edge functions <available_edge_functions>`
 
 .. literalinclude:: examples/cdag_examples/edge_sigmoid.py
     :lines: 4-17
-
-Gaussian RBF function
-~~~~~~~~~~~~~~~~~~~~~
-Gaussian RBF function is activated by ``function_name='gaussian_rbf'`` and follows the transformation of
-
-.. math::
-    \begin{align}
-        z^*_i = \gamma + (-1)^\gamma .
-        \exp\big(-\alpha \|z_i - \beta\|^\tau\big),
-    \end{align}
-    :label: edge_gaussian_rbf_1
-
-Parameters in Eq. :eq:`edge_gaussian_rbf_1`, similar to Eq. :eq:`edge_sigmoid_1` parameters, control the overall shape of the radial basis function (Figure ?):
-
-.. warning:: require Figure
 
 .. literalinclude:: examples/cdag_examples/edge_gaussian_rbf.py
     :lines: 4-17
@@ -135,6 +98,9 @@ Explanations:
 * the ``dist_params_coefs`` is a dictionary of distributions parameters. In case of the Bernoulli distribution, the only parameter is the success probability i.e. ``p_``. Three distinct key-value pairs define the coefficient vectors for each parameter. The keys are ``bias, linear, interactions``. In this example, the source node needs only the bias, so other vectors are set to empty. In next examples about non-source nodes, we provide more details regarding the coefficients.
 * the ``data`` input is required for the ``.sample()`` method. In this case, as the node has no parents, the data frame can be empty.
 
+.. seealso::
+    List of :ref:`available output distributions <available_output_distributions>`
+
 Sampling a Node with Parents
 ----------------------------
 
@@ -146,17 +112,6 @@ We repeat the previous process, but now for a node assuming it has two parents.
 In the example above, we assumed the data frame is already filled with parent values, where both parents are uniformly distributed r.v.s. and the edges are set to identity function (in the next steps, we also simulate the parents as PARCS nodes). The ``dist_params_coefs`` implements :math:`P(Z_3=1|Z_1, Z_2) = Z_1Z_2`
 
 .. note:: To create the interaction input vector elements, the order of permutation over the parent values follows the standard of Python's ``itertools.combinations`` function. As an example, the order for the case of three ``(X,Y,Z)`` nodes is: ``XY, XZ, XYZ``
-
-Output Distributions
---------------------
-
-Bernoulli distribution
-~~~~~~~~~~~~~~~~~~~~~~
-**tbc**
-
-Gaussian normal distribution
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-**tbc**
 
 Correction of distribution parameters
 -------------------------------------

@@ -6,24 +6,37 @@
 Welcome to PARCS's documentation!
 =================================
 
-**PA**-rtially **R**-andomized **C**-ausal **S**-imulator is a simulation tool for causal inference.
-
-.. note::
-   This welcome page must be filled properly*
+**PA**-rtially **R**-andomized **C**-ausal **S**-imulator is a simulation tool for causal inference. `to be continued`
 
 .. note::
    This project is under active development
 
-Table of Contents
-=================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+   :caption: Get to know PARCS
 
    usage
    get_started
    conventions
    function_list
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Next steps
+
+   other_randomizers
+   adjusting_randomized
+   m_graphs
+   graph_templates
+   parcs_as_latent_distribution
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Technical details
+
+   graph_objects
+   graph_interventions
    api
 
 

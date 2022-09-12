@@ -1,5 +1,5 @@
 =====================================
-Available Functions and Distributions
+Available functions and distributions
 =====================================
 
 .. _available_output_distributions:
