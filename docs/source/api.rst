@@ -8,3 +8,7 @@ API
 .. _node_api:
 .. autoclass:: parcs.cdag.graph_objects.Node
     :members:
+
+.. _graph_api:
+.. autoclass:: parcs.cdag.graph_objects.Graph
+    :members:

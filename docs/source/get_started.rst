@@ -29,6 +29,8 @@ Simulation in PARCS follows this formulation, and in addition to that, 4 more de
 
 Figure ? depicts a schematic of how the 4 ideas form the internal structure of PARCS simulation. (more details)
 
+.. _get_started_graph:
+
 Starting with causal DAGs
 =========================
 Based on the description above, we can define a causal DAG in PARCS by specifying the output distributions and parameter coefficient vectors of the nodes, along with edges and their edge functions. This can be done using the `parcs.cdag.graph_objects.Graph` class, and a `.yml` description file.
@@ -45,6 +47,8 @@ As self-explainatory as the description file is, please refer to "here" to read 
     :lines: 1-13
 
 The :code:`graph_file_parser` function, outputs *node* and *edge* objects to instantiate a :code:`Graph` class. These objects are lists of Python dicts, including all information given by the description file. See "here" for a detailed explanation. The output of the graph object is a :code:`Pandas.DataFrame` object.
+
+.. _get_started_sampling_error_terms:
 
 Sampling error terms
 --------------------
@@ -109,6 +113,8 @@ In this type of intervention which you do via :code:`.do_functional()`, you can 
     :linenos:
     :lines: 17-26
     :emphasize-lines: 3-4
+
+.. _get_started_self_intervention:
 
 self intervention
 -----------------
