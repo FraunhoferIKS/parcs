@@ -22,6 +22,8 @@ Table of Contents
 
    usage
    get_started
+   conventions
+   function_list
    api
 
 
