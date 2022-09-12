@@ -183,6 +183,22 @@ def edge_parser(line):
     }
 
 def graph_file_parser(file_dir):
+    """**Parser for graph description YAML files**
+    This function reads the graph description ``.yml`` files and returns the list of nodes and edges.
+    These lists are used to instantiate a :func:`~parcs.cdag.graph_objects.Graph` object.
+
+    See Also
+    --------
+
+    Parameters
+    ----------
+    file_dir : str
+        directory of the description file.
+
+    Returns
+    -------
+
+    """
     # if file is empty
     if file_dir is None:
         return [], []
