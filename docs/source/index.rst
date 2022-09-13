@@ -14,30 +14,43 @@ Welcome to PARCS's documentation!
 
 .. toctree::
    :maxdepth: 1
-   :caption: Get to know PARCS
+   :caption: First Steps
 
-   usage
-   get_started
-   conventions
-   function_list
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Next steps
-
-   other_randomizers
-   adjusting_randomized
-   m_graphs
-   graph_templates
-   parcs_as_latent_distribution
+   first_steps/usage
+   first_steps/theoretical_background
+   first_steps/first_graph
+   first_steps/function_list
 
 .. toctree::
    :maxdepth: 1
-   :caption: Technical details
+   :caption: More Features
 
-   graph_objects
-   graph_interventions
-   api
+   features/interventions
+   features/partial_randomization
+   features/other_randomizers
+   features/adjusting_randomized
+   features/m_graphs
+   features/graph_templates
+
+.. toctree::
+   :maxdepth: 1
+   :caption: PARCS as a Latent Simulation
+
+   parcs_as_latent/timeseries
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Theoretical Details
+
+   theoretical/graph_interventions
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Technical Details
+
+   technical/graph_objects
+   technical/api
+   technical/conventions
 
 
 Indices and tables

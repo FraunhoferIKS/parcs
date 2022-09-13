@@ -2,7 +2,7 @@
 Graph objects
 =============
 
-In :ref:`Getting started document <get_started>` we explained how to make a graph using a graph description file, how to sample from observational and interventional distributions, and how to randomize it partially. This is the most efficient way to utilize PARCS. Nevertheless, it might be beneficial if we get to know the nuts and bolts of the graph object.
+In Getting started document we explained how to make a graph using a graph description file, how to sample from observational and interventional distributions, and how to randomize it partially. This is the most efficient way to utilize PARCS. Nevertheless, it might be beneficial if we get to know the nuts and bolts of the graph object.
 
 In PARCS two main objects make DAGs: *nodes*, *edges*
 

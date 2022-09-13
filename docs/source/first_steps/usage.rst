@@ -1,8 +1,6 @@
-Usage
-=====
-
+============
 Installation
-------------
+============
 
 To use PARCS, do this and that
 
