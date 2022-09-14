@@ -1,6 +1,10 @@
+.. _function_list:
+
 =====================================
 Available functions and distributions
 =====================================
+
+For all functions and distributions, you can find a link to the API doc on top of the parameters table, including more details.
 
 .. _available_output_distributions:
 
@@ -11,42 +15,34 @@ The distributions are provided by `Scipy's` `stats <https://docs.scipy.org/doc/s
 
 ``bernoulli``
 -------------
-`Bernoulli distribution <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bernoulli.html#scipy.stats.bernoulli>`_ defines a binary output variable.
 
-.. list-table:: Bernoulli Distribution parameters
+.. list-table::
    :widths: 20 60 20
    :header-rows: 1
 
    * - Parameter
      - Description
-     - Affected by Correction
+     - Correction
    * - ``p_``
      - success probability.
-     - Yes
-
-Bernoulli correction is a :ref:`Sigmoid correction <sigmoid_correction>` which applies to ``p_`` parameter. For Bernoulli distribution, upper and lower must be 0, 1 (default values)
-
---------------
+     - :ref:`Sigmoid correction <sigmoid_correction>`
 
 ``gaussian``
 ------------
-`Gaussian normal distribution <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.norm.html#scipy.stats.norm>`_ defines a normally distributed variable.
 
-.. list-table:: Bernoulli Distribution parameters
+.. list-table::
    :widths: 20 60 20
    :header-rows: 1
 
    * - Parameter
      - Description
-     - Affected by Correction
+     - Correction
    * - ``mu_``
      - mean of the distribution
-     - No
+     - N/A
    * - ``sigma_``
      - standard deviation of the distribution
-     - Yes
-
-Similar to Bernoulli, Gaussian correction is a Bernoulli correction is a :ref:`Sigmoid correction <sigmoid_correction>` which applies to ``sigma_`` parameter.
+     - :ref:`Sigmoid correction <sigmoid_correction>`
 
 .. _available_edge_functions:
 
@@ -56,22 +52,22 @@ Edge functions
 ``identity``
 ------------
 
-As the name indicates, this function provides an identity mapping. However, it can be still affected by edge correction.
+.. list-table:: :func:`~parcs.cdag.mapping_functions.edge_identity`
+   :widths: 20 60 20
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+     - Default
+   * -
+     -
+     -
+
 
 ``sigmoid``
 -----------
 
-Sigmoid maps the raw values using a sigmoid function. The function is parameterized by a number of parameters presented in the table. The formula is:
-
-.. math::
-    \begin{align}
-        z^*_i = \sigma\Big(
-            (-1)^\gamma.  2  \alpha  (z_i - \beta)^\tau
-        \Big).
-    \end{align}
-    :label: edge_sigmoid
-
-.. list-table:: Sigmoid edge function parameters
+.. list-table:: :func:`~parcs.cdag.mapping_functions.edge_sigmoid`
    :widths: 20 60 20
    :header-rows: 1
 
@@ -94,21 +90,10 @@ Sigmoid maps the raw values using a sigmoid function. The function is parameteri
        | Takes odd values :math:`\{1, 3, \dots\}`
      - ``1``
 
-Figures below the table illustrate how each parameter changes the sigmoid function.
-
 ``gaussian_rbf``
------------
+----------------
 
-Gaussian RBF maps the raw values using the Gaussian radial basis function. The function is parameterized by a number of parameters presented in the table. The formula is:
-
-.. math::
-    \begin{align}
-        z^*_i = \gamma + (-1)^\gamma .
-        \exp\big(-\alpha \|z_i - \beta\|^\tau\big),
-    \end{align}
-    :label: edge_gaussian_rbf
-
-.. list-table:: Gaussian RBF edge function parameters
+.. list-table:: :func:`~parcs.cdag.mapping_functions.gaussian_rbf`
    :widths: 20 60 20
    :header-rows: 1
 
@@ -131,8 +116,6 @@ Gaussian RBF maps the raw values using the Gaussian radial basis function. The f
        | Takes even values :math:`\{2, 4, \dots\}`
      - ``2``
 
-Figures below the table illustrate how each parameter changes the RBF function.
-
 Corrections
 ===========
 
@@ -140,9 +123,8 @@ Corrections
 
 Sigmoid Correction
 ------------------
-Sigmoid correction maps the real values to a ``[lower, upper]`` range, with a possibility to `center` the raw values, or set a `target mean` for the corrected values.
 
-.. list-table:: Correction
+.. list-table:: :func:`~parcs.cdag.utils.SigmoidCorrection`
    :widths: 10 70 10 10
    :header-rows: 1
 

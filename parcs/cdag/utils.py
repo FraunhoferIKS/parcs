@@ -37,8 +37,29 @@ def is_adj_matrix_acyclic(adj_matrix):
         return False
 
 
-def get_interactions(data):
-    len_ = data.shape[1]
+def get_interactions(data, max_terms=2):
+    """ ** Creates interaction terms**
+
+    Returns the columns of product of interaction terms. The interaction terms are of length
+    ``2, 3, ..., min(max_terms, data.shape[1])``. The order of interaction terms follow the order
+    of ``itertools.combination`` module. Example: for ``[X,Y,Z]`` the method returns:
+    ``[XY, YZ, XZ, XYZ]``.
+
+    Parameters
+    ----------
+    data : array-like
+        with `n x m` shape, `m` being the number of features
+    max_terms : int, default=2
+        the largest number of features in the interaction term. if `max_terms > m` then it will be ignored and `m`
+        will be the largest number
+
+    Returns
+    -------
+    data : array-like
+        interaction terms
+
+    """
+    len_ = min(data.shape[1], max_terms)
     return np.array([
         [np.prod(i) for r in range(2, len_ + 1) for i in comb(row, r)]
         for row in data
@@ -74,6 +95,16 @@ def dot_prod(data, coef):
 
 
 class SigmoidCorrection:
+    """
+    hi man
+
+    Parameters
+    ----------
+    lower
+    upper
+    target_mean
+    to_center
+    """
     def __init__(self, lower=0, upper=1, target_mean=None, to_center=False):
         assert upper > lower
         if target_mean is not None:

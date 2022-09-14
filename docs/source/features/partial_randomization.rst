@@ -20,7 +20,7 @@ As before, simulation starts with a graph description file. However we can use t
     :caption: graph.py
     :emphasize-lines: 5-9
 
-In :code:`graph.py` file, instead of :code:`graph_file_parser`, we import :code:`parcs.graph_builder.randomizer.ParamRandomizer`. :code:`ParamRandomizer` takes the graph description directory, as well as a *guideline file*. This file tells the radomizer, what are the options for parameters and functions. Let's have a look at the guideline file:
+In :code:`graph.py` file, instead of :code:`graph_file_parser`, we import :code:`parcs.graph_builder.randomizer.ParamRandomizer`. ``ParamRandomizer`` takes the graph description directory, as well as a *guideline file*. This file tells the radomizer, what are the options for parameters and functions. Let's have a look at the guideline file:
 
 .. literalinclude:: examples/randomization_examples/simple_guideline.yml
     :linenos:
@@ -31,9 +31,9 @@ In :code:`graph.py` file, instead of :code:`graph_file_parser`, we import :code:
 3. Each function/distribution option contains the corresponding parameters as keys. The value of these keys is a list of the length 3 which corresponds to *bias, linear,* and *interactions* coefficients (in the same order). Each component is a directive for the respective coefficient, i.e. first component is used to randomize the bias value, second one for linear coefficient, and third for the interaction coefficient. The directives follow the following convention:
 
    a. a single value, means *fixed*, thus for all the randomization turns, randomizer picks the same value
-   b. :code:`[f-range, X, Y]` tells the randomizer to pick a float value between X and Y (uniformly).
-   c. :code:`[i-range, X, Y]` is similar to (a), except that the value is integer.
-   d. :code:`[choice, X_0, X_1, ...]` tells the randomizer to pick a value from the given list of options in the directive (element 2nd onward).
+   b. :code:`[f-range, X, Y]` tells the randomizer to pick a float value between X and Y uniformly, i.e. from `Unif(X, Y)`.
+   c. :code:`[i-range, X, Y]` is similar to (a), except that the value is integer (with equal probabilities).
+   d. :code:`[choice, X_0, X_1, ...]` tells the randomizer to pick a value from the given list of options in the directive with equal probabilities (element 2nd onward).
 
 In our example, therefore, mean of node A is selected according to line 5 of the guideline, and the distribution of Y is chosen between Bernoulli and Gaussian distributions.
 
