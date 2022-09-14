@@ -70,7 +70,4 @@ To activate the correction, we add an extra :code:`correction[...]` term to the 
     :linenos:
     :caption: graph.py
 
-In this example, the correction transformation for Bernoulli distribution, is a Sigmoid function, mapping the real values to the [lower, upper] range. As a result, the success probability of the example has the form :math:`\sigma(10A+10C)`.
-
-.. warning::
-    read more on correction (technical and API)
+In this example, the correction transformation for Bernoulli distribution, is a Sigmoid function, mapping the real values to the [lower, upper] range. As a result, the success probability of the example has the form :math:`\sigma(10A+10C)`. Read more about sigmoid correction at :func:`~parcs.cdag.utils.SigmoidCorrection`.

@@ -1,16 +1,20 @@
 API
 ===
 
-Graph Objects
+Graph objects
 -------------
-
-Edge
-~~~~
-
-.. _edge_api:
 
 .. autoclass:: parcs.cdag.graph_objects.Edge
     :members:
+
+.. autoclass:: parcs.cdag.graph_objects.Node
+    :members:
+
+.. autoclass:: parcs.cdag.graph_objects.Graph
+    :members:
+
+Mapping functions
+-----------------
 
 .. autoclass:: parcs.cdag.mapping_functions.edge_sigmoid
 
@@ -18,31 +22,13 @@ Edge
 
 .. autoclass:: parcs.cdag.mapping_functions.edge_gaussian_rbf
 
+Corrections
+-----------
+
 .. autoclass:: parcs.cdag.utils.SigmoidCorrection
-    :members: transform
-
-------------------
-
-Node
-~~~~
-
-.. _node_api:
-
-.. autoclass:: parcs.cdag.graph_objects.Node
     :members:
-
-------------------
-
-Graph
-~~~~~
-
-.. _graph_api:
-
-.. autoclass:: parcs.cdag.graph_objects.Graph
-    :members:
-
 
 Utils
-~~~~~
+-----
 
 .. autoclass:: parcs.cdag.utils.get_interactions
