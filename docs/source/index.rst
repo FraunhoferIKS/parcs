@@ -29,6 +29,7 @@ Welcome to PARCS's documentation!
    features/partial_randomization
    features/other_randomizers
    features/adjusting_randomized
+   features/more_graph_objects
    features/m_graphs
    features/graph_templates
 

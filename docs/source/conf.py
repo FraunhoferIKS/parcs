@@ -33,7 +33,7 @@ release = '0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.doctest',  # test the examples in the code
+    'sphinx.ext.doctest',  # test the code_blocks in the code
     'sphinx.ext.autodoc',  # generate doc from docstrings
     'sphinx.ext.napoleon',  # generate from numpy/google style
     'sphinx_rtd_theme',  # read the docs theme
