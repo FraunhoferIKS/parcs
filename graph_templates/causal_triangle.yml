@@ -1,8 +1,8 @@
 # nodes
-C: gaussian(mu_=?, sigma_=1)
-A: gaussian(mu_=2C+1, sigma_=1)
-Y: bernoulli(p_=-A+2C+3AC), correction[]
+C: gaussian(mu_=0, sigma_=?)
+A: random
+Y: bernoulli(p_=?), correction[target_mean=0.3]
 # edges
-C->A: identity()
+C->A: gaussian_rbf()
 C->Y: identity()
 A->Y: identity()

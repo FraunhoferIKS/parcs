@@ -34,7 +34,6 @@ def equation_parser(eq, vars):
     eq = [term_parser(term, vars) for term in eq]
     return eq
 
-
 def node_parser(line, parents):
     # preliminary: get order of interactions
     interactions_dict = get_interactions_dict(parents)
@@ -46,6 +45,25 @@ def node_parser(line, parents):
             'output_distribution': '?',
             'do_correction': True
         }
+
+    # check if node is deterministic
+    try:
+        det_pattern = re.compile(
+            'deterministic\((.*),(.*)\)'.format('|'.join(DISTRIBUTION_PARAMS.keys()))
+        )
+        res = det_pattern.search(line)
+        directory = res.group(1)
+        assert directory[-3:] == '.py'
+        directory = directory[:-3]
+        function_name = res.group(2)
+        function_file = __import__(directory)
+        function = getattr(function_file, function_name)
+        return {
+            'function': function
+        }
+    except AttributeError:
+        # it's not deterministic
+        pass
 
     # find the dist(p1=v1, ...) pattern
     output_params_pattern = re.compile(

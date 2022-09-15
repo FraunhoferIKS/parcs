@@ -10,9 +10,7 @@ class Node:
 
     Use this class to create a node, independent of any graphs.
     If you want to construct a causal DAG, please use the :func:`~parcs.cdag.graph_objects.Graph` class instead.
-    Node can be sampled by passing the data (``pd.DataFrame``) to the ``.sample()`` method.
-    if the node is source in graph (parents are not in columns of data), then ``size`` is used to sample with
-    random distribution parameters
+    Node can be sampled by passing the data and error terms (``pd.DataFrame``) to the ``.calculate()`` method.
 
     Parameters
     ----------
@@ -51,10 +49,9 @@ class Node:
         )
 
     def calculate(self, data, parents, errors):
-        """ **samples the node**
+        """ **calculates node's output the node**
 
-        If data is empty, the ``size`` is used to sample according to coefficient vector *biases*.
-        If data is non-empty, then ``size`` is ignored
+        calculates the output of the noise based on the sampled errors and the data of parent nodes.
 
         Parameters
         ----------
@@ -75,6 +72,41 @@ class Node:
             data[parents].values,
             errors
         )
+
+
+class DetNode:
+    """ **Deterministic Node object in causal DAGs**
+
+    Use this class to create a node, independent of any graphs.
+    If you want to construct a causal DAG, please use the :func:`~parcs.cdag.graph_objects.Graph` class instead.
+    Deterministic node yields the output by calling the `.calculate()` method.
+
+    Parameters
+    ----------
+    name : str, optional
+        name of the node. Optional unless the node is used in a graph
+    function : callable
+        the user-defined function that represents the node.
+
+    Examples
+    --------
+    >>> from parcs.cdag.graph_objects import DetNode
+    >>> import pandas as pd
+    >>> n_0 = DetNode(name='N_0', func=lambda a,b: a+b)
+    >>> data = pd.DataFrame([[1, 2], [2, 2], [3, 3]], columns=('N_1', 'N_2'))
+    >>> n_0.calculate(data, ['N_1', 'N_2'])
+    array([3, 4, 6])
+    """
+    def __init__(self,
+                 name=None,
+                 function=None):
+        self.info = {'name': name}
+        self.function = function
+
+    def calculate(self, data, parents):
+        return np.array([
+            self.function(r[0], r[1]) for r in data[parents].values
+        ])
 
 
 class Edge:
@@ -164,7 +196,7 @@ class Graph:
     """**Causal DAG class**
 
     This class creates a causal DAG for the specified nodes and edges. A graph is equipped with sampling
-    and intervention methods. For a comprehensive tutorial, see the :ref:`get started <get_started_graph>` doc.
+    and intervention methods. For a comprehensive tutorial, see the :ref:`get started <create_the_first_graph>` doc.
 
     Parameters
     ----------
@@ -184,7 +216,10 @@ class Graph:
     def __init__(self,
                  nodes=None,
                  edges=None):
-        self.nodes = {kwargs['name']: Node(**kwargs) for kwargs in nodes}
+        self.nodes = {
+            kwargs['name']: Node(**kwargs) if 'output_distribution' in kwargs else DetNode(**kwargs)
+            for kwargs in nodes
+        }
         self.edges = {kwargs['name']: Edge(**kwargs) for kwargs in edges}
         self.parent_sets = {}
         self.adj_matrix = None
@@ -217,8 +252,28 @@ class Graph:
         })
         # calculate node
         parents = sorted(list(self.adj_matrix[self.adj_matrix[node_name] == 1].index))
-        data[node_name] = self.nodes[node_name].calculate(inputs, parents, sampled_errors[node_name])
-        return data
+
+        return self.nodes[node_name].calculate(inputs, parents, sampled_errors[node_name])
+
+    def _single_det_round(self, node_name, data):
+        # transform parents by edges
+        inputs = pd.DataFrame({
+            parent: self.edges['{}->{}'.format(parent, node_name)].map(array=data[parent].values)
+            for parent in self.parent_sets[node_name]
+        })
+        # calculate node
+        parents = sorted(list(self.adj_matrix[self.adj_matrix[node_name] == 1].index))
+
+        return self.nodes[node_name].calculate(inputs, parents)
+
+    def _node_type(self, node_name):
+        node = self.nodes[node_name]
+        if isinstance(node, Node):
+            return 'stoch'
+        elif isinstance(node, DetNode):
+            return 'det'
+        else:
+            return TypeError
 
     def sample(self, size=None, return_errors=False, cache_sampling=False, cache_name=None,
                use_sampled_errors=False, sampled_errors=None):
@@ -226,7 +281,7 @@ class Graph:
 
         This method samples from the distribution that is modeled by the graph (with no intervention)
         this method reads either the `size` or `sampled_errors` which then set the size to length of sampled errors.
-        To read more about sampling procedure and the meaning of error terms, :ref:`see here <get_started_sampling_error_terms>`
+        To read more about sampling procedure and the meaning of error terms, :ref:`see here <sampling_error_terms>`
 
         Parameters
         ----------
@@ -260,10 +315,16 @@ class Graph:
             sampled_errors = pd.DataFrame([])
 
         for node_name in topological_sort(self.adj_matrix):
-            data = self._single_sample_round(
-                use_sampled_errors=use_sampled_errors, node_name=node_name, size=size, data=data,
-                sampled_errors=sampled_errors
-            )
+            if self._node_type(node_name) == 'stoch':
+                array = self._single_sample_round(
+                    use_sampled_errors=use_sampled_errors, node_name=node_name, size=size, data=data,
+                    sampled_errors=sampled_errors
+                )
+            elif self._node_type(node_name) == 'det':
+                array = self._single_det_round(node_name=node_name, data=data)
+            else:
+                raise ValueError
+            data[node_name] = array
 
         if cache_sampling:
             self.cache[cache_name] = (data, sampled_errors)
@@ -407,3 +468,19 @@ class Graph:
             return data, sampled_errors
         else:
             return data
+
+
+def m_graph_convert(data: pd.DataFrame, missingness_prefix='R_', indicator_is_missed=0):
+    len_prefix = len(missingness_prefix)
+    # take Rs: it starts with prefix, and subtracting the prefix gives the name of another node
+    r_columns = [
+        i for i in data.columns if i[:len_prefix] == missingness_prefix and i[len_prefix:] in data.columns
+    ]
+
+    x_columns = set(data.columns) - set(r_columns)
+    # masking
+    for r in r_columns:
+        x = r[len_prefix:]
+        data[x][data[r]==indicator_is_missed] = np.nan
+
+    return data[x_columns]

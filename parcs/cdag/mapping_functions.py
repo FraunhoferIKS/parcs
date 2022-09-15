@@ -8,28 +8,37 @@ def edge_empty(**kwargs):
 
 
 def edge_sigmoid(array=None,
-                 alpha=1.0, beta=0.0, gamma=1, tau=1):
+                 alpha=1.0, beta=0.0, gamma=0, tau=1):
     r"""
-    here is the formula
+    This edge function transforms input variable according to the following equation:
 
     .. math::
-        z^*_i = \sigma\Big(
-            \alpha
-        \Big)
+        x^{*} = \sigma\Big(
+            (-1)^{\gamma+1} \alpha (x - \beta)^{\tau}
+        \Big), \quad \sigma(a) = \frac{1}{1+e^{-a}}
+
+    .. warning::
+        put images
 
     Parameters
     ----------
-    array
-    alpha
-    beta
-    gamma
-    tau
+    array : array-like
+        input array
+    alpha : float, default=1.0
+        scale parameter. Reasonable range in `[0.5, 3]`
+    beta : float, default=0.0
+        offset parameter. Reasonable range in `[-0.8, 0.8]`
+    gamma : {0, 1}, default=0
+        mirroring parameter.
+    tau : odd integer, default=1
+        power parameter
 
     Returns
     -------
+    transformed_array : array-like
 
     """
-    expon = (-1)**gamma * 2 * alpha * ((array - beta)**tau)
+    expon = (-1)**gamma * alpha * ((array - beta)**tau)
 
     return expit(expon)
 
@@ -43,16 +52,25 @@ def edge_gaussian_rbf(array=None,
             \exp\big(-\alpha \|z_i - \beta\|^\tau\big),
         \end{align}
 
+    .. warning::
+        put images
+
     Parameters
     ----------
-    array
-    alpha
-    beta
-    gamma
-    tau
+    array : array-like
+        input array
+    alpha : float, default=1.0
+        scale parameter. Reasonable range in `[0.5, 3]`
+    beta : float, default=0.0
+        offset parameter. Reasonable range in `[-0.8, 0.8]`
+    gamma : {0, 1}, default=0
+        mirroring parameter.
+    tau : even integer, default=2
+        power parameter
 
     Returns
     -------
+    transformed_array : array-like
 
     """
     expon = -alpha * ((array - beta)**tau)
