@@ -1,7 +1,7 @@
 Interventions, Counterfactuals
 ==============================
 
-In addition to the :code:`.sample()` method, which allows us to sample from the observational distribution, the graph object provides methods to sample from interventional distributions as well. There are three types of interventions available:
+In addition to the :code:`.sample()` method, which allows us to sample from the observational distribution, the graph object provides methods to sample from interventional distributions, defined in different three types. Read more about :ref:`theoretical details <theoretical_graph_interventions>`.
 
 Fixed-value intervention
 ------------------------
@@ -22,7 +22,7 @@ In this type of intervention which you do via :code:`.do_functional()`, you can 
     :lines: 17-26
     :emphasize-lines: 3-4
 
-.. _get_started_self_intervention:
+.. _self_intervention:
 
 self intervention
 -----------------

@@ -28,6 +28,9 @@ Corrections
 .. autoclass:: parcs.cdag.utils.SigmoidCorrection
     :members:
 
+.. autoclass:: parcs.cdag.utils.EdgeCorrection
+    :members:
+
 Utils
 -----
 

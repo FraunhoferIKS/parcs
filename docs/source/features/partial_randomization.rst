@@ -3,7 +3,11 @@ Partial Randomization
 
 In simulations, sometimes we need to explore the graphs with certain restrictions; we need to fix some (not all) parameters that models our restrictions, while randomizing the rest of the parameters. As an example, for testing an ML or causal inference model with Gaussian assumption on the nodes, we want to simulate a graph with all Gaussian output distributions, while allowing the mean values to be selected randomly (because perhaps we want to test our model on MVG distributions with arbitrary means and variances).
 
-An important feature of PARCS, the *partial randomization*, allows us to simulate for such scenarios. In this section we explain how this can be done. For more details regarding the motivation and use-cases please see "here".
+An important feature of PARCS, the *partial randomization*, allows us to simulate for such scenarios. In this section we explain how this can be done.
+
+.. warning::
+    to add: For more details regarding the motivation and use-cases please see "here".
+
 
 Parameter Randomization
 -----------------------
@@ -36,6 +40,9 @@ In :code:`graph.py` file, instead of :code:`graph_file_parser`, we import :code:
    d. :code:`[choice, X_0, X_1, ...]` tells the randomizer to pick a value from the given list of options in the directive with equal probabilities (element 2nd onward).
 
 In our example, therefore, mean of node A is selected according to line 5 of the guideline, and the distribution of Y is chosen between Bernoulli and Gaussian distributions.
+
+.. seealso::
+    :ref:`Randomization conventions <conventions_inducing_randomization>`
 
 Edge correction
 ---------------

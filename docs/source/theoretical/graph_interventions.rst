@@ -1,3 +1,5 @@
+.. _theoretical_graph_interventions:
+
 ===================
 Graph interventions
 ===================

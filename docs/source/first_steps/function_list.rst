@@ -146,3 +146,19 @@ Sigmoid Correction
        | of corrected values. must be in range of (lower, upper)
      - *float*
      - `null/None`
+
+Edge Correction
+------------------
+
+.. list-table:: :func:`~parcs.cdag.utils.EdgeCorrection`
+   :widths: 10 70 10 10
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+     - type
+     - default (yml/py)
+   * -
+     -
+     -
+     -

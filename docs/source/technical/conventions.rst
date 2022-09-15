@@ -16,6 +16,8 @@ The description file is a YAML file. Below is a list of conventions for the desc
 * the value of each row (after ``:``) is an edge function for edges, and an output distribution for nodes. Parameters of the functions must correspond to the function itself. See the full list of available edge functions and output distributions.
 * For activating `correction`, the ``correction[...]`` keyword should be brought after the main function. It's not necessary, however recommended for readability, that the function and correction are separated by a comma.
 
+.. _conventions_inducing_randomization:
+
 Inducing randomization
 ----------------------
 

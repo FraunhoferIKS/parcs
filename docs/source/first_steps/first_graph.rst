@@ -28,8 +28,7 @@ The ``graph_file_parser`` function converts the description lines to standard *n
 
 Sampling error terms
 --------------------
-
-The math library in PARCS that supports sampling from the distributions is Scipy. Instead of using the :code:`.rvs()` methods of the distributions, however, PARCS samples *error* terms from a :math:`\text{Unif}(0, 1)` per each data row, and passes the realization to the :code:`.ppf()` method to obtain the corresponding sample from the target distribution. (read more about :ref:`internal mechanics of nodes <node_doc>`). With this procedure, we follow two main goals:
+The math library in PARCS that supports sampling from the distributions is `Scipy <https://docs.scipy.org/doc/scipy/reference/stats.html>`_. Instead of using the :code:`.rvs()` methods of the distributions, however, PARCS samples *error* terms from a :math:`\text{Unif}(0, 1)` per each data row, and passes the realization to the :code:`.ppf()` method to obtain the corresponding sample from the target distribution. (read more about :ref:`internal mechanics of nodes <node_doc>`). With this procedure, we follow two main goals:
 
 * Reproducibility is explicitly handled by returning and re-using the error terms.
 * These error terms enable us to run simulate for counterfactual analysis. We explain this goal in the section below.
