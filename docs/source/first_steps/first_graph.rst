@@ -69,4 +69,9 @@ To activate the correction, we add an extra :code:`correction[...]` term to the 
     :linenos:
     :caption: graph.py
 
-In this example, the correction transformation for Bernoulli distribution, is a Sigmoid function, mapping the real values to the [lower, upper] range. As a result, the success probability of the example has the form :math:`\sigma(10A+10C)`. Read more about sigmoid correction at :func:`~parcs.cdag.utils.SigmoidCorrection`.
+In this example, the correction transformation for Bernoulli distribution, is a Sigmoid function, mapping the real values to the [lower, upper] range. As a result, the success probability of the example has the form :math:`\sigma(10A+10C)`.
+
+.. _node_correction_node:
+
+.. note::
+    **Node correction is always initialized upon the first batch of data**. For example, if `target_mean` option is set for node correction in the example above, the output values will be transformed such that the output has the mean equal to the `target_mean`. This is done by learning an `offset` term from the first batch which satisfies the `mean` requirements. This values will be then used for next simulations. For this purpose, the graph object always `burns` the first 500 samples, to initialize the corrections. Read more about sigmoid correction at :func:`~parcs.cdag.utils.SigmoidCorrection`.

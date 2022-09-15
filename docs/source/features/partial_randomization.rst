@@ -14,19 +14,19 @@ Parameter Randomization
 
 As before, simulation starts with a graph description file. However we can use two new values to activate randomization PARCS: :code:`?` for parameters, and :code:`random` for functions and distributions. Here is an example of the causal triangle where we randomize the mean of node A, and also the output distribution of Y:
 
-.. literalinclude:: examples/randomization_examples/graph_description_1.yml
+.. literalinclude:: code_blocks/b2/graph_description_1.yml
     :linenos:
     :caption: graph_description.yml
     :emphasize-lines: 3, 4
 
-.. literalinclude:: examples/randomization_examples/graph_1.py
+.. literalinclude:: code_blocks/b2/graph_1.py
     :linenos:
     :caption: graph.py
     :emphasize-lines: 5-9
 
 In :code:`graph.py` file, instead of :code:`graph_file_parser`, we import :code:`parcs.graph_builder.randomizer.ParamRandomizer`. ``ParamRandomizer`` takes the graph description directory, as well as a *guideline file*. This file tells the radomizer, what are the options for parameters and functions. Let's have a look at the guideline file:
 
-.. literalinclude:: examples/randomization_examples/simple_guideline.yml
+.. literalinclude:: code_blocks/b2/simple_guideline.yml
     :linenos:
     :caption: simple_guideline.yml
 
@@ -54,25 +54,28 @@ When randomizing the graph parameters, we potentially face two undesired issues:
 
 In general, both items indicate an issue similar to the issue of *sensitivity of calculations to unit of measurement*, and of course the remedy to that can be the same, which is normalization. In issue 1, normalization brings the values to the active region of the edge function, and in issue 2, it brings all the parents to the same scale.
 
-Such normalization can be done via activating the `correction` option for the edges (For more details blah blah). PARCS automatically activates edge correction when randomizing the parameters. But in general, we can do edge correction in any simulation, by modifying the graph description file.
+Such normalization can be done via activating the `correction` option for the edges. PARCS automatically activates edge correction when randomizing the parameters. But in general, we can do edge correction in any simulation, by modifying the graph description file.
 
-.. literalinclude:: examples/correction_examples/graph_description_edge.yml
+.. literalinclude:: code_blocks/b3/graph_description_edge.yml
     :linenos:
     :caption: graph_description.yml
 
-.. literalinclude:: examples/correction_examples/edge_correction.py
+.. literalinclude:: code_blocks/b3/edge_correction.py
     :linenos:
     :caption: graph.py
     :lines: 1-4, 6-10
 
 In this example, the variable Y has the mean of `1.0` because of the mean of A and C. Now we activate correction for `A->Y` and `C->Y` edges:
 
-.. literalinclude:: examples/correction_examples/graph_description_edge_2.yml
+.. literalinclude:: code_blocks/b3/graph_description_edge_2.yml
     :linenos:
     :caption: graph_description.yml
     :emphasize-lines: 8-9
 
-.. literalinclude:: examples/correction_examples/edge_correction.py
+.. literalinclude:: code_blocks/b3/edge_correction.py
     :linenos:
     :caption: graph.py
     :lines: 5-9, 11
+
+.. note::
+    Similar to :ref:`Node correction <node_correction_node>` **edge correction parameters (i.e. mean and standard deviation) is always initialized upon the first batch of data**. For this purpose, the graph object always `burns` the first 500 samples, to initialize the corrections. Read more about edge correction at :func:`~parcs.cdag.utils.EdgeCorrection`.
