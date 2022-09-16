@@ -275,6 +275,19 @@ class Graph:
         else:
             return TypeError
 
+    def _calc_non_interventions(self, node_name=None, data=None, size=None,
+                                use_sampled_errors=None, sampled_errors=None):
+        if self._node_type(node_name) == 'stoch':
+            return self._single_sample_round(
+                use_sampled_errors=use_sampled_errors, node_name=node_name, size=size, data=data,
+                sampled_errors=sampled_errors
+            )
+        elif self._node_type(node_name) == 'det':
+            return self._single_det_round(node_name=node_name, data=data)
+        else:
+            raise ValueError
+
+
     def sample(self, size=None, return_errors=False, cache_sampling=False, cache_name=None,
                use_sampled_errors=False, sampled_errors=None):
         """**Sample from observational distribution**
@@ -315,16 +328,10 @@ class Graph:
             sampled_errors = pd.DataFrame([])
 
         for node_name in topological_sort(self.adj_matrix):
-            if self._node_type(node_name) == 'stoch':
-                array = self._single_sample_round(
-                    use_sampled_errors=use_sampled_errors, node_name=node_name, size=size, data=data,
-                    sampled_errors=sampled_errors
-                )
-            elif self._node_type(node_name) == 'det':
-                array = self._single_det_round(node_name=node_name, data=data)
-            else:
-                raise ValueError
-            data[node_name] = array
+            data[node_name] = self._calc_non_interventions(
+                node_name=node_name, size=size, data=data,
+                use_sampled_errors=use_sampled_errors, sampled_errors=sampled_errors
+            )
 
         if cache_sampling:
             self.cache[cache_name] = (data, sampled_errors)
@@ -360,12 +367,13 @@ class Graph:
 
         for node_name in topological_sort(self.adj_matrix):
             if node_name not in interventions:
-                data = self._single_sample_round(
-                    use_sampled_errors=use_sampled_errors, node_name=node_name, size=size, data=data,
-                    sampled_errors=sampled_errors
+                array = self._calc_non_interventions(
+                    node_name=node_name, size=size, data=data,
+                    use_sampled_errors=use_sampled_errors, sampled_errors=sampled_errors
                 )
             else:
-                data[node_name] = np.ones(shape=(size,)) * interventions[node_name]
+                array = np.ones(shape=(size,)) * interventions[node_name]
+            data[node_name] = array
 
         if cache_sampling:
             self.cache[cache_name] = (data, sampled_errors)
@@ -410,14 +418,15 @@ class Graph:
         # solution: do all sampling first, then sample again the node with intrv, and the downstreams too.
         for node_name in topological_sort(self.adj_matrix):
             if node_name != intervene_on:
-                data = self._single_sample_round(
-                    use_sampled_errors=use_sampled_errors, node_name=node_name, size=size, data=data,
-                    sampled_errors=sampled_errors
+                array = self._calc_non_interventions(
+                    node_name=node_name, size=size, data=data,
+                    use_sampled_errors=use_sampled_errors, sampled_errors=sampled_errors
                 )
             else:
                 # TODO: warn if z is child of X_0
                 assert True
-                data[node_name] = data[inputs].apply(lambda x: func(*x.values), axis=1)
+                array = data[inputs].apply(lambda x: func(*x.values), axis=1)
+            data[node_name] = array
 
         if cache_sampling:
             self.cache[cache_name] = (data, sampled_errors)
@@ -455,7 +464,7 @@ class Graph:
             sampled_errors = pd.DataFrame([])
 
         for node_name in topological_sort(self.adj_matrix):
-            data = self._single_sample_round(
+            data[node_name] = self._single_sample_round(
                 use_sampled_errors=use_sampled_errors, node_name=node_name, size=size, data=data,
                 sampled_errors=sampled_errors
             )

@@ -25,7 +25,7 @@ print(samples)
 # 2 -0.205022 -2.051459 -2.569398
 
 intrv_samples = g.do_self(
-    func=lambda a: a-1, intervention='A',
+    func=lambda a: a-1, intervene_on='A',
     use_sampled_errors=True, sampled_errors=errors
 )
 print(intrv_samples)
