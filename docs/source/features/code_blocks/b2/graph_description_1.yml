@@ -1,0 +1,8 @@
+# nodes
+C: gaussian(mu_=1, sigma_=1)
+A: gaussian(mu_=?, sigma_=1)
+Y: random
+# edges
+C->A: identity()
+C->Y: identity()
+A->Y: identity()

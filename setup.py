@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='rad_sim',
+    name='parcs',
     version='0.0.2',
     description='Simulation package',
     author='RAD-IKS@FhG',

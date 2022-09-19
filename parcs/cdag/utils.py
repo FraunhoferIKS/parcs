@@ -1,0 +1,331 @@
+import warnings
+import numpy as np
+import pandas as pd
+from scipy.special import expit
+from itertools import combinations as comb
+
+
+def topological_sort(adj_matrix: pd.DataFrame = None):
+    try:
+        adjm = adj_matrix.copy(deep=True).values
+        ordered_list = []
+        covered_nodes = 0
+        while covered_nodes < adjm.shape[0]:
+            # sum r/x -> r edges
+            sum_c = adjm.sum(axis=0)
+            # find nodes with no parents
+            parent_inds = list(np.where(sum_c == 0)[0])
+            assert len(parent_inds) != 0
+
+            covered_nodes += len(parent_inds)
+            # add to the list
+            ordered_list += parent_inds
+            # remove parent edges
+            adjm[parent_inds, :] = 0
+            # eliminate from columns by assigning values
+            adjm[:, parent_inds] = 10
+        return [adj_matrix.columns.tolist()[idx] for idx in ordered_list]
+    except AssertionError:
+        print('adj_matrix is not acyclic')
+        raise
+
+def is_adj_matrix_acyclic(adj_matrix):
+    try:
+        topological_sort(adj_matrix)
+        return True
+    except AssertionError:
+        return False
+
+
+def get_interactions(data, max_terms=2):
+    """ **Creates interaction terms**
+
+    Returns the columns of product of interaction terms. The interaction terms are of length
+    ``2, 3, ..., min(max_terms, data.shape[1])``. The order of interaction terms follow the order
+    of ``itertools.combination`` module. Example: for ``[X,Y,Z]`` the method returns:
+    ``[XY, YZ, XZ, XYZ]``.
+
+    Parameters
+    ----------
+    data : array-like
+        with `n x m` shape, `m` being the number of features
+    max_terms : int, default=2
+        the largest number of features in the interaction term. if `max_terms > m` then it will be ignored and `m`
+        will be the largest number
+
+    Returns
+    -------
+    data : array-like
+        interaction terms
+
+    Examples
+    --------
+    >>> from parcs.cdag.utils import get_interactions
+    >>> data = np.array([
+    ...     [1, 2, 4],
+    ...     [3, 5, 7]
+    ... ])
+    >>> get_interactions(data, max_terms=3)
+    array([[  2,   4,   8,   8],
+           [ 15,  21,  35, 105]])
+    """
+    len_ = min(data.shape[1], max_terms)
+    return np.array([
+        [np.prod(i) for r in range(2, len_ + 1) for i in comb(row, r)]
+        for row in data
+    ])
+
+def get_interactions_length(len_, max_terms=2):
+    """ **Returns length of interaction terms**
+
+    This function returns the length of the output of :func:`~cdag.parcs.utils.get_interactions`.
+
+    Parameters
+    ----------
+    len_ : int
+        `shape[1]` of the raw data (number of columns)
+    max_terms : int, default=2
+        similar to `max_terms` in :func:`~cdag.parcs.utils.get_interactions`,
+        maximum number of parents in an interaction term.
+
+    Returns
+    -------
+    length : int
+        length of the interaction data
+
+    Examples
+    --------
+    >>> from parcs.cdag.utils import get_interactions, get_interactions_length
+    >>> import numpy as np
+    >>> data = np.random.normal(size=(9, 3))
+    >>> interactions = get_interactions(data)
+    >>> interaction_len = get_interactions_length(data.shape[1])
+    >>> interactions.shape[1] == interaction_len
+    True
+    """
+    dummy_data = np.ones(shape=(len_,))
+    max_t = min(len_, max_terms)
+    return len([
+        np.prod(i)
+        for r in range(2, max_t + 1)
+        for i in comb(dummy_data, r)
+    ])
+
+def get_interactions_dict(parents, max_terms=2):
+    """ **gives parents pairings for each interaction term**
+
+    This function is used to trace which parents are making an interaction term in some index.
+
+    Parameters
+    ----------
+    parents : list of str
+        list of parents
+    max_terms : int, default=2
+        similar to :func:`~cdag.parcs.utils.get_interactions`
+    Returns
+    -------
+    pairings : list of tuple
+        list of all parent pairings, where the index corresponds to the interaction data
+
+    Examples
+    --------
+    >>> from parcs.cdag.utils import get_interactions, get_interactions_dict
+    >>> parents = ['a', 'b', 'c', 'd']
+    >>> get_interactions_dict(parents, max_terms=2)
+    [{'b', 'a'}, {'c', 'a'}, {'a', 'd'}, {'b', 'c'}, {'b', 'd'}, {'c', 'd'}]
+
+    """
+    len_ = min(len(parents), max_terms)
+    return [set(i) for r in range(2, len_ + 1) for i in comb(parents, r)]
+
+def get_poly(data, n):
+    return data ** n
+
+
+def dot_prod(data, coef):
+    if data.shape[0] == 0:
+        data_augmented = [np.array([]) for _ in range(3)]
+    else:
+        # data_augmented = [data, get_poly(data, 2), get_interactions(data)]
+        data_augmented = [data, get_interactions(data)]
+
+    return coef['bias'] + np.array([
+        np.dot(d, coef[i])
+        for (i, d) in zip(['linear', 'interactions'], data_augmented)
+    ]).sum(axis=0)
+
+
+class SigmoidCorrection:
+    r"""
+    This object, transforms the values on :math:`\mathbb{R}` support to a `[L, U]` range
+    using the sigmoid function. The Equation is:
+
+    .. math::
+        \begin{align}
+            x^{'} = ( U - L ) \sigma(x - x_0) + L, \quad \sigma(a) = \frac{1}{1+e^{-a}}
+        \end{align}
+
+    where :math:`U` and :math:`L` are user-defined upper and lower bounds for transformed variable, and :math:`X_0`
+    is the `offset` which is defined according to user needs, defined by ``target_mean`` and ``to_center`` parameters.
+    see the parameter descriptions below for more details.
+
+    Parameters
+    ----------
+    lower, upper : float
+        lower and upper bounds for transformed variable
+    target_mean : float, default=None
+        If a float value (not ``None``), then the mean of transformed value is fixed. This value must be
+        in the `[L, U]` range.
+    to_center : bool, default=False
+        If set to `True` then the input variable is normalized before being passed to the sigmoid function.
+        If `target_mean != None` then this parameter is ignored.
+
+    Raises
+    ------
+    AssertionError
+        if the `target_mean` doesn't lie in the lower, upper range or `lower >= upper`
+
+    Examples
+    --------
+    This class is used internally by PARCS if `correction` parameter is chosen for a node. However, to understand
+    the functionality better, we make an example using the class:
+
+    >>> from parcs.cdag.utils import SigmoidCorrection
+    >>> import numpy as np
+    >>> x = np.linspace(-10, 10, 200)
+    >>> sc = SigmoidCorrection(lower=-3, upper=2)
+    >>> x_t = sc.transform(x)
+    >>> print(np.round(x_t.min(), 3), np.round(x_t.max(), 3), np.round(x_t.mean(), 3))
+    -3.0 2.0 -0.5
+    >>> sc_2 = SigmoidCorrection(lower=0, upper=1, target_mean=0.8)
+    >>> x_t = sc_2.transform(x)
+    >>> print(np.round(x_t.min(), 3), np.round(x_t.max(), 3), np.round(x_t.mean(), 3))
+    0.019 1.0 0.8
+
+    .. note::
+        If ``target_mean`` is given, sigmoid correction searches for an offset term to add to the input values,
+        such that the required mean is obtained. The process is a manual search near the support of data points.
+    """
+    def __init__(self, lower=0, upper=1, target_mean=None, to_center=False):
+        assert upper > lower
+        if target_mean is not None:
+            assert lower < target_mean < upper
+        self.config = {
+            'lower': lower,
+            'upper': upper,
+            'offset': 0,
+            'offset_for_target_mean': 0
+        }
+        self.is_initialized = False
+        self.to_center = to_center
+        self.target_mean = target_mean
+
+    def transform(self, array):
+        """
+        transform the input variable according to parameters set upon instantiation.
+
+        Parameters
+        ----------
+        array : array-like
+            input array
+
+        Returns
+        -------
+        transformed_array : array-like
+            transformed array by the sigmoid correction
+        """
+        if not self.is_initialized:
+            # center
+            if self.to_center:
+                self.config['offset'] = array.mean()
+
+            # transform by sigmoid
+            U = (self.config['upper'] - self.config['lower'])
+            L = self.config['lower']
+            # fixing the mean via another offset
+            if self.target_mean is not None:
+                # min - I =  6 -> I = min - 6
+                # max - I = -6 -> I = max + 6
+                error = np.inf
+                theta = 0
+                for i in np.linspace(array.min() - 6, array.max() + 6, 1000):
+                    h = U * expit(array - i) + L
+                    new_error = abs(h.mean() - self.target_mean)
+                    if new_error <= error:
+                        theta = i
+                        error = new_error
+                    else:
+                        break
+                self.config['offset'] = theta
+            self.is_initialized = True
+        return (self.config['upper'] - self.config['lower']) * \
+               expit(array - self.config['offset']) + \
+               self.config['lower']
+
+
+class EdgeCorrection:
+    r"""
+    This object normalizes the input variables using the mean and standard deviation **of the first data batch** that
+    it receives.
+
+    .. math::
+        \begin{align}
+            x^{'} = \frac{x-\mu_{b_1}}{\sigma_{b_1}}
+        \end{align}
+
+
+    Examples
+    --------
+    This class is used internally by PARCS if `correction` parameter is chosen for a edge. However, to understand
+    the functionality better, we make an example using the class:
+
+    >>> from parcs.cdag.utils import EdgeCorrection
+    >>> import numpy as np
+    >>> x = np.random.normal(2, 10, size=200)
+    >>> ec = EdgeCorrection()
+    >>> # This is the first batch
+    >>> x_t = ec.transform(x)
+    >>> print(np.round(x_t.mean(), 2), np.round(x_t.std(), 2))
+    0.0 1.0
+    >>> # Give the second batch: mean and std are already fixed according to x batch.
+    >>> y = np.random.normal(-1, 2, size=300)
+    >>> y_t = ec.transform(y)
+    >>> print(np.round(y_t.mean(), 2), np.round(y_t.std(), 2))
+    -0.36 0.19
+
+    """
+    def __init__(self):
+        self.is_initialized = False
+        self.offset = None
+        self.scale = None
+
+    def transform(self, array):
+        """
+        transform the input variable according to parameters set upon instantiation.
+
+        Parameters
+        ----------
+        array : array-like
+            input array
+
+        Returns
+        -------
+        transformed_array : array-like
+            transformed array by the edge correction
+        """
+        if not self.is_initialized:
+            try:
+                assert len(array) >= 500
+            except AssertionError:
+                warnings.warn(
+                    """
+                    PARCS calculate normalization statistics from the first input batch,
+                    This is the 1st batch, while size < 500. It might lead to instabilities.
+                    we recommend to run the first simulation run with greater size
+                    """
+                )
+            self.offset = array.mean()
+            self.scale = array.std()
+            self.is_initialized = True
+
+        return (array - self.offset) / self.scale
