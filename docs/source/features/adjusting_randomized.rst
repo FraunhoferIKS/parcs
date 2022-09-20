@@ -1,4 +1,9 @@
-===========================
+===========================\begin{lstlisting}
+...
+A->Y: identity(), correction[]
+...
+\end{lstlisting}
+%
 Adjusting randomized graphs
 ===========================
 
