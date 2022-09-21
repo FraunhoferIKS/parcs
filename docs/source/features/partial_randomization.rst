@@ -1,3 +1,4 @@
+=====================
 Partial Randomization
 =====================
 
@@ -10,7 +11,7 @@ An important feature of PARCS, the *partial randomization*, allows us to simulat
 
 
 Parameter Randomization
------------------------
+=======================
 
 As before, simulation starts with a graph description file. However we can use two new values to activate randomization PARCS: :code:`?` for parameters, and :code:`random` for functions and distributions. Here is an example of the causal triangle where we randomize the mean of node A, and also the output distribution of Y:
 
@@ -43,6 +44,26 @@ In our example, therefore, mean of node A is selected according to line 5 of the
 
 .. seealso::
     :ref:`Randomization conventions <conventions_inducing_randomization>`
+
+Free Randomizer
+===============
+
+Using free randomizer, we can randomly generate a graph based on guidelines for number of nodes and graph sparsity. In fact, this randomizer is wrapped around the parameter randomization, meaning that first, PARCS initializes a graph with some nodes and edges, and assigns `free` and `?` to all functions and parameters, then passes the process to parameter randomizer to fill the blanks.
+
+The guideline is similar to that of parameter randomizer, except that we need to give the directives for ``graph`` as well. The keys are `num_nodes` and `graph_sparsity`.
+
+.. literalinclude:: code_blocks/b2/simple_guideline.yml
+    :linenos:
+    :caption: simple_guideline.yml
+
+using the `FreeRandomizer` class, we generate a graph object.
+
+.. literalinclude:: code_blocks/b6/graph.py
+    :linenos:
+    :caption: graph.py
+    :emphasize-lines: 5-9
+
+Nodes are named `H_<num>` by default. You can change the name prefix by the key ``node_name_prefix`` in the guideline (under graph key). The value must be string.
 
 Edge correction
 ---------------
