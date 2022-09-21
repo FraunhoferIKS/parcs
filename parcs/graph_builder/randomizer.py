@@ -111,69 +111,94 @@ class ExtendRandomizer(ParamRandomizer):
     def __init__(self,
                  graph_dir=None, guideline_dir=None):
         super().__init__(graph_dir=graph_dir, guideline_dir=guideline_dir)
-        # pick number of nodes
-        num_node_directive = self.guideline['graph']['num_nodes']
-        if isinstance(num_node_directive, list):
-            assert num_node_directive[1] >= len(self.nodes)
-        else:
-            assert num_node_directive >= len(self.nodes)
-        self.num_nodes = self.directive_picker(num_node_directive)
+
+        # pick number of nodes:
+        self.num_nodes = self._set_num_nodes()
         # pick names
-        self.node_names = [
-            '{}_{}'.format(self.guideline['graph']['node_name_prefix'], i) for i in range(self.num_nodes)
-        ]
-        # randomize adj matrix
+        if 'node_name_prefix' not in self.guideline['graph']:
+            self.guideline['graph']['node_name_prefix'] = 'H'
+        self.node_names = self._set_node_names()
+        # randomize main adj matrix
         self.adj_matrix = self._random_adj_matrix()
-        # get local adj_matrix
-        local_node_order = self._local_topological_sort()
+        # get local node order of the user-given graph, given already by self.nodes and self.edges
+        user_node_order = self._user_topological_sort()
         # assign places
-        indices = np.sort(np.random.choice(range(self.num_nodes), replace=False, size=len(local_node_order)))
+        indices = np.sort(np.random.choice(range(self.num_nodes), replace=False, size=len(user_node_order)))
         mapper = {
-            '{}_{}'.format(self.guideline['graph']['node_name_prefix'], i): n for i, n in zip(indices, local_node_order)
+            '{}_{}'.format(self.guideline['graph']['node_name_prefix'], i): n for i, n in zip(indices, user_node_order)
         }
         self.adj_matrix.rename(columns=mapper, index=mapper, inplace=True)
         # update adj matrix elements
         for e in self.edges:
             par, child = e['name'].split('->')
             self.adj_matrix.loc[par, child] = 1
+        # extend nodes and edges
+        self._extend_nodes(indices)._extend_edges()
+        # modify param coefs based on newly added parents
+        self._update_param_coefs()
 
-        # extend nodes
-        for i in range(self.num_nodes):
-            if i not in indices:
-                node_name = '{}_{}'.format(self.guideline['graph']['node_name_prefix'], i)
-                parents = sorted(list(self.adj_matrix[self.adj_matrix[node_name]==1].index))
-                self.nodes.append({
-                    'name': node_name,
-                    **parsers.node_parser('random', parents)
-                })
-        # extend edges
-        current_edges = [e['name'] for e in self.edges]
-        for par, child in comb(self.adj_matrix.columns, 2):
-            if '{}->{}'.format(par, child) not in current_edges and self.adj_matrix.loc[par, child]==1:
-                self.edges.append({
-                    'name': '{}->{}'.format(par, child),
-                    **parsers.edge_parser('random')
-                })
+    def _set_num_nodes(self):
+        num_node_directive = self.guideline['graph']['num_nodes']
+        if isinstance(num_node_directive, list):
+            assert num_node_directive[1] >= len(self.nodes)
+        else:
+            assert num_node_directive >= len(self.nodes)
+        return self.directive_picker(num_node_directive)
 
-    def _local_topological_sort(self):
+    def _set_node_names(self):
+        try:
+            return [
+                '{}_{}'.format(self.guideline['graph']['node_name_prefix'], i) for i in range(self.num_nodes)
+            ]
+        except KeyError:
+            return [
+                'H_{}'.format(i) for i in range(self.num_nodes)
+            ]
+
+    def _user_topological_sort(self):
         # local adj
-        num_local_node = len(self.nodes)
-        local_adj_matrix = pd.DataFrame(
-            np.zeros(shape=(num_local_node, num_local_node)),
+        num_user_node = len(self.nodes)
+        user_adj_matrix = pd.DataFrame(
+            np.zeros(shape=(num_user_node, num_user_node)),
             columns=[n['name'] for n in self.nodes],
             index=[n['name'] for n in self.nodes]
         )
         for e in self.edges:
             par, child = e['name'].split('->')
-            local_adj_matrix.loc[par, child] = 1
+            user_adj_matrix.loc[par, child] = 1
 
-        return topological_sort(local_adj_matrix)
+        return topological_sort(user_adj_matrix)
+
     def _random_adj_matrix(self):
         density = self.directive_picker(self.guideline['graph']['graph_density'])
         adj_matrix = np.random.choice([0, 1], p=[1-density, density], size=(self.num_nodes, self.num_nodes))
         mask = np.triu(adj_matrix, k=1)
         adj_matrix = np.multiply(adj_matrix, mask)
         return pd.DataFrame(adj_matrix, columns=self.node_names, index=self.node_names)
+
+    def _extend_nodes(self, indices):
+        for i in range(self.num_nodes):
+            if i not in indices:
+                node_name = '{}_{}'.format(self.guideline['graph']['node_name_prefix'], i)
+                parents = sorted(list(self.adj_matrix[self.adj_matrix[node_name] == 1].index))
+                self.nodes.append({
+                    'name': node_name,
+                    **parsers.node_parser('random', parents)
+                })
+        return self
+
+    def _extend_edges(self):
+        current_edges = [e['name'] for e in self.edges]
+        for par, child in comb(self.adj_matrix.columns, 2):
+            if '{}->{}'.format(par, child) not in current_edges and self.adj_matrix.loc[par, child] == 1:
+                self.edges.append({
+                    'name': '{}->{}'.format(par, child),
+                    **parsers.edge_parser('random')
+                })
+        return self
+
+    def _update_param_coefs(self):
+        return self
 
 
 class FreeRandomizer(ExtendRandomizer):

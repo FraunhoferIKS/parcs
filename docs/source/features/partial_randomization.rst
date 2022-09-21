@@ -52,8 +52,9 @@ Using free randomizer, we can randomly generate a graph based on guidelines for 
 
 The guideline is similar to that of parameter randomizer, except that we need to give the directives for ``graph`` as well. The keys are `num_nodes` and `graph_sparsity`.
 
-.. literalinclude:: code_blocks/b2/simple_guideline.yml
+.. literalinclude:: code_blocks/b6/simple_guideline.yml
     :linenos:
+    :emphasize-lines: 1-3
     :caption: simple_guideline.yml
 
 using the `FreeRandomizer` class, we generate a graph object.
@@ -61,7 +62,6 @@ using the `FreeRandomizer` class, we generate a graph object.
 .. literalinclude:: code_blocks/b6/graph.py
     :linenos:
     :caption: graph.py
-    :emphasize-lines: 5-9
 
 Nodes are named `H_<num>` by default. You can change the name prefix by the key ``node_name_prefix`` in the guideline (under graph key). The value must be string.
 
