@@ -33,3 +33,20 @@ While defining the function, we consider the input to be the simulated data of t
 
 .. warning::
     Deterministic nodes are designed for simulating variables that are deterministic given the parent variables. Even though it is technically possible to perform stochastic sampling inside the function (e.g. ``return np.random.normal(data['A']+data['C'], 1)``) it is not recommended to, as the stochasticity cannot be controlled by PARCS.
+
+
+Constant nodes
+==============
+
+This class of nodes provide a simple way to add a constant node to the graph. The syntax in the description file as simple as creating a node by ``constant(<value>)``
+
+.. literalinclude:: code_blocks/b1/graph_description.yml
+    :caption: :code:`graph_description_const.yml`
+    :linenos:
+
+.. literalinclude:: code_blocks/b1/graph.py
+    :caption: :code:`graph_const.py`
+    :linenos:
+
+.. note::
+    We can simulate deterministic and constant nodes by `hacking` stochastic ``gaussian`` node with ``mean_`` being a desired constant or determinist term, and ``sigma_`` being 0. Using the deterministic and constant nodes, however, adds more to the clarity of the simulation and the description file.
