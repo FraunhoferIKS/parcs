@@ -1,3 +1,5 @@
+.. _partial_randomization:
+
 =====================
 Partial Randomization
 =====================
