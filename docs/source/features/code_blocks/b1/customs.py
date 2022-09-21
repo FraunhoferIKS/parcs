@@ -1,2 +1,2 @@
-def custom_function(a, b):
-    return a + b
+def custom_function(data):
+    return data['A'] + data['C']

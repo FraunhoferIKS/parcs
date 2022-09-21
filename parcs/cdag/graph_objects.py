@@ -104,9 +104,7 @@ class DetNode:
         self.function = function
 
     def calculate(self, data, parents):
-        return np.array([
-            self.function(r[0], r[1]) for r in data[parents].values
-        ])
+        return self.function(data[parents]).values
 
 
 class Edge:

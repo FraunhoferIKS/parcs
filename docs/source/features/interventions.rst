@@ -12,6 +12,8 @@ This method sets the value of one or more nodes to a fixed value. As this is the
     :linenos:
     :emphasize-lines: 17, 25-26, 32
 
+.. _functional_intervention:
+
 functional intervention
 -----------------------
 
