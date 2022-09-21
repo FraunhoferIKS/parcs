@@ -40,11 +40,11 @@ Constant nodes
 
 This class of nodes provide a simple way to add a constant node to the graph. The syntax in the description file as simple as creating a node by ``constant(<value>)``
 
-.. literalinclude:: code_blocks/b1/graph_description.yml
+.. literalinclude:: code_blocks/b1/graph_description_const.yml
     :caption: :code:`graph_description_const.yml`
     :linenos:
 
-.. literalinclude:: code_blocks/b1/graph.py
+.. literalinclude:: code_blocks/b1/graph_const.py
     :caption: :code:`graph_const.py`
     :linenos:
 
