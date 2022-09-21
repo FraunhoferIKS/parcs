@@ -12,7 +12,7 @@ Graph description file
 The description file is a YAML file. Below is a list of conventions for the description file:
 
 * The rows start by ``some_name:``, following are the *names* and values are functions/distributions.The parser recognizes all the keys including `arrow` sign  ``->`` as edges, and the remaining keys as nodes.
-* Node names start with Letters, and can be a series of letters, followed by underscore ``_`` and a number. multi-character names are allowed
+* Node names and edges must be consistent. In other words, if there is an `A->B` edge, there must be nodes `A` and `B` defined. We recommend to start the node names with letters, and (multiple) `_` and numbers, for more stability.
 * the value of each row (after ``:``) is an edge function for edges, and an output distribution for nodes. Parameters of the functions must correspond to the function itself. See the full list of available edge functions and output distributions.
 * For activating `correction`, the ``correction[...]`` keyword should be brought after the main function. It's not necessary, however recommended for readability, that the function and correction are separated by a comma.
 

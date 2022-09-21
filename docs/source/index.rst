@@ -25,6 +25,7 @@ Welcome to PARCS's documentation!
    :maxdepth: 1
    :caption: More Features
 
+   features/more_graph_objects
    features/interventions
    features/partial_randomization
    features/other_randomizers

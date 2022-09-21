@@ -45,7 +45,22 @@ def node_parser(line, parents):
             'output_distribution': '?',
             'do_correction': True
         }
-
+    # check if node is constant
+    try:
+        const_pattern = re.compile(
+            'constant\(([0-9]+(\.[0-9]+)?)\)'
+        )
+        res = const_pattern.search(line)
+        raw_value = res.group(1)
+        if len(res.groups()) == 2:
+            return {'value': float(raw_value)}
+        elif len(res.groups()) == 1: # doesn't have floating part
+            return {'value': int(raw_value)}
+        else:
+            raise AttributeError
+    except AttributeError:
+        # it's not constant
+        pass
     # check if node is deterministic
     try:
         det_pattern = re.compile(

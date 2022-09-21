@@ -11,7 +11,7 @@ Deterministic nodes
 A node can be defined to output a deterministic function of its parents. In this case, a deterministic function replaces the output distribution. To define a deterministic node:
 
 1. create a `.py` file in the same directory as your main Python script
-2. Define your custom function in the file
+2. Define your custom function in the file. The input must be considered the dataset pandas data frame. (see example below)
 3. define the node in the `description file` by ``deterministic(<.py file name>, <function name>)``
 
 .. literalinclude:: code_blocks/b1/customs.py
@@ -26,4 +26,27 @@ A node can be defined to output a deterministic function of its parents. In this
     :caption: :code:`graph.py`
     :linenos:
 
+While defining the function, we consider the input to be the simulated data of the graph, and call the columns by the same node names as in graph description file. Note that you can write your function using Pandas functionalities, e.g. column operations, or for loops using pandas `iterrows <https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.iterrows.html>`_. The output must be a pandas ``Series``.
 
+.. note::
+    The data passed to the custom function only includes data of the parent nodes (inferred from the description file). In order to do interventions and calculate the node using other parents, see :ref:`interventions docs <functional_intervention>`
+
+.. warning::
+    Deterministic nodes are designed for simulating variables that are deterministic given the parent variables. Even though it is technically possible to perform stochastic sampling inside the function (e.g. ``return np.random.normal(data['A']+data['C'], 1)``) it is not recommended to, as the stochasticity cannot be controlled by PARCS.
+
+
+Constant nodes
+==============
+
+This class of nodes provide a simple way to add a constant node to the graph. The syntax in the description file as simple as creating a node by ``constant(<value>)``
+
+.. literalinclude:: code_blocks/b1/graph_description_const.yml
+    :caption: :code:`graph_description_const.yml`
+    :linenos:
+
+.. literalinclude:: code_blocks/b1/graph_const.py
+    :caption: :code:`graph_const.py`
+    :linenos:
+
+.. note::
+    We can simulate deterministic and constant nodes by `hacking` stochastic ``gaussian`` node with ``mean_`` being a desired constant or determinist term, and ``sigma_`` being 0. Using the deterministic and constant nodes, however, adds more to the clarity of the simulation and the description file.

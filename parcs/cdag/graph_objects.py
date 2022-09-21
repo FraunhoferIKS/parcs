@@ -104,9 +104,39 @@ class DetNode:
         self.function = function
 
     def calculate(self, data, parents):
-        return np.array([
-            self.function(r[0], r[1]) for r in data[parents].values
-        ])
+        return self.function(data[parents]).values
+
+
+class ConstNode:
+    """ **Constant Node object in causal DAGs**
+
+    Use this class to create a node with constant value.
+    If you want to construct a causal DAG, please use the :func:`~parcs.cdag.graph_objects.Graph` class instead.
+
+    Parameters
+    ----------
+    name : str, optional
+        name of the node. Optional unless the node is used in a graph
+    value : float
+        constant value of the node
+
+    Examples
+    --------
+    >>> from parcs.cdag.graph_objects import ConstNode
+    >>> import pandas as pd
+    >>> n_0 = ConstNode(name='N_0', value=2)
+    >>> data = pd.DataFrame([[1, 2], [2, 2], [3, 3]], columns=('N_1', 'N_2'))
+    >>> n_0.calculate(data)
+    array([3, 4, 6])
+    """
+    def __init__(self,
+                 name=None,
+                 value=None):
+        self.info = {'name': name}
+        self.value = value
+
+    def calculate(self, size_):
+        return np.ones(shape=(size_,)) * self.value
 
 
 class Edge:
@@ -217,7 +247,9 @@ class Graph:
                  nodes=None,
                  edges=None):
         self.nodes = {
-            kwargs['name']: Node(**kwargs) if 'output_distribution' in kwargs else DetNode(**kwargs)
+            kwargs['name']: Node(**kwargs) if 'output_distribution' in kwargs
+                else DetNode(**kwargs) if 'function' in kwargs
+                else ConstNode(**kwargs)
             for kwargs in nodes
         }
         self.edges = {kwargs['name']: Edge(**kwargs) for kwargs in edges}
@@ -266,12 +298,17 @@ class Graph:
 
         return self.nodes[node_name].calculate(inputs, parents)
 
+    def  _single_const_round(self, node_name, size_):
+        return self.nodes[node_name].calculate(size_)
+
     def _node_type(self, node_name):
         node = self.nodes[node_name]
         if isinstance(node, Node):
             return 'stoch'
         elif isinstance(node, DetNode):
             return 'det'
+        elif isinstance(node, ConstNode):
+            return 'const'
         else:
             return TypeError
 
@@ -284,8 +321,10 @@ class Graph:
             )
         elif self._node_type(node_name) == 'det':
             return self._single_det_round(node_name=node_name, data=data)
+        elif self._node_type(node_name) == 'const':
+            return self._single_const_round(node_name=node_name, size_=size)
         else:
-            raise ValueError
+            raise TypeError
 
 
     def sample(self, size=None, return_errors=False, cache_sampling=False, cache_name=None,
