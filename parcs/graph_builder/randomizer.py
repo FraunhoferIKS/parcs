@@ -1,8 +1,10 @@
-import numpy as np
+import os
+from copy import deepcopy
 import pandas as pd
 from parcs.cdag.output_distributions import DISTRIBUTION_PARAMS
 from parcs.cdag.mapping_functions import FUNCTION_PARAMS
 from parcs.graph_builder import parsers
+from parcs.graph_builder.utils import config_parser, config_dumper
 from parcs.cdag.utils import get_interactions_length, topological_sort
 from itertools import combinations as comb
 import warnings
@@ -205,6 +207,52 @@ class FreeRandomizer(ExtendRandomizer):
     def __init__(self, guideline_dir=None):
         super().__init__(graph_dir=None, guideline_dir=guideline_dir)
 
+
+def guideline_iterator(guideline_dir=None, to_iterate=None, steps=None, repeat=1):
+    def _get_iterable(directive, steps):
+        assert isinstance(directive, list), 'GuidelineIterator received fixed value as the directive'
+        if directive[0] == 'f-range':
+            return np.linspace(directive[1], directive[2], steps)
+        elif directive[0] == 'i-range':
+            return range(directive[1], directive[2]+1)
+        elif directive[0] == 'choice':
+            return directive[1:]
+        else:
+            raise ValueError
+
+    def _get_directive(dict_, path):
+        directive = dict_[path[0]]
+        if len(path) == 1:
+            return directive
+        for step in path[1:]:
+            directive = directive[step]
+        return directive
+
+    def _set_directive(dict_, path, value):
+        new_guideline = deepcopy(dict_)
+        replacement = value
+        for i in range(1, len(path)):
+            temp = _get_directive(dict_, path[:-i])
+            temp[path[-i]] = replacement
+            replacement = temp
+        new_guideline[path[0]] = replacement
+        return new_guideline
+
+    def _generator(dict_, iterable, path, repeat):
+        for i in iterable:
+            for epoch in range(repeat):
+                new_guideline = _set_directive(dict_, path, i)
+                dir_ = './temp_analysis_guideline.yml'
+                config_dumper(new_guideline, dir_)
+                yield dir_, epoch, i
+        os.remove('./temp_analysis_guideline.yml')
+
+    guideline = config_parser(guideline_dir)
+    path = to_iterate.split('/')
+    directive = _get_directive(guideline, path)
+    iterable = _get_iterable(directive, steps)
+    generator = _generator(guideline, iterable, path, repeat)
+    return generator
 
 if __name__ == '__main__':
     from parcs.cdag.graph_objects import Graph

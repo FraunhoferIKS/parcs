@@ -7,6 +7,11 @@ def config_parser(dir_):
         conf = yaml.safe_load(stream)
     return conf
 
+def config_dumper(dict_, dir):
+    with open(dir, 'w') as outfile:
+        yaml.dump(dict_, outfile, default_flow_style=False)
+
+
 def dist_param_coefs_reader(obj, dist):
     given_params = obj.keys()
     assert set(given_params).issubset(set(DISTRIBUTION_PARAMS[dist]))
