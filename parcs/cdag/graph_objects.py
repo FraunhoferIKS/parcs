@@ -139,6 +139,32 @@ class ConstNode:
         return np.ones(shape=(size_,)) * self.value
 
 
+class DataNode:
+    """ **Data Node object in causal DAGs**
+
+    Use this class to create a node with the samples being read from an external data file.
+    If you want to construct a causal DAG, please use the :func:`~parcs.cdag.graph_objects.Graph` class instead.
+
+    Parameters
+    ----------
+    name : str, optional
+        name of the node. Optional unless the node is used in a graph
+    csv_dir : str
+        CSV file directory
+    """
+    def __init__(self,
+                 name=None,
+                 csv_dir=None):
+        self.info = {'name': name}
+        self.samples = pd.read_csv(csv_dir)[name]
+
+    def calculate(self, size_=None, with_replacement=True):
+        if size_ > len(self.samples) and not with_replacement:
+            raise ValueError('sample size is bigger than data node length, while replacement = False')
+
+        return self.samples.sample(n=size_, replace=with_replacement).values
+
+
 class Edge:
     """ **Edge object in causal DAGs**
 
@@ -249,8 +275,12 @@ class Graph:
         self.nodes = {
             kwargs['name']: Node(**kwargs) if 'output_distribution' in kwargs
                 else DetNode(**kwargs) if 'function' in kwargs
+                else DataNode(**kwargs) if 'csv_dir' in kwargs
                 else ConstNode(**kwargs)
             for kwargs in nodes
+        }
+        self.node_types = {
+            name: self._node_type(name) for name in self.nodes
         }
         self.edges = {kwargs['name']: Edge(**kwargs) for kwargs in edges}
         self.parent_sets = {}
@@ -260,7 +290,7 @@ class Graph:
 
         # one-time sample to setup corrections
         # TODO: don't do it if no correction=True
-        self.sample(size=500)
+        self.sample(size=500, with_replacement=True)
 
     def _set_adj_matrix(self):
         num_n = len(self.nodes)
@@ -272,6 +302,9 @@ class Graph:
         for n in self.nodes:
             self.parent_sets[n] = [edge.split('->')[0] for edge in self.edges if edge.split('->')[1] == n]
             self.adj_matrix.loc[self.parent_sets[n], n] = 1
+
+            if self.node_types[n] == 'data' and len(self.parent_sets[n]) != 0:
+                raise ValueError('node {} is DataNode but has parents in graph'.format(n))
 
     def _single_sample_round(self, use_sampled_errors=False, node_name=None, size=None, data=None, sampled_errors=None):
         if not use_sampled_errors:
@@ -301,6 +334,9 @@ class Graph:
     def  _single_const_round(self, node_name, size_):
         return self.nodes[node_name].calculate(size_)
 
+    def  _single_data_round(self, node_name, size_, with_replacement):
+        return self.nodes[node_name].calculate(size_=size_, with_replacement=with_replacement)
+
     def _node_type(self, node_name):
         node = self.nodes[node_name]
         if isinstance(node, Node):
@@ -309,26 +345,32 @@ class Graph:
             return 'det'
         elif isinstance(node, ConstNode):
             return 'const'
+        elif isinstance(node, DataNode):
+            return 'data'
         else:
             return TypeError
 
     def _calc_non_interventions(self, node_name=None, data=None, size=None,
-                                use_sampled_errors=None, sampled_errors=None):
-        if self._node_type(node_name) == 'stoch':
+                                use_sampled_errors=None, sampled_errors=None,
+                                with_replacement=None):
+        if self.node_types[node_name] == 'stoch':
             return self._single_sample_round(
                 use_sampled_errors=use_sampled_errors, node_name=node_name, size=size, data=data,
                 sampled_errors=sampled_errors
             )
-        elif self._node_type(node_name) == 'det':
+        elif self.node_types[node_name] == 'det':
             return self._single_det_round(node_name=node_name, data=data)
-        elif self._node_type(node_name) == 'const':
+        elif self.node_types[node_name] == 'const':
             return self._single_const_round(node_name=node_name, size_=size)
+        elif self.node_types[node_name] == 'data':
+            assert with_replacement is not None, 'Graph contains Data node but `with_replacement` param is not given'
+            return self._single_data_round(node_name=node_name, size_=size, with_replacement=with_replacement)
         else:
             raise TypeError
 
 
     def sample(self, size=None, return_errors=False, cache_sampling=False, cache_name=None,
-               use_sampled_errors=False, sampled_errors=None):
+               use_sampled_errors=False, sampled_errors=None, with_replacement=None):
         """**Sample from observational distribution**
 
         This method samples from the distribution that is modeled by the graph (with no intervention)
@@ -340,6 +382,7 @@ class Graph:
         size : int
             number of samples. If ``use_sampled_errors=False`` then this method is used.
             Otherwise, this argument will be ignored.
+            If the graph contains at least one data node, size will be ignored
         return_errors : bool, default=False
             If ``True`` then method returns ``samples, errors``.
         cache_sampling : bool, default=True
@@ -351,6 +394,9 @@ class Graph:
             If ``True``, the ``sampled_errors`` arg must be given. The ``size`` argument will be ignored.
         sampled_errors : pd.DataFrame
             The result of other sample calls with ``return_errors=True``.
+        with_replacement : bool
+            If graph contains at least 1 Data node, then you must specify if sampling from the data node
+            is with or without replacement. see errors
 
         Returns
         -------
@@ -359,6 +405,11 @@ class Graph:
             while each row is a sample
         samples, errors : pd.DataFrame, pd.DataFrame
             If ``return_errors=True``. both objects are pandas data frames and similar to the previous item.
+
+        Raises
+        ------
+        ValueError
+            if sample size is bigger than the length of data in a data node and `with_replacement=False`.
         """
         # TODO: check if size is none and use_sample_errors=False: raise error
         data = pd.DataFrame([])
@@ -369,7 +420,8 @@ class Graph:
         for node_name in topological_sort(self.adj_matrix):
             data[node_name] = self._calc_non_interventions(
                 node_name=node_name, size=size, data=data,
-                use_sampled_errors=use_sampled_errors, sampled_errors=sampled_errors
+                use_sampled_errors=use_sampled_errors, sampled_errors=sampled_errors,
+                with_replacement=with_replacement
             )
 
         if cache_sampling:
@@ -380,17 +432,18 @@ class Graph:
             return data
 
     def do(self, size=None, interventions=None, use_sampled_errors=False, sampled_errors=None,
-           return_errors=False, cache_sampling=False, cache_name=None):
+           return_errors=False, cache_sampling=False, cache_name=None, with_replacement=None):
         """**sample from interventional distribution**
         This methods sample from an interventional distribution which is modeled by intervention(s) on the main graph.
         This method accepts fixed interventions (see the ``interventions`` parameter).
 
         Parameters
         ----------
-        size, use_sampled_errors, sampled_errors, return_errors, cache_sampling, cache_name
+        size, use_sampled_errors, sampled_errors, return_errors, cache_sampling, cache_name, with_replacement
             see :func:`~parcs.cdag.graph_objects.Graph.sample`
         interventions : dict
             dictionary of interventions in the form of ``{'<node_to_be_intervened>': <intervention_value>}``
+
 
         Returns
         -------
@@ -408,7 +461,8 @@ class Graph:
             if node_name not in interventions:
                 array = self._calc_non_interventions(
                     node_name=node_name, size=size, data=data,
-                    use_sampled_errors=use_sampled_errors, sampled_errors=sampled_errors
+                    use_sampled_errors=use_sampled_errors, sampled_errors=sampled_errors,
+                    with_replacement=with_replacement
                 )
             else:
                 array = np.ones(shape=(size,)) * interventions[node_name]
@@ -423,7 +477,8 @@ class Graph:
 
     def do_functional(self, size=None, intervene_on=None, inputs=None, func=None,
                       use_sampled_errors=False, sampled_errors=None,
-                      return_errors=False, cache_sampling=False, cache_name=None):
+                      return_errors=False, cache_sampling=False, cache_name=None,
+                      with_replacement=None):
         """**sample from interventional distribution**
         This methods sample from an interventional distribution which is modeled by intervention(s) on the main graph.
         This method accepts interventions defined by a function on a subset of nodes.
@@ -431,7 +486,7 @@ class Graph:
 
         Parameters
         ----------
-        size, use_sampled_errors, sampled_errors, return_errors, cache_sampling, cache_name
+        size, use_sampled_errors, sampled_errors, return_errors, cache_sampling, cache_name, with_replacement
             see :func:`~parcs.cdag.graph_objects.Graph.sample`
         intervene_on : str
             name of the node subjected to intervention
@@ -459,7 +514,8 @@ class Graph:
             if node_name != intervene_on:
                 array = self._calc_non_interventions(
                     node_name=node_name, size=size, data=data,
-                    use_sampled_errors=use_sampled_errors, sampled_errors=sampled_errors
+                    use_sampled_errors=use_sampled_errors, sampled_errors=sampled_errors,
+                    with_replacement=with_replacement
                 )
             else:
                 # TODO: warn if z is child of X_0
@@ -476,14 +532,14 @@ class Graph:
 
     def do_self(self, size=None, func=None, intervene_on=None,
                 use_sampled_errors=False, sampled_errors=None, return_errors=False,
-                cache_sampling=False, cache_name=None):
+                cache_sampling=False, cache_name=None, with_replacement=None):
         """**sample from interventional distribution**
         This methods sample from an interventional distribution which is modeled by intervention(s) on the main graph.
         This method accepts interventions defined as intervening on a node based on its observed value.
 
         Parameters
         ----------
-        size, use_sampled_errors, sampled_errors, return_errors, cache_sampling, cache_name
+        size, use_sampled_errors, sampled_errors, return_errors, cache_sampling, cache_name, with_replacement
             see :func:`~parcs.cdag.graph_objects.Graph.sample`
         intervene_on : str
             name of the node subjected to intervention
@@ -503,9 +559,9 @@ class Graph:
             sampled_errors = pd.DataFrame([])
 
         for node_name in topological_sort(self.adj_matrix):
-            data[node_name] = self._single_sample_round(
+            data[node_name] = self._calc_non_interventions(
                 use_sampled_errors=use_sampled_errors, node_name=node_name, size=size, data=data,
-                sampled_errors=sampled_errors
+                sampled_errors=sampled_errors, with_replacement=with_replacement
             )
             if intervene_on == node_name:
                 data[node_name] = data[node_name].apply(func)

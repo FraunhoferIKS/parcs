@@ -50,3 +50,24 @@ This class of nodes provide a simple way to add a constant node to the graph. Th
 
 .. note::
     We can simulate deterministic and constant nodes by `hacking` stochastic ``gaussian`` node with ``mean_`` being a desired constant or determinist term, and ``sigma_`` being 0. Using the deterministic and constant nodes, however, adds more to the clarity of the simulation and the description file.
+
+
+Data nodes
+==============
+
+This class of nodes allows us to read an external CSV file for the samples. The file should be given to PARCS by its directory. To provide an example, we assume there is already a CSV file (created in the first lines of `graph.py` file):
+
+.. literalinclude:: code_blocks/b1/graph_description_data.yml
+    :caption: :code:`graph_description_data.yml`
+    :linenos:
+
+.. literalinclude:: code_blocks/b1/graph_data.py
+    :caption: :code:`graph.py`
+    :linenos:
+
+Two important notes:
+
+- Data nodes must have no incoming edges in the graph description file
+- If the graph contains at least one data node, then the boolean `with_replacement` parameter is needed, in order to determine the sampling behaviour for the data nodes. If `size` parameter is larger than the size of the data node and `with_replacement=False`, sampling raises an error.
+
+sampling from interventional distributions using `.do()`, ... methods are similar to `.sample()`.

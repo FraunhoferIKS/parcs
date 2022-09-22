@@ -45,6 +45,17 @@ def node_parser(line, parents):
             'output_distribution': '?',
             'do_correction': True
         }
+    # check if data node
+    try:
+        data_pattern = re.compile(
+            'data\((.*)\)'
+        )
+        res = data_pattern.search(line)
+        return {'csv_dir': res.group(1)}
+    except AttributeError:
+        # it's not constant
+        pass
+
     # check if node is constant
     try:
         const_pattern = re.compile(
