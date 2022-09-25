@@ -65,9 +65,17 @@ This class of nodes allows us to read an external CSV file for the samples. The 
     :caption: :code:`graph.py`
     :linenos:
 
-Two important notes:
+.. note::
+    Data nodes must have no incoming edges in the graph description file
 
-- Data nodes must have no incoming edges in the graph description file
-- If the graph contains at least one data node, then the boolean `with_replacement` parameter is needed, in order to determine the sampling behaviour for the data nodes. If `size` parameter is larger than the size of the data node and `with_replacement=False`, sampling raises an error.
+The sampling procedure based on the errors repeats for the data nodes again. Therefore we might have duplicate samples as the a row can be selected more than once (sotchastically). If more than one columns are read from the csv file, then the graph samples *jointly*. It does so by using a shared error vector for all the data nodes, leading to selection of the same rows simultaneously.
+
+.. literalinclude:: code_blocks/b1/graph_description_data_2.yml
+    :caption: :code:`graph_description_data_2.yml`
+    :linenos:
+
+.. literalinclude:: code_blocks/b1/graph_data_2.py
+    :caption: :code:`graph.py`
+    :linenos:
 
 sampling from interventional distributions using `.do()`, ... methods are similar to `.sample()`.
