@@ -11,7 +11,7 @@ df.to_csv('dummy_data.csv')
 # main script
 nodes, edges = graph_file_parser('graph_description_data.yml')
 g = Graph(nodes=nodes, edges=edges)
-samples = g.sample(size=3, with_replacement=False)
+samples = g.sample(size=3)
 print(samples)
 #     C          A          Y
 # 0  11  22.144651  35.270247
