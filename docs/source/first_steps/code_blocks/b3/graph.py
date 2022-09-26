@@ -8,7 +8,10 @@ nodes, edges = graph_file_parser('graph_description.yml')
 g = Graph(nodes=nodes, edges=edges)
 
 pprint(g.get_info())
-# {'edges': {'A->Y': {'edge_function': 'identity', 'function_params': {}},
+# {'edges': {'A->Y': {'correction': {'offset': -0.9682150226680958,
+#                                    'scale': 2.229350605378819},
+#                     'edge_function': 'identity',
+#                     'function_params': {}},
 #            'C->A': {'edge_function': 'identity', 'function_params': {}},
 #            'C->Y': {'edge_function': 'identity', 'function_params': {}}},
 #  'nodes': {'A': {'dist_params_coefs': {'mu_': {'bias': -1.0,
@@ -35,4 +38,4 @@ pprint(g.get_info())
 #                                                   'linear': array([0., 0.])}},
 #                  'node_type': 'stochastic',
 #                  'output_distribution': 'gaussian'}}}
-#
+

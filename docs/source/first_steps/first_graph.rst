@@ -79,7 +79,7 @@ In this example, the correction transformation for Bernoulli distribution, is a 
 Reading graph info
 ------------------
 
-You can read the graph information via calling ``.get_info(type=...)``. If `type='raw'` (default), then a dictionary of nodes and edges info are returned. If `type='md'` then a markdown file including decorated report (pretty equations) will be written in the given directory via `info_dir` parameter.
+You can read the graph information via calling ``.get_info(type=...)``. The output includes information of nodes and edges, and corrections if available. If `type='raw'` (default), then a dictionary of nodes and edges info are returned. If `type='md'` then a markdown file including decorated report (pretty equations) will be written in the given directory via `info_dir` parameter.
 
 .. warning::
     Markdown report has not been implemented yet. The doc will be updated after implementation
