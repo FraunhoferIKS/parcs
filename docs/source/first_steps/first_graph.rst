@@ -75,3 +75,15 @@ In this example, the correction transformation for Bernoulli distribution, is a 
 
 .. note::
     **Node correction is always initialized upon the first batch of data**. For example, if `target_mean` option is set for node correction in the example above, the output values will be transformed such that the output has the mean equal to the `target_mean`. This is done by learning an `offset` term from the first batch which satisfies the `mean` requirements. This values will be then used for next simulations. For this purpose, the graph object always `burns` the first 500 samples, to initialize the corrections. Read more about sigmoid correction at :func:`~parcs.cdag.utils.SigmoidCorrection`.
+
+Reading graph info
+------------------
+
+You can read the graph information via calling ``.get_info(type=...)``. If `type='raw'` (default), then a dictionary of nodes and edges info are returned. If `type='md'` then a markdown file including decorated report (pretty equations) will be written in the given directory via `info_dir` parameter.
+
+.. warning::
+    Markdown report has not been implemented yet. The doc will be updated after implementation
+
+.. literalinclude:: code_blocks/b3/graph.py
+    :linenos:
+    :caption: graph.py
