@@ -49,6 +49,9 @@ def node_guideline_reader(obj):
     return nodes
 
 
+def info_md_parser(info):
+    raise NotImplementedError
+
 if __name__ == '__main__':
     example = {
         'x0': {

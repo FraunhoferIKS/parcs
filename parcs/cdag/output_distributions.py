@@ -5,8 +5,10 @@ import numpy as np
 
 DISTRIBUTION_PARAMS = {
     'gaussian': ['mu_', 'sigma_'],
-    'bernoulli': ['p_']
+    'bernoulli': ['p_'],
+    'uniform': ['mu_', 'diff_']
 }
+
 
 class GaussianDistribution:
     def __init__(self,
@@ -34,6 +36,7 @@ class GaussianDistribution:
 
         return samples
 
+
 class BernoulliDistribution:
     def __init__(self,
                  coefs=None,
@@ -54,12 +57,30 @@ class BernoulliDistribution:
         if self.do_correction:
             p_ = self._correct_param(p_)
         else:
-            assert (np.abs(p_)<=1).sum() == len(p_), 'Bern(p) probabilities are out of [0, 1] range'
+            assert (np.abs(p_) <= 1).sum() == len(p_), 'Bern(p) probabilities are out of [0, 1] range'
         samples = dists.bernoulli.ppf(errors, p_)
 
         return samples
 
+
+class UniformDistribution:
+    def __init__(self,
+                 coefs=None):
+        self.params = ['mu_', 'diff_']
+        self.coefs = coefs
+
+    def calculate(self, data, errors):
+        mu_ = dot_prod(data, self.coefs['mu_'])
+        diff_ = dot_prod(data, self.coefs['diff_'])
+        low = mu_ - (diff_/2)
+
+        samples = errors * diff_ + low
+
+        return samples
+
+
 OUTPUT_DISTRIBUTIONS = {
     'gaussian': GaussianDistribution,
-    'bernoulli': BernoulliDistribution
+    'bernoulli': BernoulliDistribution,
+    'uniform': UniformDistribution
 }

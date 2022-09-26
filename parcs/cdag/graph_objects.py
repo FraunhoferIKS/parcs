@@ -3,6 +3,7 @@ import pandas as pd
 from parcs.cdag import mapping_functions
 from parcs.cdag.utils import topological_sort, EdgeCorrection
 from parcs.cdag.output_distributions import OUTPUT_DISTRIBUTIONS
+from parcs.graph_builder.utils import info_md_parser
 
 
 class Node:
@@ -14,8 +15,6 @@ class Node:
 
     Parameters
     ----------
-    name : str, optional
-        name of the node. Optional unless the node is used in a graph
     output_distribution : str
         Selected from the available distributions. call ``graph_objects.OUTPUT_DISTRIBUTIONS`` to see the list.
     do_correction : bool, default=False
@@ -31,6 +30,7 @@ class Node:
         for each parameter, three *bias*, *linear* and *interactions* key are given.
         The bias value is a float, while linear and interaction values are numpy arrays.
     """
+
     def __init__(self,
                  name=None,
                  output_distribution=None,
@@ -38,15 +38,23 @@ class Node:
                  correction_config={},
                  dist_params_coefs=None):
         # basic attributes
+        self.name = name
         self.info = {
-            'name': name,
-            'output_distribution': output_distribution
+            'node_type': 'stochastic',
+            'output_distribution': output_distribution,
+            'dist_params_coefs': dist_params_coefs
         }
         self.output_distribution = OUTPUT_DISTRIBUTIONS[output_distribution](
             correction_config=correction_config,
             do_correction=do_correction,
             coefs=dist_params_coefs
         )
+        self.do_correction = do_correction
+
+    def get_info(self):
+        if self.do_correction:
+            self.info['correction'] = self.output_distribution.sigma_correction.get_params()
+        return self.info
 
     def calculate(self, data, parents, errors):
         """ **calculates node's output the node**
@@ -83,8 +91,6 @@ class DetNode:
 
     Parameters
     ----------
-    name : str, optional
-        name of the node. Optional unless the node is used in a graph
     function : callable
         the user-defined function that represents the node.
 
@@ -97,11 +103,16 @@ class DetNode:
     >>> n_0.calculate(data, ['N_1', 'N_2'])
     array([3, 4, 6])
     """
+
     def __init__(self,
                  name=None,
                  function=None):
-        self.info = {'name': name}
+        self.name = name
+        self.info = {'node_type': 'deterministic'}
         self.function = function
+
+    def get_info(self):
+        return self.info
 
     def calculate(self, data, parents):
         return self.function(data[parents]).values
@@ -129,14 +140,18 @@ class ConstNode:
     >>> n_0.calculate(data)
     array([3, 4, 6])
     """
+
     def __init__(self,
                  name=None,
                  value=None):
-        self.info = {'name': name}
-        self.value = value
+        self.name = name
+        self.info = {'node_type': 'constant', 'value': value}
+
+    def get_info(self):
+        return self.info
 
     def calculate(self, size_):
-        return np.ones(shape=(size_,)) * self.value
+        return np.ones(shape=(size_,)) * self.info['value']
 
 
 class DataNode:
@@ -145,8 +160,6 @@ class DataNode:
     Use this class to create a node with the samples being read from an external data file.
     If you want to construct a causal DAG, please use the :func:`~parcs.cdag.graph_objects.Graph` class instead.
 
-    # TODO: behavior is unstable if multiple data node from one csv file. must sample indices in graph, and pass to node
-
     Parameters
     ----------
     name : str, optional
@@ -154,11 +167,15 @@ class DataNode:
     csv_dir : str
         CSV file directory
     """
+
     def __init__(self,
                  name=None,
                  csv_dir=None):
-        self.info = {'name': name}
+        self.info = {'node_type': 'data'}
         self.samples = pd.read_csv(csv_dir)[name]
+
+    def get_info(self):
+        return self.info
 
     def calculate(self, sampled_errors=None):
         ind = np.floor(sampled_errors * len(self.samples))
@@ -207,13 +224,13 @@ class Edge:
     >>> x_mapped
     array([0.  , 0.12, 0.5 , 0.88, 1.  ])
     """
+
     def __init__(self,
                  name=None,
                  do_correction=False,
                  function_name=None,
                  function_params=None):
         self.name = name
-        self.parent, self.child = self.name.split('->')
         self.do_correction = do_correction
         if self.do_correction:
             self.corrector = EdgeCorrection()
@@ -223,6 +240,15 @@ class Edge:
             'function': mapping_functions.EDGE_FUNCTIONS[function_name],
             'params': function_params
         }
+        self.info = {
+            'edge_function': function_name,
+            'function_params': function_params
+        }
+
+    def get_info(self):
+        if self.do_correction:
+            self.info['correction'] = self.corrector.get_params()
+        return self.info
 
     def map(self, array=None):
         """ **maps an input array**
@@ -269,18 +295,19 @@ class Graph:
     cache : tuple of samples and error terms
         If caching is enabled upon sampling, then the result is cached in this attribute
     """
+
     def __init__(self,
                  nodes=None,
                  edges=None):
         self.nodes = {
             kwargs['name']: Node(**kwargs) if 'output_distribution' in kwargs
-                else DetNode(**kwargs) if 'function' in kwargs
-                else DataNode(**kwargs) if 'csv_dir' in kwargs
-                else ConstNode(**kwargs)
+            else DetNode(**kwargs) if 'function' in kwargs
+            else DataNode(**kwargs) if 'csv_dir' in kwargs
+            else ConstNode(**kwargs)
             for kwargs in nodes
         }
         self.node_types = {
-            name: self._node_type(name) for name in self.nodes
+            name: self.nodes[name].info['node_type'] for name in self.nodes
         }
         self.edges = {kwargs['name']: Edge(**kwargs) for kwargs in edges}
         self.parent_sets = {}
@@ -291,6 +318,18 @@ class Graph:
         # one-time sample to setup corrections
         # TODO: don't do it if no correction=True
         self.sample(size=500)
+
+    def get_info(self, type='raw', info_dir=None):
+        info = {
+            'nodes': {n: self.nodes[n].get_info() for n in self.nodes},
+            'edges': {e: self.edges[e].get_info() for e in self.edges}
+        }
+        if type == 'raw':
+            return info
+        elif type == 'md':
+            with open(info_dir, 'w') as file:
+                file.write(info_md_parser(info))
+            return None
 
     def _set_adj_matrix(self):
         num_n = len(self.nodes)
@@ -328,33 +367,20 @@ class Graph:
 
         return self.nodes[node_name].calculate(inputs, parents)
 
-    def  _single_const_round(self, node_name, size_):
+    def _single_const_round(self, node_name, size_):
         return self.nodes[node_name].calculate(size_)
 
-    def  _single_data_round(self, node_name, sampled_errors):
+    def _single_data_round(self, node_name, sampled_errors):
         return self.nodes[node_name].calculate(sampled_errors=sampled_errors[node_name])
 
-    def _node_type(self, node_name):
-        node = self.nodes[node_name]
-        if isinstance(node, Node):
-            return 'stoch'
-        elif isinstance(node, DetNode):
-            return 'det'
-        elif isinstance(node, ConstNode):
-            return 'const'
-        elif isinstance(node, DataNode):
-            return 'data'
-        else:
-            return TypeError
-
     def _calc_non_interventions(self, node_name=None, data=None, sampled_errors=None):
-        if self.node_types[node_name] == 'stoch':
+        if self.node_types[node_name] == 'stochastic':
             return self._single_sample_round(
                 node_name=node_name, data=data, sampled_errors=sampled_errors
             )
-        elif self.node_types[node_name] == 'det':
+        elif self.node_types[node_name] == 'deterministic':
             return self._single_det_round(node_name=node_name, data=data)
-        elif self.node_types[node_name] == 'const':
+        elif self.node_types[node_name] == 'constant':
             return self._single_const_round(node_name=node_name, size_=len(sampled_errors))
         elif self.node_types[node_name] == 'data':
             return self._single_data_round(node_name=node_name, sampled_errors=sampled_errors)
@@ -367,7 +393,7 @@ class Graph:
             # sample new errors
             sampled_errors = pd.DataFrame(
                 np.random.uniform(size=(size, len(self.adj_matrix))),
-                columns = self.adj_matrix.columns
+                columns=self.adj_matrix.columns
             )
             # unify the data nodes.
             for i in range(1, len(data_nodes)):
@@ -395,7 +421,8 @@ class Graph:
         return_errors : bool, default=False
             If ``True`` then method returns ``samples, errors``.
         cache_sampling : bool, default=True
-            If ``True``, then the ``cache_name`` must be given. The samples will be cached then in the attribute ``cache``
+            If ``True``, then the ``cache_name`` must be given.
+            The samples will be cached then in the attribute ``cache``
         cache_name : str
             If ``cache_sampling=True`` then this argument is necessary.
             The cached results are stored in ``Graph.cache[cache_name]``
@@ -403,9 +430,6 @@ class Graph:
             If ``True``, the ``sampled_errors`` arg must be given. The ``size`` argument will be ignored.
         sampled_errors : pd.DataFrame
             The result of other sample calls with ``return_errors=True``.
-        with_replacement : bool
-            If graph contains at least 1 Data node, then you must specify if sampling from the data node
-            is with or without replacement. see errors
 
         Returns
         -------
@@ -427,7 +451,6 @@ class Graph:
             use_sampled_errors=use_sampled_errors, size=size, sampled_errors=sampled_errors
         )
 
-
         for node_name in topological_sort(self.adj_matrix):
             data[node_name] = self._calc_non_interventions(
                 node_name=node_name, data=data, sampled_errors=sampled_errors
@@ -448,7 +471,7 @@ class Graph:
 
         Parameters
         ----------
-        size, use_sampled_errors, sampled_errors, return_errors, cache_sampling, cache_name, with_replacement
+        size, use_sampled_errors, sampled_errors, return_errors, cache_sampling, cache_name
             see :func:`~parcs.cdag.graph_objects.Graph.sample`
         interventions : dict
             dictionary of interventions in the form of ``{'<node_to_be_intervened>': <intervention_value>}``
@@ -492,7 +515,7 @@ class Graph:
 
         Parameters
         ----------
-        size, use_sampled_errors, sampled_errors, return_errors, cache_sampling, cache_name, with_replacement
+        size, use_sampled_errors, sampled_errors, return_errors, cache_sampling, cache_name
             see :func:`~parcs.cdag.graph_objects.Graph.sample`
         intervene_on : str
             name of the node subjected to intervention
@@ -536,14 +559,14 @@ class Graph:
 
     def do_self(self, size=None, func=None, intervene_on=None,
                 use_sampled_errors=False, sampled_errors=None, return_errors=False,
-                cache_sampling=False, cache_name=None, with_replacement=None):
+                cache_sampling=False, cache_name=None):
         """**sample from interventional distribution**
         This methods sample from an interventional distribution which is modeled by intervention(s) on the main graph.
         This method accepts interventions defined as intervening on a node based on its observed value.
 
         Parameters
         ----------
-        size, use_sampled_errors, sampled_errors, return_errors, cache_sampling, cache_name, with_replacement
+        size, use_sampled_errors, sampled_errors, return_errors, cache_sampling, cache_name
             see :func:`~parcs.cdag.graph_objects.Graph.sample`
         intervene_on : str
             name of the node subjected to intervention
@@ -588,6 +611,6 @@ def m_graph_convert(data: pd.DataFrame, missingness_prefix='R_', indicator_is_mi
     # masking
     for r in r_columns:
         x = r[len_prefix:]
-        data[x][data[r]==indicator_is_missed] = np.nan
+        data[x][data[r] == indicator_is_missed] = np.nan
 
     return data[x_columns]

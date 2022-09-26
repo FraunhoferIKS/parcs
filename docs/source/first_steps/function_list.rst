@@ -44,6 +44,23 @@ The distributions are provided by `Scipy's` `stats <https://docs.scipy.org/doc/s
      - standard deviation of the distribution
      - :ref:`Sigmoid correction <sigmoid_correction>`
 
+``uniform``
+------------
+
+.. list-table::
+   :widths: 20 60 20
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+     - Correction
+   * - ``mu_``
+     - middle point of uniform range
+     - N/A
+   * - ``diff_``
+     - `high - low`. can be negative
+     - N/A
+
 .. _available_edge_functions:
 
 Edge functions

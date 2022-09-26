@@ -213,12 +213,15 @@ class SigmoidCorrection:
         self.config = {
             'lower': lower,
             'upper': upper,
-            'offset': 0,
-            'offset_for_target_mean': 0
+            'offset': 0
         }
         self.is_initialized = False
         self.to_center = to_center
         self.target_mean = target_mean
+
+    def get_params(self):
+        assert self.is_initialized
+        return self.config
 
     def transform(self, array):
         """
@@ -296,8 +299,14 @@ class EdgeCorrection:
     """
     def __init__(self):
         self.is_initialized = False
-        self.offset = None
-        self.scale = None
+        self.config = {
+            'offset': None,
+            'scale': None
+        }
+
+    def get_params(self):
+        assert self.is_initialized
+        return self.config
 
     def transform(self, array):
         """
@@ -324,8 +333,8 @@ class EdgeCorrection:
                     we recommend to run the first simulation run with greater size
                     """
                 )
-            self.offset = array.mean()
-            self.scale = array.std()
+            self.config['offset'] = array.mean()
+            self.config['scale'] = array.std()
             self.is_initialized = True
 
-        return (array - self.offset) / self.scale
+        return (array - self.config['offset']) / self.config['scale']
