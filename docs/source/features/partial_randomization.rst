@@ -67,8 +67,57 @@ using the `FreeRandomizer` class, we generate a graph object.
 
 Nodes are named `H_<num>` by default. You can change the name prefix by the key ``node_name_prefix`` in the guideline (under graph key). The value must be string.
 
+Connect Randomizer
+==================
+
+This class randomizes the causal flow from a parent to a child graph. To clarify this functionality, suppose we want to simulate the following data model.
+
+.. math::
+
+    L = AL
+    Z = BZ + CL
+
+where :math:`Z` and :math:`L` are random vectors, :math:`A` and :math:`B` are a lower triangular coefficient matrices, and :math:`C` is another arbitrary coefficient matrix. In this model, :math:`L` and :math:`Z` are normal simulated graphs, while :math:`Z` receives causal edges from :math:`L` via :math:`C` matrix.
+
+This model can be simulated as the following:
+
+.. literalinclude:: code_blocks/b8/graph_description_L.yml
+    :linenos:
+    :caption: `graph description for L`
+
+This description is a normal PARCS graph description file for the parent graph.
+
+.. literalinclude:: code_blocks/b8/graph_description_Z.yml
+    :linenos:
+    :emphasize-lines: 4, 5
+    :caption: `graph description for Z`
+
+The second graph description file has a minor special style. In line 4 and 5 you can see a symbol `*` behind `mu_` distribution parameters. This syntax tells PARCS to affect these parameters when external causal edges (from L) connect to the graph. Similarly, the fact that the node `Z_1` doesn't have an asterisk means that PARCS will not let any edge to go to `Z_1`.
+
+Similar to other randomization classes, `ConnectRandomizer` also requires a (normal) guideline file.
+
+Finally, the graph can be simulated as follows:
+
+.. literalinclude:: code_blocks/b8/graph.py
+    :linenos:
+    :caption: `graph.py`
+
+argument `adj_matrix_mask` is a further restriction by the user to limit the new edges. For example we can suppress any outgoing edge from `L_1` if in this mask, first row is all zero (rows and columns follow the same order of the nodes in the graph description file of the parent and child graphs respectively).
+
+ConnectionRandomizer creates a temp graph description file as an intermediate step, which deletes it after the process if ``delete_temp_graph_description=False``. To check how the class works, we can have a look at this temp file.
+
+.. literalinclude:: code_blocks/b8/combined_gdf.yml
+    :linenos:
+    :emphasize-lines: 6, 8, 9, 13, 15
+    :caption: temp file: `combined_gdf.yml`
+
+The highlighted lines show the traces of the new connection between graphs. Note that this description file is next passed to the `ParamRandomizer`, the parent class of `ConnectionRandomizer`, and that is why there are question marks in the description file.
+
+.. note::
+    The density of new edges follows the `graph_density` entry in the guideline file. However, based on asterisks and adjacency matrix mask, number of edges might be less than intended. E.g., `graph_density: 1` tells PARCS to fully connect the parent graph to child graph. However, if the child nodes doesn't have asterisks in parameters, PARCS will skip all nodes (as we have requested no parameter to be affected by new edges), hence no new edges will be added.
+
 Edge correction
----------------
+===============
 
 When randomizing the graph parameters, we potentially face two undesired issues:
 

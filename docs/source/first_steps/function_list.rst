@@ -11,7 +11,7 @@ For all functions and distributions, you can find a link to the API doc on top o
 Output distributions
 ====================
 
-The distributions are provided by `Scipy's` `stats <https://docs.scipy.org/doc/scipy/reference/stats.html>`_ module. Instead of calling the ``.rvs()`` method, however, we use the ``.ppf()`` (precent point function) method to obtain realizations given the error terms.
+The distributions are provided by `Scipy's` `stats <https://docs.scipy.org/doc/scipy/reference/stats.html>`_ module. Instead of calling the ``.rvs()`` method, however, we use the ``.ppf()`` (percent point function) method to obtain realizations given the error terms.
 
 ``bernoulli``
 -------------
