@@ -1,5 +1,6 @@
 from parcs.cdag.graph_objects import Graph
 from parcs.graph_builder.randomizer import ConnectRandomizer
+import pandas as pd
 import numpy as np
 np.random.seed(2022)
 
@@ -8,7 +9,9 @@ rndz = ConnectRandomizer(
     parent_graph_dir='graph_description_L.yml',
     child_graph_dir='graph_description_Z.yml',
     guideline_dir='simple_guideline.yml',
-    adj_matrix_mask=np.ones(shape=(3, 3))
+    adj_matrix_mask=pd.DataFrame(np.ones(shape=(3, 3)),
+                                 index=('L_1', 'L_2', 'L_3'),
+                                 columns=('Z_1', 'Z_2', 'Z_3'))
 )
 nodes, edges = rndz.get_graph_params()
 g = Graph(nodes=nodes, edges=edges)

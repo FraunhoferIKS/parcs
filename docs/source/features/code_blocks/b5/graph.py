@@ -1,5 +1,6 @@
-from parcs.cdag.graph_objects import Graph, m_graph_convert
+from parcs.helpers.missing_data import m_graph_convert
 from parcs.graph_builder.parsers import graph_file_parser
+from parcs.cdag.graph_objects import Graph
 import numpy as np
 np.random.seed(2022)
 
@@ -8,15 +9,15 @@ g = Graph(nodes=nodes, edges=edges)
 samples = g.sample(size=5)
 print(samples)
 #           C         A  R_A
-# 0  1.500622  3.341016  1.0
-# 1  0.774417  2.003075  1.0
-# 2 -1.140551 -1.970714  0.0
-# 3  0.590632  1.487290  0.0
-# 4 -0.652315 -2.673828  0.0
-print(m_graph_convert(samples, missingness_prefix='R_'))
-#           A         C
-# 0  3.341016  1.500622
-# 1  2.003075  0.774417
-# 2       NaN -1.140551
-# 3       NaN  0.590632
-# 4       NaN -0.652315
+# 0  0.774417  2.049457  0.0
+# 1 -0.652315 -1.713998  0.0
+# 2  1.310389  3.075017  1.0
+# 3  0.240281 -0.888637  0.0
+# 4 -0.884086 -2.497936  0.0
+print(m_graph_convert(samples, missingness_prefix='R_', shared_subscript=False))
+#           C         A
+# 0  0.774417       NaN
+# 1 -0.652315       NaN
+# 2  1.310389  3.075017
+# 3  0.240281       NaN
+# 4 -0.884086       NaN

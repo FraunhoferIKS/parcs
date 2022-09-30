@@ -67,6 +67,8 @@ using the `FreeRandomizer` class, we generate a graph object.
 
 Nodes are named `H_<num>` by default. You can change the name prefix by the key ``node_name_prefix`` in the guideline (under graph key). The value must be string.
 
+.. _connect_randomizer:
+
 Connect Randomizer
 ==================
 
@@ -74,8 +76,10 @@ This class randomizes the causal flow from a parent to a child graph. To clarify
 
 .. math::
 
-    L = AL
-    Z = BZ + CL
+    \begin{aligned}
+        L &= AL \\
+        Z &= BZ + CL
+    \end{aligned}
 
 where :math:`Z` and :math:`L` are random vectors, :math:`A` and :math:`B` are a lower triangular coefficient matrices, and :math:`C` is another arbitrary coefficient matrix. In this model, :math:`L` and :math:`Z` are normal simulated graphs, while :math:`Z` receives causal edges from :math:`L` via :math:`C` matrix.
 
@@ -108,7 +112,7 @@ ConnectionRandomizer creates a temp graph description file as an intermediate st
 
 .. literalinclude:: code_blocks/b8/combined_gdf.yml
     :linenos:
-    :emphasize-lines: 6, 8, 9, 13, 15
+    :emphasize-lines: 10-12
     :caption: temp file: `combined_gdf.yml`
 
 The highlighted lines show the traces of the new connection between graphs. Note that this description file is next passed to the `ParamRandomizer`, the parent class of `ConnectionRandomizer`, and that is why there are question marks in the description file.

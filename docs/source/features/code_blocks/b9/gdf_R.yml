@@ -1,0 +1,6 @@
+# nodes
+R_1: bernoulli(*p_=?), correction[]
+R_2: bernoulli(*p_=?), correction[]
+R_3: bernoulli(*p_=?), correction[]
+R_4: bernoulli(*p_=?), correction[]
+# edges
