@@ -2,10 +2,12 @@ import yaml
 import numpy as np
 from parcs.cdag.output_distributions import DISTRIBUTION_PARAMS
 
+
 def config_parser(dir_):
     with open(dir_, 'r') as stream:
         conf = yaml.safe_load(stream)
     return conf
+
 
 def config_dumper(dict_, dir):
     with open(dir, 'w') as outfile:
@@ -22,6 +24,7 @@ def dist_param_coefs_reader(obj, dist):
             'interactions': np.array(obj[param]['interactions']),
         } for param in given_params
     }
+
 
 def empty_dist_param_coefs(dist):
     return {

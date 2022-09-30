@@ -74,6 +74,7 @@ def edge_gaussian_rbf(array=None,
 
     """
     expon = -alpha * ((array - beta)**tau)
+
     return gamma + ((-1)**gamma) * np.exp(expon)
 
 
@@ -108,10 +109,10 @@ FUNCTION_PARAMS = {
 
 
 if __name__ == '__main__':
-    arr = np.array(range(100))
+    arr = np.random.normal(0, 1, size=300)
 
     # v = edge_sigmoid_new(array=arr)
-    v = edge_gaussian_rbf(array=arr)
+    v = edge_gaussian_rbf(array=arr, alpha=1, beta=-1, gamma=1)
 
     from matplotlib import pyplot as plt
     plt.scatter(arr, v)

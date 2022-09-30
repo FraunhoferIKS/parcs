@@ -598,19 +598,3 @@ class Graph:
             return data, sampled_errors
         else:
             return data
-
-
-def m_graph_convert(data: pd.DataFrame, missingness_prefix='R_', indicator_is_missed=0):
-    len_prefix = len(missingness_prefix)
-    # take Rs: it starts with prefix, and subtracting the prefix gives the name of another node
-    r_columns = [
-        i for i in data.columns if i[:len_prefix] == missingness_prefix and i[len_prefix:] in data.columns
-    ]
-
-    x_columns = set(data.columns) - set(r_columns)
-    # masking
-    for r in r_columns:
-        x = r[len_prefix:]
-        data[x][data[r] == indicator_is_missed] = np.nan
-
-    return data[x_columns]

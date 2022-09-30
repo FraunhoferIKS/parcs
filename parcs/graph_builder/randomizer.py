@@ -1,13 +1,14 @@
-import os
-import numpy as np
 from copy import deepcopy
-import pandas as pd
-from parcs.cdag.output_distributions import DISTRIBUTION_PARAMS
 from parcs.cdag.mapping_functions import FUNCTION_PARAMS
 from parcs.graph_builder import parsers
-from parcs.graph_builder.utils import config_parser, config_dumper
 from parcs.cdag.utils import get_interactions_length, topological_sort
-from itertools import combinations as comb
+from itertools import product, combinations
+from parcs.graph_builder.utils import config_parser, config_dumper
+from parcs.cdag.output_distributions import OUTPUT_DISTRIBUTIONS, DISTRIBUTION_PARAMS
+import pandas as pd
+import numpy as np
+import re
+import os
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -78,12 +79,12 @@ class ParamRandomizer:
                         self.directive_picker(self.guideline['nodes'][dist][param][0])
                 if node['dist_params_coefs'][param]['linear'] == '?':
                     node['dist_params_coefs'][param]['linear'] = np.array([
-                        self.directive_picker(self.guideline['nodes'][dist][param][0])
+                        self.directive_picker(self.guideline['nodes'][dist][param][1])
                         for _ in range(num_parents)
                     ])
                 if node['dist_params_coefs'][param]['interactions'] == '?':
                     node['dist_params_coefs'][param]['interactions'] = np.array([
-                        self.directive_picker(self.guideline['nodes'][dist][param][0])
+                        self.directive_picker(self.guideline['nodes'][dist][param][2])
                         for _ in range(num_interactions)
                     ])
         return self
@@ -192,7 +193,7 @@ class ExtendRandomizer(ParamRandomizer):
 
     def _extend_edges(self):
         current_edges = [e['name'] for e in self.edges]
-        for par, child in comb(self.adj_matrix.columns, 2):
+        for par, child in combinations(self.adj_matrix.columns, 2):
             if '{}->{}'.format(par, child) not in current_edges and self.adj_matrix.loc[par, child] == 1:
                 self.edges.append({
                     'name': '{}->{}'.format(par, child),
@@ -207,6 +208,85 @@ class ExtendRandomizer(ParamRandomizer):
 class FreeRandomizer(ExtendRandomizer):
     def __init__(self, guideline_dir=None):
         super().__init__(graph_dir=None, guideline_dir=guideline_dir)
+
+
+class ConnectRandomizer(ParamRandomizer):
+    def __init__(self, parent_graph_dir=None, child_graph_dir=None,
+                 guideline_dir=None, adj_matrix_mask=None,
+                 delete_temp_graph_description=True):
+        pgd = config_parser(parent_graph_dir)
+        cgd = config_parser(child_graph_dir)
+        n_p = [n for n in pgd if '->' not in n]
+        l_p = len(n_p)
+        n_c = [n for n in cgd if '->' not in n]
+        e_c = [n for n in cgd if '->' in n]
+        l_c = len(n_c)
+
+        guideline = config_parser(guideline_dir)
+
+        # sample connection adj_matrix
+        density = self.directive_picker(guideline['graph']['graph_density'])
+        adj_matrix = np.random.choice([0, 1], p=[1-density, density], size=(l_p, l_c))
+        adj_matrix = np.multiply(adj_matrix, adj_matrix_mask.values)
+        adj_matrix = pd.DataFrame(adj_matrix, index=adj_matrix_mask.index, columns=adj_matrix_mask.columns)
+        # make additional edges
+        e_opt = list(guideline['edges'].keys())
+        add_edges = {
+            '{}->{}'.format(p, c): '{}(?), correction[]'.format(np.random.choice(e_opt))
+            for p, c in product(n_p, n_c) if adj_matrix.loc[p, c] == 1
+        }
+        # modify receiving child nodes
+        for n in n_c:
+            if adj_matrix[n].sum() == 0: # no added edge
+                # delete all stars and move on
+                cgd[n] = cgd[n].replace('*', '')
+                continue
+            dist, arg, rest = re.split('[()]', cgd[n].replace(' ', ''))
+            assert dist in OUTPUT_DISTRIBUTIONS, 'non stochastic child node is receiving additional edge'
+            params = arg.split(',')
+            star_flag = False
+            for i in range(len(params)):
+                if params[i][0] != '*':
+                    if i == len(params)-1 and not star_flag: # last param and still no star
+                        # remove the new edges which doesn't do anything
+                        e_names = [i for i in add_edges if i.split('->')[1] == n]
+                        for e in e_names:
+                            del add_edges[e]
+                    continue
+                star_flag = True # has at least one star param
+                # remove '*'
+                params[i] = params[i][1:]
+                k, v = params[i].split('=')
+                if v == '?':
+                    continue
+                # add new parents
+                current_par = [p for p in n_c if '{}->{}'.format(p, n) in e_c]
+                new_par = [p for p in n_p if adj_matrix.loc[p, n] == 1]
+
+                ## linear terms
+                coefs = [self.directive_picker(guideline['nodes'][dist][k][1]) for _ in range(len(new_par))]
+                for coef, par in zip(coefs, new_par):
+                    if coef > 0:
+                        v += '+{}{}'.format(np.round(coef, 2), par)
+                    elif coef < 0:
+                        v += '{}{}'.format(np.round(coef, 2), par)
+                ## interaction terms
+                terms = [i for i in combinations(new_par, 2)] + [i for i in product(new_par, current_par)]
+                terms = [''.join(i) for i in terms]
+                coefs = [self.directive_picker(guideline['nodes'][dist][k][2]) for _ in range(len(terms))]
+                for coef, par in zip(coefs, terms):
+                    if coef > 0:
+                        v += '+{}{}'.format(np.round(coef, 2), par)
+                    elif coef < 0:
+                        v += '{}{}'.format(np.round(coef, 2), par)
+                params[i] = k + '=' + v
+            arg = ','.join(params)
+            cgd[n] = '{}({}){}'.format(dist, arg, rest)
+        gd = {**cgd, **pgd, **add_edges}
+        config_dumper(gd, 'combined_gdf.yml')
+        super().__init__(graph_dir='combined_gdf.yml', guideline_dir=guideline_dir)
+        if delete_temp_graph_description:
+            os.remove('combined_gdf.yml')
 
 
 def guideline_iterator(guideline_dir=None, to_iterate=None, steps=None, repeat=1):
