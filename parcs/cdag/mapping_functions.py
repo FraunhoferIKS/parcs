@@ -77,6 +77,36 @@ def edge_gaussian_rbf(array=None,
 
     return gamma + ((-1)**gamma) * np.exp(expon)
 
+def edge_arctan(array=None,
+                alpha=1, beta=0, gamma=0):
+    r"""
+    .. math::
+        \begin{align}
+            z^*_i = \gamma + (-1)^\gamma .
+            \arctan{(\alpha(z_i-\beta))},
+        \end{align}
+
+    .. warning::
+        put images
+
+    Parameters
+    ----------
+    array : array-like
+        input array
+    alpha : float, default=1.0
+        scale parameter. Reasonable range in `[0.5, 3]`
+    beta : float, default=0.0
+        offset parameter. Reasonable range in `[-0.8, 0.8]`
+    gamma : {0, 1}, default=0
+        mirroring parameter.
+
+    Returns
+    -------
+    transformed_array : array-like
+
+    """
+    return gamma + ((-1)**gamma) * np.arctan(alpha*(array-beta))
+
 
 def edge_identity(array=None):
     r"""
@@ -98,13 +128,15 @@ def edge_identity(array=None):
 EDGE_FUNCTIONS = {
     'identity': edge_identity,
     'sigmoid': edge_sigmoid,
-    'gaussian_rbf': edge_gaussian_rbf
+    'gaussian_rbf': edge_gaussian_rbf,
+    'arctan': edge_arctan
 }
 
 FUNCTION_PARAMS = {
     'identity': [],
     'sigmoid': ['alpha', 'beta', 'gamma', 'tau'],
-    'gaussian_rbf': ['alpha', 'beta', 'gamma', 'tau']
+    'gaussian_rbf': ['alpha', 'beta', 'gamma', 'tau'],
+    'arctan': ['alpha', 'beta', 'gamma']
 }
 
 
