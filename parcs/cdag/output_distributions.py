@@ -71,7 +71,9 @@ class BernoulliDistribution:
 
 class UniformDistribution:
     def __init__(self,
-                 coefs=None):
+                 coefs=None,
+                 do_correction=False,
+                 correction_config=None):
         self.params = ['mu_', 'diff_']
         self.coefs = coefs
 
