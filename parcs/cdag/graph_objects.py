@@ -286,6 +286,9 @@ class Graph:
         List of dictionaries whose keys are kwargs of the :func:`~parcs.cdag.graph_objects.Node` object.
     edges : list of dicts
         List of dictionaries whose keys are kwargs of the :func:`~parcs.cdag.graph_objects.Edge` object.
+    dummy_node_prefix : str
+        the prefix in the graph description file which identifies dummy nodes: dummy nodes will be suppressed
+        from the output
 
     Attributes
     ----------
@@ -298,7 +301,8 @@ class Graph:
 
     def __init__(self,
                  nodes=None,
-                 edges=None):
+                 edges=None,
+                 dummy_node_prefix='dummy_'):
         self.nodes = {
             kwargs['name']: Node(**kwargs) if 'output_distribution' in kwargs
             else DetNode(**kwargs) if 'function' in kwargs
@@ -306,6 +310,8 @@ class Graph:
             else ConstNode(**kwargs)
             for kwargs in nodes
         }
+        dummy_len = len(dummy_node_prefix)
+        self.dummy_names = [n for n in self.nodes if n[:dummy_len] == dummy_node_prefix]
         self.node_types = {
             name: self.nodes[name].info['node_type'] for name in self.nodes
         }
@@ -456,6 +462,7 @@ class Graph:
                 node_name=node_name, data=data, sampled_errors=sampled_errors
             )
 
+        data.drop(self.dummy_names, axis=1, inplace=True)
         if cache_sampling:
             self.cache[cache_name] = (data, sampled_errors)
         if return_errors:
@@ -484,6 +491,8 @@ class Graph:
         samples, errors : pd.DataFrame, pd.DataFrame
             If ``return_errors=True``. See :func:`~parcs.cdag.graph_objects.Graph.sample`
         """
+        for i in interventions:
+            assert i not in self.dummy_names, 'cannot intervene on dummy node {}'.format(i)
         data = pd.DataFrame([])
         sampled_errors = self._get_errors(
             use_sampled_errors=use_sampled_errors, size=size, sampled_errors=sampled_errors
@@ -498,6 +507,7 @@ class Graph:
                 array = np.ones(shape=(size,)) * interventions[node_name]
             data[node_name] = array
 
+        data.drop(self.dummy_names, axis=1, inplace=True)
         if cache_sampling:
             self.cache[cache_name] = (data, sampled_errors)
         if return_errors:
@@ -532,6 +542,7 @@ class Graph:
         samples, errors : pd.DataFrame, pd.DataFrame
             If ``return_errors=True``. See :func:`~parcs.cdag.graph_objects.Graph.sample`
         """
+        assert intervene_on not in self.dummy_names, 'cannot intervene on dummy node {}'.format(intervene_on)
         data = pd.DataFrame([])
         sampled_errors = self._get_errors(
             use_sampled_errors=use_sampled_errors, size=size, sampled_errors=sampled_errors
@@ -550,6 +561,7 @@ class Graph:
                 array = data[inputs].apply(lambda x: func(*x.values), axis=1)
             data[node_name] = array
 
+        data.drop(self.dummy_names, axis=1, inplace=True)
         if cache_sampling:
             self.cache[cache_name] = (data, sampled_errors)
         if return_errors:
@@ -580,6 +592,7 @@ class Graph:
         samples, errors : pd.DataFrame, pd.DataFrame
             If ``return_errors=True``. See :func:`~parcs.cdag.graph_objects.Graph.sample`
         """
+        assert intervene_on not in self.dummy_names, 'cannot intervene on dummy node {}'.format(intervene_on)
         data = pd.DataFrame([])
         sampled_errors = self._get_errors(
             use_sampled_errors=use_sampled_errors, size=size, sampled_errors=sampled_errors
@@ -592,6 +605,7 @@ class Graph:
             if intervene_on == node_name:
                 data[node_name] = data[node_name].apply(func)
 
+        data.drop(self.dummy_names, axis=1, inplace=True)
         if cache_sampling:
             self.cache[cache_name] = (data, sampled_errors)
         if return_errors:
