@@ -31,6 +31,10 @@ class GaussianDistribution:
         sigma_ = dot_prod(data, self.coefs['sigma_'])
         if self.do_correction:
             mu_, sigma_ = self._correct_param(mu_, sigma_)
+        elif isinstance(sigma_, np.ndarray):
+            assert (sigma_ >= 0).sum() == len(sigma_), 'sigma_ has negative values'
+        else:
+            assert sigma_ >= 0, 'sigma_ has negative values'
 
         samples = dists.norm.ppf(errors, loc=mu_, scale=sigma_)
 
@@ -56,8 +60,10 @@ class BernoulliDistribution:
         p_ = dot_prod(data, self.coefs['p_'])
         if self.do_correction:
             p_ = self._correct_param(p_)
+        elif isinstance(p_, np.ndarray):
+            assert (p_ <= 1).sum() == len(p_), 'Bern(p) probabilities are out of [0, 1] range'
         else:
-            assert (np.abs(p_) <= 1).sum() == len(p_), 'Bern(p) probabilities are out of [0, 1] range'
+            assert 0 <= p_ <= 1, 'Bern(p) probabilities are out of [0, 1] range'
         samples = dists.bernoulli.ppf(errors, p_)
 
         return samples
