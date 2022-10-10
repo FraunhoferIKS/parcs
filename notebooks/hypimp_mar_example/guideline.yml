@@ -1,0 +1,7 @@
+graph:
+  graph_density: 1
+nodes:
+  bernoulli:
+    p_: [ [f-range, -1, 1] , [f-range, -1, 1], [f-range, -10, 10] ]
+edges:
+  identity: null
