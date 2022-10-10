@@ -71,7 +71,7 @@ def R_attrition_adj_matrix(size=None, step=None, density=1.0):
     return adj_matrix
 
 def indicator_graph_description_file(adj_matrix=None, node_names=None, prefix='R', subscript_only=False,
-                                     file_dir=None):
+                                     file_dir=None, miss_ratio=None, supress_asteriks=False):
     if subscript_only:
         sub = [n.split('_')[1] for n in node_names]
     else:
@@ -79,15 +79,24 @@ def indicator_graph_description_file(adj_matrix=None, node_names=None, prefix='R
     r_names = ['{}_{}'.format(prefix, s) for s in sub]
     adj_matrix = pd.DataFrame(adj_matrix, index=r_names, columns=r_names)
 
+    if miss_ratio is None:
+        ratio = ''
+    else:
+        assert 0 < miss_ratio < 1
+        ratio = 'target_mean={}'.format(1-miss_ratio)
+    if supress_asteriks:
+        asteriks = ''
+    else:
+        asteriks = '*'
     file = '# nodes\n'
     for r in r_names:
-        file += '{}: bernoulli(p_=?), correction[]\n'.format(r)
+        file += '{r}: bernoulli({a}p_=?), correction[{ratio}]\n'.format(r=r, a=asteriks, ratio=ratio)
     file += '# edges\n'
     for r1, r2 in combinations(r_names, 2):
         if adj_matrix.loc[r1, r2] == 1:
-            file += '{}->{}: free\n'.format(r1, r2)
+            file += '{}->{}: random\n'.format(r1, r2)
         elif adj_matrix.loc[r2, r1] == 1:
-            file += '{}->{}: free\n'.format(r2, r1)
+            file += '{}->{}: random\n'.format(r2, r1)
     with open(file_dir, 'w') as gdf:
         gdf.write(file)
     return None
