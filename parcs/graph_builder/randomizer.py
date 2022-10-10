@@ -48,16 +48,20 @@ class ParamRandomizer:
 
     def _set_node_distributions(self):
         for node in self.nodes:
-            # check if distribution is set
-            if node['output_distribution'] == '?':
-                # pick a distribution
-                dist = np.random.choice(list(self.guideline['nodes'].keys()))
-                node['output_distribution'] = dist
-                # set empty dist param coefs
-                node['dist_params_coefs'] = {
-                    param: {k: '?' for k in ['bias', 'linear', 'interactions']}
-                    for param in DISTRIBUTION_PARAMS[dist]
-                }
+            try:
+                assert 'output_distribution' in node
+                # check if distribution is set
+                if node['output_distribution'] == '?':
+                    # pick a distribution
+                    dist = np.random.choice(list(self.guideline['nodes'].keys()))
+                    node['output_distribution'] = dist
+                    # set empty dist param coefs
+                    node['dist_params_coefs'] = {
+                        param: {k: '?' for k in ['bias', 'linear', 'interactions']}
+                        for param in DISTRIBUTION_PARAMS[dist]
+                    }
+            except AssertionError:
+                continue
         return self
 
     def _fill_in_edges(self):
@@ -70,23 +74,27 @@ class ParamRandomizer:
 
     def _fill_in_nodes(self):
         for node in self.nodes:
-            dist = node['output_distribution']
-            num_parents = len(self.nodes_parents[node['name']])
-            num_interactions = get_interactions_length(num_parents)
-            for param in node['dist_params_coefs']:
-                if node['dist_params_coefs'][param]['bias'] == '?':
-                    node['dist_params_coefs'][param]['bias'] = \
-                        self.directive_picker(self.guideline['nodes'][dist][param][0])
-                if node['dist_params_coefs'][param]['linear'] == '?':
-                    node['dist_params_coefs'][param]['linear'] = np.array([
-                        self.directive_picker(self.guideline['nodes'][dist][param][1])
-                        for _ in range(num_parents)
-                    ])
-                if node['dist_params_coefs'][param]['interactions'] == '?':
-                    node['dist_params_coefs'][param]['interactions'] = np.array([
-                        self.directive_picker(self.guideline['nodes'][dist][param][2])
-                        for _ in range(num_interactions)
-                    ])
+            try:
+                assert 'output_distribution' in node
+                dist = node['output_distribution']
+                num_parents = len(self.nodes_parents[node['name']])
+                num_interactions = get_interactions_length(num_parents)
+                for param in node['dist_params_coefs']:
+                    if node['dist_params_coefs'][param]['bias'] == '?':
+                        node['dist_params_coefs'][param]['bias'] = \
+                            self.directive_picker(self.guideline['nodes'][dist][param][0])
+                    if node['dist_params_coefs'][param]['linear'] == '?':
+                        node['dist_params_coefs'][param]['linear'] = np.array([
+                            self.directive_picker(self.guideline['nodes'][dist][param][1])
+                            for _ in range(num_parents)
+                        ])
+                    if node['dist_params_coefs'][param]['interactions'] == '?':
+                        node['dist_params_coefs'][param]['interactions'] = np.array([
+                            self.directive_picker(self.guideline['nodes'][dist][param][2])
+                            for _ in range(num_interactions)
+                        ])
+            except AssertionError:
+                continue
         return self
 
     def _setup(self):
