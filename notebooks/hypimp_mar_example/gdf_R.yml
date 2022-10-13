@@ -1,23 +1,7 @@
 # nodes
-R_6: bernoulli(*p_=?), correction[target_mean=0.7]
-R_0: bernoulli(*p_=?), correction[target_mean=0.7]
-R_4: bernoulli(*p_=?), correction[target_mean=0.7]
-R_7: bernoulli(*p_=?), correction[target_mean=0.7]
-R_3: bernoulli(*p_=?), correction[target_mean=0.7]
-R_5: bernoulli(*p_=?), correction[target_mean=0.7]
+R_8: bernoulli(*p_=?), correction[target_mean=0.5]
+R_0: bernoulli(*p_=?), correction[target_mean=0.5]
+R_4: bernoulli(*p_=?), correction[target_mean=0.5]
+R_3: bernoulli(*p_=?), correction[target_mean=0.5]
+R_2: bernoulli(*p_=?), correction[target_mean=0.5]
 # edges
-R_6->R_0: random
-R_6->R_4: random
-R_6->R_7: random
-R_6->R_3: random
-R_6->R_5: random
-R_0->R_4: random
-R_0->R_7: random
-R_0->R_3: random
-R_0->R_5: random
-R_4->R_7: random
-R_4->R_3: random
-R_4->R_5: random
-R_7->R_3: random
-R_7->R_5: random
-R_3->R_5: random
