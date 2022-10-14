@@ -44,6 +44,9 @@ In :code:`graph.py` file, instead of :code:`graph_file_parser`, we import :code:
 
 In our example, therefore, mean of node A is selected according to line 5 of the guideline, and the distribution of Y is chosen between Bernoulli and Gaussian distributions.
 
+.. note::
+    For ``f-range`` and ``i-range`` directives, we can specify more than one range. To do so, we simply write the next low/high pairs in the list. **Example:** The guideline :code:`[f-range, -1, -0.5, 0.5, 1]` samples randomly from the range of :math:`(-1, -0.5) \cup (0.5, 1)`.
+
 .. seealso::
     :ref:`Randomization conventions <conventions_inducing_randomization>`
 

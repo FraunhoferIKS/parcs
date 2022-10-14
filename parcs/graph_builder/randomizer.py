@@ -24,12 +24,20 @@ class ParamRandomizer:
             if directive[0] == 'choice':
                 options = directive[1:]
                 return np.random.choice(options)
-            elif directive[0] == 'i-range':
-                return np.random.randint(low=directive[1], high=directive[2]+1)
-            elif directive[0] == 'f-range':
-                return np.random.uniform(low=directive[1], high=directive[2])
             else:
-                return ValueError
+                ranges = directive[1:]
+                # if multiple ranges are given
+                assert len(ranges) % 2 == 0
+                num_ranges = int(len(ranges) / 2)
+                # pick the range
+                range_ = np.random.randint(num_ranges)
+                low, high = ranges[range_ * 2], ranges[range_ * 2 + 1]
+                if directive[0] == 'i-range':
+                    return np.random.randint(low=low, high=high)
+                elif directive[0] == 'f-range':
+                    return np.random.uniform(low=low, high=high)
+                else:
+                    raise ValueError
         else:
             return directive
 
