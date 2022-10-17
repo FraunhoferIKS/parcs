@@ -1,0 +1,6 @@
+# nodes
+R_0: bernoulli(*p_=?), correction[target_mean=0.5]
+R_1: bernoulli(*p_=?), correction[target_mean=0.5]
+R_3: bernoulli(*p_=?), correction[target_mean=0.5]
+R_6: bernoulli(*p_=?), correction[target_mean=0.5]
+# edges
