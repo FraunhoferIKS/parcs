@@ -3,28 +3,37 @@ import numpy as np
 from itertools import combinations
 
 
-
-def m_graph_convert(data: pd.DataFrame, missingness_prefix='R_', indicator_is_missed=0, shared_subscript=True):
+def m_graph_convert(data: pd.DataFrame, missingness_prefix='R', indicator_is_missed=0, shared_subscript=True):
+    assert missingness_prefix[-1] != '_', '''
+        missing prefix should not end with underscore _.
+        The underscore for connecting prefix and subscripts will be considered automatically.
+    '''
     temp_data = data.copy(deep=True)
     len_prefix = len(missingness_prefix)
     # take Rs: it starts with prefix, and subtracting the prefix gives the name of another node
     r_columns = [
-        i for i in data.columns if i[:len_prefix] == missingness_prefix
+        i for i in data.columns if (
+           i[:len_prefix] == missingness_prefix and  # starts with prefix and underscore
+           '{}_{}'.format(missingness_prefix, i) not in data.columns  # this prevents from bug for words starting with R
+        )
     ]
+    r_indices = [r.split('_')[1] for r in r_columns]
+    z_columns = list(set(data.columns) - set(r_columns))
+
     if shared_subscript:
-        r_subs = [r[len_prefix:] for r in r_columns]
-        z_prefix = [z.split('_')[0] for z in data.columns]
-        assert len(set(z_prefix) - {'R'}) == 1
-        z_prefix = z_prefix[0]
-        z_columns = ['{}_{}'.format(z_prefix, r) for r in r_subs]
+        # there must be one z prefix
+        z_prefix = [z.split('_')[0] for z in z_columns]
+        assert len(set(z_prefix)) == 1
+        z_columns = [z for z in z_columns if z.split('_')[1] in r_indices]
+        r_columns = sorted(r_columns, key=lambda x: x.split('_')[1])
+        z_columns = sorted(z_columns, key=lambda x: x.split('_')[1])
     else:
-        z_columns = [r[len_prefix:] for r in r_columns]
+        z_columns = r_indices
     assert len(set(z_columns).intersection(set(data.columns))) != 0
 
     # masking
     for z, r in zip(z_columns, r_columns):
         temp_data[z][temp_data[r] == indicator_is_missed] = np.nan
-
     return temp_data[set(data.columns) - set(r_columns)]
 
 

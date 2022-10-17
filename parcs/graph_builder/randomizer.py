@@ -309,8 +309,10 @@ def guideline_iterator(guideline_dir=None, to_iterate=None, steps=None, repeat=1
     def _get_iterable(directive, steps):
         assert isinstance(directive, list), 'GuidelineIterator received fixed value as the directive'
         if directive[0] == 'f-range':
+            assert len(directive) == 3, 'multirange doesn\'t work in guideline iterator'
             return np.linspace(directive[1], directive[2], steps)
         elif directive[0] == 'i-range':
+            assert len(directive) == 3, 'multirange doesn\'t work in guideline iterator'
             return range(directive[1], directive[2]+1)
         elif directive[0] == 'choice':
             return directive[1:]
@@ -327,6 +329,8 @@ def guideline_iterator(guideline_dir=None, to_iterate=None, steps=None, repeat=1
 
     def _set_directive(dict_, path, value):
         new_guideline = deepcopy(dict_)
+        if isinstance(value, np.float):
+            value = float(value)
         replacement = value
         for i in range(1, len(path)):
             temp = _get_directive(dict_, path[:-i])
