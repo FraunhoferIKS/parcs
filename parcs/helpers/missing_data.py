@@ -63,11 +63,11 @@ def partially_observed_mar(size=None, fully_observed_indices=None):
 
 def R_adj_matrix(size=None, shuffle=False, density=1.0):
     adj_matrix = np.triu(np.ones(shape=(size, size)), k=1)
-    if density < 1.0:
-        s = np.random.choice([0, 1], p=[1-density, density], size=(size, size))
-        adj_matrix = np.multiply(s, adj_matrix)
+    s = np.random.choice([0, 1], p=[1-density, density], size=(size, size))
+    adj_matrix = np.multiply(s, adj_matrix)
     if shuffle:
-        inds = np.random.shuffle(range(size))
+        inds = [i for i in range(size)]
+        np.random.shuffle(inds)
         adj_matrix = adj_matrix[inds, :][:, inds]
     return adj_matrix
 
