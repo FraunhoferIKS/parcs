@@ -17,13 +17,13 @@ total_r = ['R_{}'.format(i.split('_')[1]) for i in total_v]
 
 def get_miss_dataset():
     # 3. write GDF for R
-    r_adj = R_adj_matrix(size=N_total, shuffle=True, density=0.0)
+    r_adj = R_adj_matrix(size=N_total, density=1)
     indicator_graph_description_file(adj_matrix=r_adj,
                                      node_names=total_v, miss_ratio=miss_ratio, subscript_only=True,
                                      file_dir='./graph_description_files/gdf_R.yml')
 
     # 4. mask
-    mask = pd.DataFrame(sc_mask(size=N_total), index=total_v, columns=total_r)
+    mask = pd.DataFrame(np.ones(shape=(N_total, N_total)), index=total_v, columns=total_r)
     rndz = ConnectRandomizer(parent_graph_dir='gdf_Z.yml', child_graph_dir='./graph_description_files/gdf_R.yml',
                              guideline_dir='./guidelines/guideline_1.yml',
                              adj_matrix_mask=mask)
@@ -68,5 +68,5 @@ for it in tqdm(range(iters)):
 
 results = {'hyperimpute': rmse_hi, 'missforest': rmse_mf}
 #
-with open('./results/MNAR_SC.json', 'w') as f:
+with open('./results/MNAR_general.json', 'w') as f:
     json.dump(results, f)

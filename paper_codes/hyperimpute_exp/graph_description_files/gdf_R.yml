@@ -8,3 +8,31 @@ R_5: bernoulli(*p_=?), correction[target_mean=0.5]
 R_6: bernoulli(*p_=?), correction[target_mean=0.5]
 R_7: bernoulli(*p_=?), correction[target_mean=0.5]
 # edges
+R_0->R_1: random
+R_0->R_2: random
+R_0->R_3: random
+R_0->R_4: random
+R_0->R_5: random
+R_0->R_6: random
+R_0->R_7: random
+R_1->R_2: random
+R_1->R_3: random
+R_1->R_4: random
+R_1->R_5: random
+R_1->R_6: random
+R_1->R_7: random
+R_2->R_3: random
+R_2->R_4: random
+R_2->R_5: random
+R_2->R_6: random
+R_2->R_7: random
+R_3->R_4: random
+R_3->R_5: random
+R_3->R_6: random
+R_3->R_7: random
+R_4->R_5: random
+R_4->R_6: random
+R_4->R_7: random
+R_5->R_6: random
+R_5->R_7: random
+R_6->R_7: random
