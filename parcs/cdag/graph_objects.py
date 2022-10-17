@@ -171,14 +171,17 @@ class DataNode:
     def __init__(self,
                  name=None,
                  csv_dir=None):
-        self.info = {'node_type': 'data'}
         self.samples = pd.read_csv(csv_dir)[name]
+        self.info = {'node_type': 'data', 'size': len(self.samples)}
 
     def get_info(self):
         return self.info
 
     def calculate(self, sampled_errors=None):
         ind = np.floor(sampled_errors * len(self.samples))
+        # if full data, last row is 1. only one row must be 1
+        assert len(ind[ind==self.info['size']]) <= 1, 'wrong sampled error for data node'
+        ind[ind == self.info['size']] = self.info['size'] - 1
         return self.samples.iloc[ind].values
 
 
@@ -393,25 +396,35 @@ class Graph:
         else:
             raise TypeError
 
-    def _get_errors(self, use_sampled_errors=None, size=None, sampled_errors=None):
+    def _get_errors(self, use_sampled_errors=None, size=None, sampled_errors=None, full_data=False):
         data_nodes = [n for n in self.node_types if self.node_types[n] == 'data']
+        if full_data:
+            assert len(data_nodes) > 0, 'full_data option works only if graph has data node'
+            assert size is None, 'with full_data option, size parameter must not be given'
+            # read size
+            size = self.nodes[data_nodes[0]].get_info()['size']
         if not use_sampled_errors:
             # sample new errors
             sampled_errors = pd.DataFrame(
                 np.random.uniform(size=(size, len(self.adj_matrix))),
                 columns=self.adj_matrix.columns
             )
+            # if full data: return linspace index for all data nodes
+            if full_data:
+                sampled_errors[data_nodes[0]] = np.linspace(0, 1, size)
             # unify the data nodes.
             for i in range(1, len(data_nodes)):
                 sampled_errors[data_nodes[i]] = sampled_errors[data_nodes[0]].values
         else:
+            assert not full_data, 'full_data option does not work with reusing errors'
+            assert size is None, 'size must not be given when reusing errors'
             # check if data nodes are unified
             for i in range(1, len(data_nodes)):
                 assert sampled_errors[data_nodes[i]].values == sampled_errors[data_nodes[0]].values
         return sampled_errors
 
     def sample(self, size=None, return_errors=False, cache_sampling=False, cache_name=None,
-               use_sampled_errors=False, sampled_errors=None):
+               use_sampled_errors=False, sampled_errors=None, full_data=False):
         """**Sample from observational distribution**
 
         This method samples from the distribution that is modeled by the graph (with no intervention)
@@ -454,7 +467,8 @@ class Graph:
 
         # errors
         sampled_errors = self._get_errors(
-            use_sampled_errors=use_sampled_errors, size=size, sampled_errors=sampled_errors
+            use_sampled_errors=use_sampled_errors, size=size, sampled_errors=sampled_errors,
+            full_data=full_data
         )
 
         for node_name in topological_sort(self.adj_matrix):
