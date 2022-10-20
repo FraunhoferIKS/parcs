@@ -1,0 +1,17 @@
+graph:
+  graph_density: [f-range, 0.7, 1]
+nodes:
+  gaussian:
+    mu_: [[f-range, -3, -1, 1, 3] , [f-range, -5, 1, 1, 5], [f-range, -3, -1, 1, 3] ]
+edges:
+  identity: null
+  sigmoid:
+    alpha: [f-range, 1, 3]
+    beta: [f-range, -0.8, 0.8]
+    gamma: [choice, 0, 1]
+    tau: 1
+  gaussian_rbf:
+    alpha: [ f-range, 1, 3 ]
+    beta: [ f-range, -0.8, 0.8 ]
+    gamma: [ choice, 0, 1 ]
+    tau: 2

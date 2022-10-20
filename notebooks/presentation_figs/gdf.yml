@@ -1,0 +1,8 @@
+# nodes
+X: gaussian(mu_=?, sigma_=1)
+Y: gaussian(mu_=?, sigma_=1)
+Z: gaussian(mu_=?, sigma_=1)
+# edges
+X->Y: random
+X->Z: random
+Y->Z: random
