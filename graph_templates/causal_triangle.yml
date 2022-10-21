@@ -1,8 +1,0 @@
-# nodes
-C: gaussian(mu_=0, sigma_=?)
-A: random
-Y: bernoulli(p_=?), correction[target_mean=0.3]
-# edges
-C->A: gaussian_rbf()
-C->Y: identity()
-A->Y: identity()

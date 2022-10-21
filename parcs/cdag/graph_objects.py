@@ -4,6 +4,7 @@ from parcs.cdag import mapping_functions
 from parcs.cdag.utils import topological_sort, EdgeCorrection
 from parcs.cdag.output_distributions import OUTPUT_DISTRIBUTIONS
 from parcs.graph_builder.utils import info_md_parser
+from parcs.exceptions import *
 
 
 class Node:
@@ -329,6 +330,26 @@ class Graph:
         self.sample(size=500)
 
     def get_info(self, type='raw', info_dir=None):
+        """ **getting nodes and edges information**
+
+        This method gives the graph nodes and edges information
+
+        Parameters
+        ----------
+        type : {'raw', 'md'}
+            Type of the report. If `raw`, then returns a raw dict of nodes and edges info.
+            If `md` then writes a markdown report in the ``info_dir`` directory.
+        info_dir : str
+            Directory of the report, if `type='md'`
+
+        Returns
+        -------
+        None
+            If `type='md'`
+        info : dict
+            If `type='raw'`
+
+        """
         info = {
             'nodes': {n: self.nodes[n].get_info() for n in self.nodes},
             'edges': {e: self.edges[e].get_info() for e in self.edges}
@@ -399,11 +420,24 @@ class Graph:
     def _get_errors(self, use_sampled_errors=None, size=None, sampled_errors=None, full_data=False):
         data_nodes = [n for n in self.node_types if self.node_types[n] == 'data']
         if full_data:
-            assert len(data_nodes) > 0, 'full_data option works only if graph has data node'
-            assert size is None, 'with full_data option, size parameter must not be given'
+            parcs_assert(
+                len(data_nodes) > 0,
+                GraphError,
+                'full_data option works only if graph has data node'
+            )
+            parcs_assert(
+                size is None,
+                GraphError,
+                'with full_data option, size parameter must not be given'
+            )
             # read size
             size = self.nodes[data_nodes[0]].get_info()['size']
         if not use_sampled_errors:
+            parcs_assert(
+                size is not None,
+                GraphError,
+                'either specify `size` or reuse sampled errors'
+            )
             # sample new errors
             sampled_errors = pd.DataFrame(
                 np.random.uniform(size=(size, len(self.adj_matrix))),
@@ -415,12 +449,19 @@ class Graph:
             # unify the data nodes.
             for i in range(1, len(data_nodes)):
                 sampled_errors[data_nodes[i]] = sampled_errors[data_nodes[0]].values
-        else:
-            assert not full_data, 'full_data option does not work with reusing errors'
-            assert size is None, 'size must not be given when reusing errors'
+        else:  # use sampled error
+            parcs_assert(
+                size is None,
+                GraphError,
+                'size must not be given when reusing errors'
+            )
             # check if data nodes are unified
             for i in range(1, len(data_nodes)):
-                assert sampled_errors[data_nodes[i]].values == sampled_errors[data_nodes[0]].values
+                parcs_assert(
+                    all(sampled_errors[data_nodes[i]].values == sampled_errors[data_nodes[0]]),
+                    DataError,
+                    'sampled errors for data nodes are inconsistent.'
+                )
         return sampled_errors
 
     def sample(self, size=None, return_errors=False, cache_sampling=False, cache_name=None,
