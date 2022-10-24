@@ -2,15 +2,27 @@ from parcs.cdag.utils import dot_prod
 from parcs.cdag.utils import SigmoidCorrection
 from scipy import stats as dists
 import numpy as np
+from parcs.exceptions import *
 
 DISTRIBUTION_PARAMS = {
     'gaussian': ['mu_', 'sigma_'],
+    'lognormal': ['mu_', 'sigma_'],
     'bernoulli': ['p_'],
-    'uniform': ['mu_', 'diff_']
+    'uniform': ['mu_', 'diff_'],
+    'exponential': ['lambda_'],
+    'poisson': ['lambda_']
 }
 
 
 class GaussianDistribution:
+    """ **Gaussian normal distribution**
+
+    Constructed based on
+    `Scipy norm distribution
+    <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.norm.html#scipy.stats.norm>`_
+    distribution.
+
+    """
     def __init__(self,
                  coefs=None,
                  do_correction=True,
@@ -32,9 +44,17 @@ class GaussianDistribution:
         if self.do_correction:
             mu_, sigma_ = self._correct_param(mu_, sigma_)
         elif isinstance(sigma_, np.ndarray):
-            assert (sigma_ >= 0).sum() == len(sigma_), 'sigma_ has negative values'
+            parcs_assert(
+                (sigma_ >= 0).sum() == len(sigma_),
+                DistributionError,
+                'Gaussian sigma_ has negative values'
+            )
         else:
-            assert sigma_ >= 0, 'sigma_ has negative values'
+            parcs_assert(
+                sigma_ >= 0,
+                DistributionError,
+                'Gaussian sigma_ has negative values'
+            )
 
         samples = dists.norm.ppf(errors, loc=mu_, scale=sigma_)
 
@@ -42,6 +62,14 @@ class GaussianDistribution:
 
 
 class BernoulliDistribution:
+    """ **Gaussian normal distribution**
+
+    Constructed based on
+    `Scipy Bernoulli distribution
+    <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bernoulli.html>`_
+    distribution.
+
+    """
     def __init__(self,
                  coefs=None,
                  do_correction=True,
@@ -61,15 +89,29 @@ class BernoulliDistribution:
         if self.do_correction:
             p_ = self._correct_param(p_)
         elif isinstance(p_, np.ndarray):
-            assert (p_ <= 1).sum() == len(p_), 'Bern(p) probabilities are out of [0, 1] range'
+            parcs_assert(
+                (p_ <= 1).sum() == len(p_),
+                DistributionError,
+                'Bern(p) probabilities are out of [0, 1] range'
+            )
         else:
-            assert 0 <= p_ <= 1, 'Bern(p) probabilities are out of [0, 1] range'
+            parcs_assert(
+                0 <= p_ <= 1,
+                DistributionError,
+                'Bern(p) probabilities are out of [0, 1] range'
+            )
         samples = dists.bernoulli.ppf(errors, p_)
 
         return samples
 
 
 class UniformDistribution:
+    """ **Gaussian normal distribution**
+
+    Since the distribution of the sampled errors is Uniform, this class takes the samples as they are,
+    and does loc-scale to satisfy the given parameters.
+
+    """
     def __init__(self,
                  coefs=None,
                  do_correction=False,
@@ -87,8 +129,146 @@ class UniformDistribution:
         return samples
 
 
+class ExponentialDistribution:
+    """ **Gaussian normal distribution**
+
+    Constructed based on
+    `Scipy Exponential distribution
+    <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.expon.html>`_
+    distribution.
+
+    """
+    def __init__(self,
+                 coefs=None,
+                 do_correction=True,
+                 correction_config=None):
+        self.params = ['lambda_']
+        self.coefs = coefs
+
+        self.do_correction = do_correction
+        if do_correction:
+            self.sigma_correction = SigmoidCorrection(**correction_config)
+
+    def _correct_param(self, lambda_):
+        return self.sigma_correction.transform(lambda_)
+
+    def calculate(self, data, errors):
+        lambda_ = dot_prod(data, self.coefs['lambda_'])
+        if self.do_correction:
+            lambda_ = self._correct_param(lambda_)
+        elif isinstance(lambda_, np.ndarray):
+            parcs_assert(
+                (lambda_ > 0).sum() == len(lambda_),
+                DistributionError,
+                'Expon lambda has non-positive values'
+            )
+        else:
+            parcs_assert(
+                lambda_ > 0,
+                DistributionError,
+                'Expon lambda has non-positive values'
+            )
+        samples = dists.expon.ppf(errors, lambda_)
+
+        return samples
+
+
+class PoissonDistribution:
+    """ **Gaussian normal distribution**
+
+    Constructed based on
+    `Scipy Poisson distribution
+    <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.poisson.html>`_
+    distribution.
+
+    """
+    def __init__(self,
+                 coefs=None,
+                 do_correction=True,
+                 correction_config=None):
+        self.params = ['lambda_']
+        self.coefs = coefs
+
+        self.do_correction = do_correction
+        if do_correction:
+            self.sigma_correction = SigmoidCorrection(**correction_config)
+
+    def _correct_param(self, lambda_):
+        return self.sigma_correction.transform(lambda_)
+
+    def calculate(self, data, errors):
+        lambda_ = dot_prod(data, self.coefs['lambda_'])
+        if self.do_correction:
+            lambda_ = self._correct_param(lambda_)
+        elif isinstance(lambda_, np.ndarray):
+            parcs_assert(
+                (lambda_ >= 0).sum() == len(lambda_),
+                DistributionError,
+                'Poisson lambda has negative values'
+            )
+        else:
+            parcs_assert(
+                lambda_ >= 0,
+                DistributionError,
+                'Poisson lambda has negative values'
+            )
+        samples = dists.poisson.ppf(errors, lambda_)
+
+        return samples
+
+
+class LogNormalDistribution:
+    """ **Gaussian normal distribution**
+
+    Constructed based on
+    `Scipy lognorm distribution
+    <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.lognorm.html>`_
+    distribution.
+
+    """
+    def __init__(self,
+                 coefs=None,
+                 do_correction=True,
+                 correction_config=None):
+        self.params = ['mu_', 'sigma_']
+        self.coefs = coefs
+
+        self.do_correction = do_correction
+        if do_correction:
+            self.sigma_correction = SigmoidCorrection(**correction_config)
+
+    def _correct_param(self, mu_, sigma_):
+        sigma_ = self.sigma_correction.transform(sigma_)
+        return mu_, sigma_
+
+    def calculate(self, data, errors):
+        mu_ = dot_prod(data, self.coefs['mu_'])
+        sigma_ = dot_prod(data, self.coefs['sigma_'])
+        if self.do_correction:
+            mu_, sigma_ = self._correct_param(mu_, sigma_)
+        elif isinstance(sigma_, np.ndarray):
+            parcs_assert(
+                (sigma_ >= 0).sum() == len(sigma_),
+                DistributionError,
+                'Log normal sigma_ has negative values'
+            )
+        else:
+            parcs_assert(
+                sigma_ >= 0,
+                DistributionError,
+                'Log normal sigma_ has negative values'
+            )
+
+        samples = dists.lognorm.ppf(errors, loc=mu_, scale=sigma_)
+
+        return samples
+
+
 OUTPUT_DISTRIBUTIONS = {
     'gaussian': GaussianDistribution,
+    'lognormal': LogNormalDistribution,
     'bernoulli': BernoulliDistribution,
-    'uniform': UniformDistribution
+    'uniform': UniformDistribution,
+    'exponential': ExponentialDistribution,
+    'poisson': PoissonDistribution
 }

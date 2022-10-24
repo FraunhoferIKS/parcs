@@ -8,26 +8,27 @@ def edge_empty(**kwargs):
 
 
 def edge_sigmoid(array=None,
-                 alpha=1.0, beta=0.0, gamma=0, tau=1):
+                 alpha=2.0, beta=0.0, gamma=0, tau=1):
     r"""
     This edge function transforms input variable according to the following equation:
 
     .. math::
         x^{*} = \sigma\Big(
-            (-1)^{\gamma+1} \alpha (x - \beta)^{\tau}
+            (-1)^{\gamma} \alpha (x - \beta)^{\tau}
         \Big), \quad \sigma(a) = \frac{1}{1+e^{-a}}
 
-    .. warning::
-        put images
+    Below figures depict the effect of different parameters.
+
+    .. image:: ../first_steps/img/edge_sigmoid.png
 
     Parameters
     ----------
     array : array-like
         input array
-    alpha : float, default=1.0
-        scale parameter. Reasonable range in `[0.5, 3]`
+    alpha : float, default=2.0
+        scale parameter. Reasonable range in `[1, 3]`
     beta : float, default=0.0
-        offset parameter. Reasonable range in `[-0.8, 0.8]`
+        offset parameter. Reasonable range in `[-2, 2]`
     gamma : {0, 1}, default=0
         mirroring parameter.
     tau : odd integer, default=1
@@ -44,7 +45,7 @@ def edge_sigmoid(array=None,
 
 
 def edge_gaussian_rbf(array=None,
-                      alpha=1, beta=0, gamma=0, tau=2):
+                      alpha=2, beta=0, gamma=0, tau=2):
     r"""
     .. math::
         \begin{align}
@@ -52,17 +53,18 @@ def edge_gaussian_rbf(array=None,
             \exp\big(-\alpha \|z_i - \beta\|^\tau\big),
         \end{align}
 
-    .. warning::
-        put images
+    Below figures depict the effect of different parameters.
+
+    .. image:: ../first_steps/img/edge_gaussian_rbf.png
 
     Parameters
     ----------
     array : array-like
         input array
     alpha : float, default=1.0
-        scale parameter. Reasonable range in `[0.5, 3]`
+        scale parameter. Reasonable range in `[1, 3]`
     beta : float, default=0.0
-        offset parameter. Reasonable range in `[-0.8, 0.8]`
+        offset parameter. Reasonable range in `[-2, 2]`
     gamma : {0, 1}, default=0
         mirroring parameter.
     tau : even integer, default=2
@@ -78,25 +80,26 @@ def edge_gaussian_rbf(array=None,
     return gamma + ((-1)**gamma) * np.exp(expon)
 
 def edge_arctan(array=None,
-                alpha=1, beta=0, gamma=0):
+                alpha=2, beta=0, gamma=0):
     r"""
     .. math::
         \begin{align}
-            z^*_i = \gamma + (-1)^\gamma .
+            z^*_i = (-1)^{\gamma} .
             \arctan{(\alpha(z_i-\beta))},
         \end{align}
 
-    .. warning::
-        put images
+    Below figures depict the effect of different parameters.
+
+    .. image:: ../first_steps/img/edge_arctan.png
 
     Parameters
     ----------
     array : array-like
         input array
-    alpha : float, default=1.0
-        scale parameter. Reasonable range in `[0.5, 3]`
+    alpha : float, default=2.0
+        scale parameter. Reasonable range in `[1, 3]`
     beta : float, default=0.0
-        offset parameter. Reasonable range in `[-0.8, 0.8]`
+        offset parameter. Reasonable range in `[-2, 2]`
     gamma : {0, 1}, default=0
         mirroring parameter.
 
@@ -105,7 +108,7 @@ def edge_arctan(array=None,
     transformed_array : array-like
 
     """
-    return gamma + ((-1)**gamma) * np.arctan(alpha*(array-beta))
+    return (-1)**gamma * np.arctan(alpha*(array-beta))
 
 
 def edge_identity(array=None):
