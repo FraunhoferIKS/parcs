@@ -1,0 +1,8 @@
+# nodes
+A: data(some_data.csv)
+C: data(some_data.csv)
+Y: gaussian(mu_=A+C, sigma_=0.1)
+
+# edges
+A->Y: identity()
+C->Y: identity()
