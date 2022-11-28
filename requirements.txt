@@ -6,3 +6,4 @@ scikit-learn~=1.0.2
 PyYAML~=6.0
 dtaidistance~=2.3.6
 setuptools~=58.5.3
+typeguard
