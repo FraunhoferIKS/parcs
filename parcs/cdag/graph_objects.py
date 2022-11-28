@@ -3,10 +3,18 @@ import pandas as pd
 from parcs.cdag import mapping_functions
 from parcs.cdag.utils import topological_sort, EdgeCorrection
 from parcs.cdag.output_distributions import OUTPUT_DISTRIBUTIONS
+from parcs.cdag.mapping_functions import EDGE_FUNCTIONS
 from parcs.graph_builder.utils import info_md_parser
 from parcs.exceptions import *
+from typeguard import typechecked
+from typing import Optional, Union
+from pathlib import Path
 
+OUTPUT_DISTRIBUTIONS_KEYS = OUTPUT_DISTRIBUTIONS.keys()
+EDGE_FUNCTIONS_KEYS = EDGE_FUNCTIONS.keys()
+REPORT_TYPES = ['md', 'raw']
 
+@typechecked
 class Node:
     """ **Node object in causal DAGs**
 
@@ -33,11 +41,13 @@ class Node:
     """
 
     def __init__(self,
-                 name=None,
-                 output_distribution=None,
-                 do_correction=False,
-                 correction_config={},
-                 dist_params_coefs=None):
+                 name: Optional[str],
+                 output_distribution: str,
+                 dist_params_coefs: dict,
+                 do_correction: bool = False,
+                 correction_config: dict = {}):
+        parcs_assert(output_distribution in OUTPUT_DISTRIBUTIONS_KEYS, DataError, 
+                        f'output_distribution should be in {OUTPUT_DISTRIBUTIONS_KEYS}, got {output_distribution} instead')
         # basic attributes
         self.name = name
         self.info = {
@@ -57,7 +67,7 @@ class Node:
             self.info['correction'] = self.output_distribution.sigma_correction.get_params()
         return self.info
 
-    def calculate(self, data, parents, errors):
+    def calculate(self, data: pd.DataFrame, parents: list[str], errors: np.ndarray) -> np.ndarray:
         """ **calculates node's output the node**
 
         calculates the output of the noise based on the sampled errors and the data of parent nodes.
@@ -82,7 +92,7 @@ class Node:
             errors
         )
 
-
+@typechecked
 class DetNode:
     """ **Deterministic Node object in causal DAGs**
 
@@ -106,8 +116,8 @@ class DetNode:
     """
 
     def __init__(self,
-                 name=None,
-                 function=None):
+                 function,
+                 name: Optional[str] = None):
         self.name = name
         self.info = {'node_type': 'deterministic'}
         self.function = function
@@ -115,10 +125,10 @@ class DetNode:
     def get_info(self):
         return self.info
 
-    def calculate(self, data, parents):
+    def calculate(self, data: pd.DataFrame, parents: list[str]):
         return self.function(data[parents]).values
 
-
+@typechecked
 class ConstNode:
     """ **Constant Node object in causal DAGs**
 
@@ -143,18 +153,18 @@ class ConstNode:
     """
 
     def __init__(self,
-                 name=None,
-                 value=None):
+                 value,
+                 name: Optional[str] = None):
         self.name = name
         self.info = {'node_type': 'constant', 'value': value}
 
     def get_info(self):
         return self.info
 
-    def calculate(self, size_):
+    def calculate(self, size_ = Optional[int]):
         return np.ones(shape=(size_,)) * self.info['value']
 
-
+@typechecked
 class DataNode:
     """ **Data Node object in causal DAGs**
 
@@ -170,22 +180,22 @@ class DataNode:
     """
 
     def __init__(self,
-                 name=None,
-                 csv_dir=None):
+                 csv_dir: Union[str, Path],
+                 name: str):
         self.samples = pd.read_csv(csv_dir)[name]
         self.info = {'node_type': 'data', 'size': len(self.samples)}
 
     def get_info(self):
         return self.info
 
-    def calculate(self, sampled_errors=None):
+    def calculate(self, sampled_errors: np.ndarray):
         ind = np.floor(sampled_errors * len(self.samples))
         # if full data, last row is 1. only one row must be 1
         assert len(ind[ind==self.info['size']]) <= 1, 'wrong sampled error for data node'
         ind[ind == self.info['size']] = self.info['size'] - 1
         return self.samples.iloc[ind].values
 
-
+@typechecked
 class Edge:
     """ **Edge object in causal DAGs**
 
@@ -230,10 +240,11 @@ class Edge:
     """
 
     def __init__(self,
-                 name=None,
+                 function_name: str,
+                 function_params: dict = {},
                  do_correction=False,
-                 function_name=None,
-                 function_params=None):
+                 name: Optional[str] = None):
+        parcs_assert(function_name in EDGE_FUNCTIONS_KEYS, DataError, f'function_name should be in f{EDGE_FUNCTIONS_KEYS}, got {function_name} instead')
         self.name = name
         self.do_correction = do_correction
         if self.do_correction:
@@ -241,7 +252,7 @@ class Edge:
 
         self.edge_function = {
             'name': function_name,
-            'function': mapping_functions.EDGE_FUNCTIONS[function_name],
+            'function': EDGE_FUNCTIONS[function_name],
             'params': function_params
         }
         self.info = {
@@ -254,7 +265,7 @@ class Edge:
             self.info['correction'] = self.corrector.get_params()
         return self.info
 
-    def map(self, array=None):
+    def map(self, array: np.ndarray):
         """ **maps an input array**
 
         This method maps a given input array based on set `edge_function` and `do_correction` values.
@@ -277,7 +288,7 @@ class Edge:
             **self.edge_function['params']
         )
 
-
+@typechecked
 class Graph:
     """**Causal DAG class**
 
@@ -304,9 +315,9 @@ class Graph:
     """
 
     def __init__(self,
-                 nodes=None,
-                 edges=None,
-                 dummy_node_prefix='dummy_'):
+                 nodes:list[dict],
+                 edges:list[dict],
+                 dummy_node_prefix: str = 'dummy_'):
         self.nodes = {
             kwargs['name']: Node(**kwargs) if 'output_distribution' in kwargs
             else DetNode(**kwargs) if 'function' in kwargs
@@ -329,7 +340,7 @@ class Graph:
         # TODO: don't do it if no correction=True
         self.sample(size=500)
 
-    def get_info(self, type='raw', info_dir=None):
+    def get_info(self, type: str ='raw', info_dir: Optional[Union[str, Path]]=None):
         """ **getting nodes and edges information**
 
         This method gives the graph nodes and edges information
@@ -350,6 +361,7 @@ class Graph:
             If `type='raw'`
 
         """
+        parcs_assert(type in REPORT_TYPES, DataError, f'type should be in {REPORT_TYPES}, got {type} instead')
         info = {
             'nodes': {n: self.nodes[n].get_info() for n in self.nodes},
             'edges': {e: self.edges[e].get_info() for e in self.edges}
@@ -375,7 +387,7 @@ class Graph:
             if self.node_types[n] == 'data' and len(self.parent_sets[n]) != 0:
                 raise ValueError('node {} is DataNode but has parents in graph'.format(n))
 
-    def _single_sample_round(self, node_name=None, data=None, sampled_errors=None):
+    def _single_sample_round(self, node_name: str, data: pd.DataFrame, sampled_errors: np.ndarray):
         # transform parents by edges
         inputs = pd.DataFrame({
             parent: self.edges['{}->{}'.format(parent, node_name)].map(array=data[parent].values)
@@ -386,7 +398,7 @@ class Graph:
 
         return self.nodes[node_name].calculate(inputs, parents, sampled_errors[node_name])
 
-    def _single_det_round(self, node_name, data):
+    def _single_det_round(self, node_name: str, data: pd.DataFrame):
         # transform parents by edges
         inputs = pd.DataFrame({
             parent: self.edges['{}->{}'.format(parent, node_name)].map(array=data[parent].values)
@@ -397,13 +409,13 @@ class Graph:
 
         return self.nodes[node_name].calculate(inputs, parents)
 
-    def _single_const_round(self, node_name, size_):
+    def _single_const_round(self, node_name: str, size_: int):
         return self.nodes[node_name].calculate(size_)
 
-    def _single_data_round(self, node_name, sampled_errors):
+    def _single_data_round(self, node_name: str, sampled_errors: np.ndarray):
         return self.nodes[node_name].calculate(sampled_errors=sampled_errors[node_name])
 
-    def _calc_non_interventions(self, node_name=None, data=None, sampled_errors=None):
+    def _calc_non_interventions(self, node_name: str, data: pd.DataFrame, sampled_errors: np.ndarray):
         if self.node_types[node_name] == 'stochastic':
             return self._single_sample_round(
                 node_name=node_name, data=data, sampled_errors=sampled_errors
@@ -417,7 +429,7 @@ class Graph:
         else:
             raise TypeError
 
-    def _get_errors(self, use_sampled_errors=None, size=None, sampled_errors=None, full_data=False):
+    def _get_errors(self, use_sampled_errors: bool, size: Optional[int], sampled_errors: Optional[pd.DataFrame], full_data: bool = False):
         data_nodes = [n for n in self.node_types if self.node_types[n] == 'data']
         if full_data:
             parcs_assert(
@@ -464,8 +476,8 @@ class Graph:
                 )
         return sampled_errors
 
-    def sample(self, size=None, return_errors=False, cache_sampling=False, cache_name=None,
-               use_sampled_errors=False, sampled_errors=None, full_data=False):
+    def sample(self, size: int, cache_name: Optional[str] = None, sampled_errors: Optional[pd.DataFrame] = None, 
+                return_errors: bool = False, cache_sampling: bool = False, use_sampled_errors: bool = False, full_data: bool = False):
         """**Sample from observational distribution**
 
         This method samples from the distribution that is modeled by the graph (with no intervention)
@@ -525,8 +537,8 @@ class Graph:
         else:
             return data
 
-    def do(self, size=None, interventions=None, use_sampled_errors=False, sampled_errors=None,
-           return_errors=False, cache_sampling=False, cache_name=None):
+    def do(self, size: int, interventions: dict, cache_name: Optional[str] = None, use_sampled_errors: bool = False,
+            sampled_errors: Optional[pd.DataFrame] = None, return_errors: bool = False, cache_sampling: bool = False):
         """**sample from interventional distribution**
         This methods sample from an interventional distribution which is modeled by intervention(s) on the main graph.
         This method accepts fixed interventions (see the ``interventions`` parameter).
@@ -570,9 +582,9 @@ class Graph:
         else:
             return data
 
-    def do_functional(self, size=None, intervene_on=None, inputs=None, func=None,
-                      use_sampled_errors=False, sampled_errors=None,
-                      return_errors=False, cache_sampling=False, cache_name=None):
+    def do_functional(self, size: int, intervene_on: str, inputs: list[str], func: function,
+                      use_sampled_errors: bool = False, sampled_errors: Optional[pd.DataFrame] = None,
+                      return_errors: bool = False, cache_sampling: bool = False, cache_name: Optional[str] = None):
         """**sample from interventional distribution**
         This methods sample from an interventional distribution which is modeled by intervention(s) on the main graph.
         This method accepts interventions defined by a function on a subset of nodes.
@@ -624,9 +636,9 @@ class Graph:
         else:
             return data
 
-    def do_self(self, size=None, func=None, intervene_on=None,
-                use_sampled_errors=False, sampled_errors=None, return_errors=False,
-                cache_sampling=False, cache_name=None):
+    def do_self(self, size: int, func: function, intervene_on: str,
+                use_sampled_errors: bool = False, sampled_errors: Optional[pd.DataFrame] = None, return_errors: bool = False,
+                cache_sampling: bool = False, cache_name: Optional[str] = None):
         """**sample from interventional distribution**
         This methods sample from an interventional distribution which is modeled by intervention(s) on the main graph.
         This method accepts interventions defined as intervening on a node based on its observed value.
