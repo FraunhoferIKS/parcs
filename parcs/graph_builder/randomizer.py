@@ -5,21 +5,28 @@ from parcs.cdag.utils import get_interactions_length, topological_sort
 from itertools import product, combinations
 from parcs.graph_builder.utils import config_parser, config_dumper
 from parcs.cdag.output_distributions import OUTPUT_DISTRIBUTIONS, DISTRIBUTION_PARAMS
+from parcs.exceptions import parcs_assert, DataError
 import pandas as pd
 import numpy as np
 import re
 import os
 import warnings
+from pathlib import Path
+from typing import Union, Optional, Iterable
+from typeguard import typechecked
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
+@typechecked
 class ParamRandomizer:
-    def __init__(self, graph_dir=None, guideline_dir=None):
+    def __init__(self,
+                 graph_dir: Optional[Union[str, Path]] = None,
+                 guideline_dir: Optional[Union[str, Path]] = None):
         # read randomization guideline
         self.guideline = parsers.guideline_parser(guideline_dir)
         # read fixed nodes and edges
         self.nodes, self.edges = parsers.graph_file_parser(graph_dir)
 
-    def directive_picker(self, directive):
+    def directive_picker(self, directive: Union[list, int, float]):
         if isinstance(directive, list):
             if directive[0] == 'choice':
                 options = directive[1:]
@@ -27,7 +34,7 @@ class ParamRandomizer:
             else:
                 ranges = directive[1:]
                 # if multiple ranges are given
-                assert len(ranges) % 2 == 0
+                parcs_assert(len(ranges) % 2 == 0, DataError, f'The number of range numbers should be even, got {len(ranges)}')
                 num_ranges = int(len(ranges) / 2)
                 # pick the range
                 range_ = np.random.randint(num_ranges)
@@ -126,10 +133,11 @@ class ParamRandomizer:
         self._setup()
         return self.nodes, self.edges
 
-
+@typechecked
 class ExtendRandomizer(ParamRandomizer):
     def __init__(self,
-                 graph_dir=None, guideline_dir=None):
+                 graph_dir: Optional[Union[str, Path]] = None,
+                 guideline_dir: Optional[Union[str, Path]] = None):
         super().__init__(graph_dir=graph_dir, guideline_dir=guideline_dir)
 
         # pick number of nodes:
@@ -196,7 +204,7 @@ class ExtendRandomizer(ParamRandomizer):
         adj_matrix = np.multiply(adj_matrix, mask)
         return pd.DataFrame(adj_matrix, columns=self.node_names, index=self.node_names)
 
-    def _extend_nodes(self, indices):
+    def _extend_nodes(self, indices: np.ndarray):
         for i in range(self.num_nodes):
             if i not in indices:
                 node_name = '{}_{}'.format(self.guideline['graph']['node_name_prefix'], i)
@@ -220,16 +228,19 @@ class ExtendRandomizer(ParamRandomizer):
     def _update_param_coefs(self):
         return self
 
-
+@typechecked
 class FreeRandomizer(ExtendRandomizer):
-    def __init__(self, guideline_dir=None):
+    def __init__(self, guideline_dir: Optional[Union[str, Path]] = None):
         super().__init__(graph_dir=None, guideline_dir=guideline_dir)
 
-
+@typechecked
 class ConnectRandomizer(ParamRandomizer):
-    def __init__(self, parent_graph_dir=None, child_graph_dir=None,
-                 guideline_dir=None, adj_matrix_mask=None,
-                 delete_temp_graph_description=True):
+    def __init__(self, 
+                 parent_graph_dir: Optional[Union[str, Path]] = None, 
+                 child_graph_dir: Optional[Union[str, Path]] = None,
+                 guideline_dir: Optional[Union[str, Path]] = None, 
+                 adj_matrix_mask: pd.DataFrame = None,
+                 delete_temp_graph_description: bool = True):
         pgd = config_parser(parent_graph_dir)
         cgd = config_parser(child_graph_dir)
         n_p = [n for n in pgd if '->' not in n]
@@ -304,10 +315,11 @@ class ConnectRandomizer(ParamRandomizer):
         if delete_temp_graph_description:
             os.remove('combined_gdf.yml')
 
-
-def guideline_iterator(guideline_dir=None, to_iterate=None, steps=None, repeat=1):
-    def _get_iterable(directive, steps):
-        assert isinstance(directive, list), 'GuidelineIterator received fixed value as the directive'
+@typechecked
+def guideline_iterator(guideline_dir: Optional[Union[str, Path]] = None, to_iterate: str = None, steps: int = None, repeat: int = 1):
+    @typechecked
+    def _get_iterable(directive: list, steps: Optional[int]):
+        # assert isinstance(directive, list), 'GuidelineIterator received fixed value as the directive'
         if directive[0] == 'f-range':
             assert len(directive) == 3, 'multirange doesn\'t work in guideline iterator'
             return np.linspace(directive[1], directive[2], steps)
@@ -316,10 +328,11 @@ def guideline_iterator(guideline_dir=None, to_iterate=None, steps=None, repeat=1
             return range(directive[1], directive[2]+1)
         elif directive[0] == 'choice':
             return directive[1:]
-        else:
-            raise ValueError
+        # else:
+        #     raise ValueError
 
-    def _get_directive(dict_, path):
+    @typechecked
+    def _get_directive(dict_: dict, path: list[str]):
         directive = dict_[path[0]]
         if len(path) == 1:
             return directive
@@ -327,7 +340,8 @@ def guideline_iterator(guideline_dir=None, to_iterate=None, steps=None, repeat=1
             directive = directive[step]
         return directive
 
-    def _set_directive(dict_, path, value):
+    @typechecked
+    def _set_directive(dict_: dict, path: list[str], value: Union[np.float, float, int]):
         new_guideline = deepcopy(dict_)
         if isinstance(value, np.float):
             value = float(value)
@@ -339,7 +353,8 @@ def guideline_iterator(guideline_dir=None, to_iterate=None, steps=None, repeat=1
         new_guideline[path[0]] = replacement
         return new_guideline
 
-    def _generator(dict_, iterable, path, repeat):
+    @typechecked
+    def _generator(dict_: dict, iterable: Iterable, path: list[str], repeat: int):
         for i in iterable:
             for epoch in range(repeat):
                 new_guideline = _set_directive(dict_, path, i)
@@ -373,3 +388,17 @@ if __name__ == '__main__':
     plt.scatter(data['C'], data['A'], c=data['Y'])
     plt.show()
 
+    # for dir_, epoch, value in guideline_iterator(guideline_dir='../../guidelines/simple_guideline.yml',
+    #                                             to_iterate='graph/num_nodes',
+    #                                             repeat=2):
+    #     print('num_nodes:', value)
+    #     print('\t EPOCH:', epoch)
+
+    #     rndz = FreeRandomizer(
+    #         guideline_dir=dir_
+    #     )
+    #     nodes, edges = rndz.get_graph_params()
+    #     g = Graph(nodes=nodes, edges=edges)
+    #     samples = g.sample(size=1)
+    #     print(samples)
+    #     print('=====')
