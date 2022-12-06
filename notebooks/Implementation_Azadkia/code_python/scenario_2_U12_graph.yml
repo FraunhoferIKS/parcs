@@ -1,0 +1,52 @@
+# all dummy nodes start with lowercase letters
+# additive errors are partly absorbed by the mean shift on the gaussian node error
+
+# nodes
+# once we have uniform variables availiable, remove the cdf(norm) computation
+e: gaussian(mu_=0, sigma_=1)
+U: deterministic(scenario_2_fcts.py, gausss)
+
+X1: gaussian(mu_=0, sigma_=1)
+
+d2: gaussian(mu_=UX1, sigma_=1)
+X2: deterministic(scenario_2_fcts.py, arctand2)
+
+d3: gaussian(mu_=X1, sigma_=1)
+X3: deterministic(scenario_2_fcts.py, arctand3)
+
+d4: gaussian(mu_=0, sigma_=1)
+X4: deterministic(scenario_2_fcts.py, arctand4)
+
+d5: gaussian(mu_=X2+X3, sigma_=1)
+X5: deterministic(scenario_2_fcts.py, arctand5)
+
+d6: gaussian(mu_=X4+X5, sigma_=1)
+X6: deterministic(scenario_2_fcts.py, arctand6)
+
+d7: gaussian(mu_=X5, sigma_=1)
+X7: deterministic(scenario_2_fcts.py, arctand7)
+
+
+
+# edges:
+e->U: identity()
+
+U->d2: identity()
+X1->d2: identity()
+d2->X2: identity()
+
+X1->d3: identity()
+d3->X3: identity()
+
+d4->X4: identity()
+
+X2->d5: identity()
+X3->d5: identity()
+d5->X5: identity()
+
+X4->d6: identity()
+X5->d6: identity()
+d6->X6: identity()
+
+X5->d7: identity()
+d7->X7: identity()
