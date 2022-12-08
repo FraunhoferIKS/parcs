@@ -7,7 +7,7 @@ from parcs.cdag.mapping_functions import EDGE_FUNCTIONS
 from parcs.graph_builder.utils import info_md_parser
 from parcs.exceptions import *
 from typeguard import typechecked
-from typing import Optional, Union
+from typing import Optional, Union, List, Callable
 from pathlib import Path
 
 OUTPUT_DISTRIBUTIONS_KEYS = OUTPUT_DISTRIBUTIONS.keys()
@@ -67,7 +67,7 @@ class Node:
             self.info['correction'] = self.output_distribution.sigma_correction.get_params()
         return self.info
 
-    def calculate(self, data: pd.DataFrame, parents: list[str], errors: np.ndarray) -> np.ndarray:
+    def calculate(self, data: pd.DataFrame, parents: List[str], errors: pd.Series) -> np.ndarray:
         """ **calculates node's output the node**
 
         calculates the output of the noise based on the sampled errors and the data of parent nodes.
@@ -125,7 +125,7 @@ class DetNode:
     def get_info(self):
         return self.info
 
-    def calculate(self, data: pd.DataFrame, parents: list[str]):
+    def calculate(self, data: pd.DataFrame, parents: List[str]):
         return self.function(data[parents]).values
 
 @typechecked
@@ -188,7 +188,7 @@ class DataNode:
     def get_info(self):
         return self.info
 
-    def calculate(self, sampled_errors: np.ndarray):
+    def calculate(self, sampled_errors: pd.Series):
         ind = np.floor(sampled_errors * len(self.samples))
         # if full data, last row is 1. only one row must be 1
         assert len(ind[ind==self.info['size']]) <= 1, 'wrong sampled error for data node'
@@ -315,8 +315,8 @@ class Graph:
     """
 
     def __init__(self,
-                 nodes:list[dict],
-                 edges:list[dict],
+                 nodes:List[dict],
+                 edges:List[dict],
                  dummy_node_prefix: str = 'dummy_'):
         self.nodes = {
             kwargs['name']: Node(**kwargs) if 'output_distribution' in kwargs
@@ -387,7 +387,7 @@ class Graph:
             if self.node_types[n] == 'data' and len(self.parent_sets[n]) != 0:
                 raise ValueError('node {} is DataNode but has parents in graph'.format(n))
 
-    def _single_sample_round(self, node_name: str, data: pd.DataFrame, sampled_errors: np.ndarray):
+    def _single_sample_round(self, node_name: str, data: pd.DataFrame, sampled_errors: pd.DataFrame):
         # transform parents by edges
         inputs = pd.DataFrame({
             parent: self.edges['{}->{}'.format(parent, node_name)].map(array=data[parent].values)
@@ -412,10 +412,10 @@ class Graph:
     def _single_const_round(self, node_name: str, size_: int):
         return self.nodes[node_name].calculate(size_)
 
-    def _single_data_round(self, node_name: str, sampled_errors: np.ndarray):
+    def _single_data_round(self, node_name: str, sampled_errors: pd.DataFrame):
         return self.nodes[node_name].calculate(sampled_errors=sampled_errors[node_name])
 
-    def _calc_non_interventions(self, node_name: str, data: pd.DataFrame, sampled_errors: np.ndarray):
+    def _calc_non_interventions(self, node_name: str, data: pd.DataFrame, sampled_errors: pd.DataFrame):
         if self.node_types[node_name] == 'stochastic':
             return self._single_sample_round(
                 node_name=node_name, data=data, sampled_errors=sampled_errors
@@ -476,7 +476,7 @@ class Graph:
                 )
         return sampled_errors
 
-    def sample(self, size: int, cache_name: Optional[str] = None, sampled_errors: Optional[pd.DataFrame] = None, 
+    def sample(self, size: Optional[int] = None, cache_name: Optional[str] = None, sampled_errors: Optional[pd.DataFrame] = None,
                 return_errors: bool = False, cache_sampling: bool = False, use_sampled_errors: bool = False, full_data: bool = False):
         """**Sample from observational distribution**
 
@@ -582,7 +582,7 @@ class Graph:
         else:
             return data
 
-    def do_functional(self, size: int, intervene_on: str, inputs: list[str], func: function,
+    def do_functional(self, size: int, intervene_on: str, inputs: List[str], func: Callable,
                       use_sampled_errors: bool = False, sampled_errors: Optional[pd.DataFrame] = None,
                       return_errors: bool = False, cache_sampling: bool = False, cache_name: Optional[str] = None):
         """**sample from interventional distribution**
@@ -636,7 +636,7 @@ class Graph:
         else:
             return data
 
-    def do_self(self, size: int, func: function, intervene_on: str,
+    def do_self(self, size: int, func: Callable, intervene_on: str,
                 use_sampled_errors: bool = False, sampled_errors: Optional[pd.DataFrame] = None, return_errors: bool = False,
                 cache_sampling: bool = False, cache_name: Optional[str] = None):
         """**sample from interventional distribution**

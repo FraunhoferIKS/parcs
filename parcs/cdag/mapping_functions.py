@@ -3,18 +3,18 @@ from scipy.special import expit
 from parcs.exceptions import DataError, parcs_assert
 from typeguard import typechecked
 
-ALPHA_MIN, ALPHA_MAX = 1, 3
-BETA_MIN, BETA_MAX = -2, 2
+ALPHA_MIN, ALPHA_MAX = 0.1, 30
+BETA_MIN, BETA_MAX = -3, 3
 GAMMA_RANGE = [0, 1]
 
 def edge_empty(**kwargs):
     assert kwargs
     print('edge function not implemented')
-    raise ValueErrorgit 
+    raise ValueError
 
 @typechecked
 def edge_sigmoid(array: np.ndarray = None,
-                 alpha: float = 2.0, beta: float = 0.0, gamma: int = 0, tau: int = 1) -> np.ndarray:
+                 alpha: float = 2.0, beta: float = 0.0, gamma: np.int_ = 0, tau: int = 1) -> np.ndarray:
     r"""
     This edge function transforms input variable according to the following equation:
 
@@ -56,7 +56,7 @@ def edge_sigmoid(array: np.ndarray = None,
 
 @typechecked
 def edge_gaussian_rbf(array: np.ndarray = None,
-                      alpha: float = 1.0, beta: float = 0, gamma: int = 0, tau: int = 2) -> np.ndarray:
+                      alpha: float = 1.0, beta: float = 0, gamma: np.int_ = 0, tau: int = 2) -> np.ndarray:
     r"""
     .. math::
         \begin{align}
@@ -97,7 +97,7 @@ def edge_gaussian_rbf(array: np.ndarray = None,
 
 @typechecked
 def edge_arctan(array: np.ndarray = None,
-                alpha: float = 2, beta: float = 0, gamma: int = 0) -> np.ndarray:
+                alpha: float = 2, beta: float = 0, gamma: np.int_ = 0) -> np.ndarray:
     r"""
     .. math::
         \begin{align}
