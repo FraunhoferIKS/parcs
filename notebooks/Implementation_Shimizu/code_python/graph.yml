@@ -1,0 +1,61 @@
+# nodes:
+
+dp: uniform(mu_=1, diff_=0.5)
+P: deterministic(fcts.py, ones_power)
+
+e1: gaussian(mu_=0, sigma_=1)
+e2: gaussian(mu_=0, sigma_=1)
+e3: gaussian(mu_=0, sigma_=1)
+e4: gaussian(mu_=0, sigma_=1)
+e5: gaussian(mu_=0, sigma_=1)
+
+X1: deterministic(fcts.py, X1)
+
+b: uniform(mu_=1.25, diff_=1.5)
+sb: uniform(mu_=0, diff_=1)
+
+X2: deterministic(fcts.py, X2)
+X3: deterministic(fcts.py, X3)
+X4: deterministic(fcts.py, X4)
+X5: deterministic(fcts.py, X5)
+
+# edges
+
+dp->P: identity()
+
+P->X2: identity()
+P->X3: identity()
+P->X4: identity()
+P->X5: identity()
+
+e1->X1: identity()
+e2->X2: identity()
+e3->X3: identity()
+e4->X4: identity()
+e5->X5: identity()
+
+X1->X2: identity()
+X1->X3: identity()
+X1->X4: identity()
+X1->X5: identity()
+
+X2->X3: identity()
+X2->X4: identity()
+X2->X5: identity()
+
+X3->X4: identity()
+X3->X5: identity()
+
+X4->X5: identity()
+
+b->X1: identity()
+b->X2: identity()
+b->X3: identity()
+b->X4: identity()
+b->X5: identity()
+
+sb->X1: identity()
+sb->X2: identity()
+sb->X3: identity()
+sb->X4: identity()
+sb->X5: identity()

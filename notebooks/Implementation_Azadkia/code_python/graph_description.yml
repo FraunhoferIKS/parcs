@@ -1,0 +1,74 @@
+# all dummy nodes start with lowercase letters
+# additive errors are partly absorbed by the mean shift on the gaussian node error
+
+
+
+# nodes
+X1: gaussian(mu_=0, sigma_=1)
+X2: gaussian(mu_=0, sigma_=1)
+X3: gaussian(mu_=0, sigma_=1)
+X4: gaussian(mu_=0, sigma_=1)
+X8: gaussian(mu_=0, sigma_=1)
+X10: gaussian(mu_=0, sigma_=1)
+X12: gaussian(mu_=0, sigma_=1)
+
+d2arctan: deterministic(fcts.py, arctanx2)
+X5: gaussian(mu_=X1-d2arctan, sigma_=1)
+
+d3squared: deterministic(fcts.py, squarex3)
+X6: gaussian(mu_=X2+X4+d3squared, sigma_=1)
+
+d3sin: deterministic(fcts.py, squarex3)
+X7: gaussian(mu_= d3sin, sigma_=1)
+
+e9: gaussian(mu_=0, sigma_=1)
+X9: deterministic(fcts.py, computex9)
+
+X11: gaussian(mu_=X6X12-X6X8, sigma_= 1)
+
+e13: gaussian(mu_=0, sigma_=1)
+X13: deterministic(fcts.py, computex13)
+
+d11sin: deterministic(fcts.py, sinx11)
+X14: gaussian(mu_=d11sin, sigma_=1)
+
+d12abssqrt: deterministic(fcts.py, abssqrtx12)
+X15: gaussian(mu_=d12abssqrt, sigma_=1)
+
+d12sin: deterministic(fcts.py, sinx12)
+X16: gaussian(mu_=d12sin, sigma_=1)
+
+
+
+# edges
+X1->X5: identity()
+X2->d2arctan: identity()
+d2arctan->X5: identity()
+
+X2->X6: identity()
+X3->d3squared: identity()
+d3squared->X6: identity()
+X4->X6: identity()
+
+X3->d3sin: identity()
+d3sin->X7: identity()
+
+X6->X9: identity()
+e9->X9: identity()
+X10->X9: identity()
+
+X6->X11: identity()
+X12->X11: identity()
+X8->X11: identity()
+
+X9->X13: identity()
+e13->X13: identity()
+
+X11->d11sin: identity()
+d11sin->X14: identity()
+
+X12->d12abssqrt: identity()
+d12abssqrt->X15: identity()
+
+X12->d12sin: identity()
+d12sin->X16: identity()
