@@ -48,18 +48,18 @@ def sc_mask(size=None):
 def block_conditional_mask(size=None):
     return np.triu(np.ones(shape=(size, size)), k=1)
 
-
-def fully_observed_mar(shape=None, fully_observed_indices=None):
-    assert len(fully_observed_indices) == shape[0] - shape[1]
-    mask = np.zeros(shape=shape)
-    mask[fully_observed_indices,:] = 1
-
-
-def partially_observed_mar(size=None, fully_observed_indices=None):
-    mask = np.ones(shape=(size, size))
-    mask[fully_observed_indices, :] = 0
-    mask[:, fully_observed_indices] = 0
-    return mask
+#
+# def fully_observed_mar(shape=None, fully_observed_indices=None):
+#     assert len(fully_observed_indices) == shape[0] - shape[1]
+#     mask = np.zeros(shape=shape)
+#     mask[fully_observed_indices,:] = 1
+#
+#
+# def partially_observed_mar(size=None, fully_observed_indices=None):
+#     mask = np.ones(shape=(size, size))
+#     mask[fully_observed_indices, :] = 0
+#     mask[:, fully_observed_indices] = 0
+#     return mask
 
 def R_adj_matrix(size=None, shuffle=False, density=1.0):
     adj_matrix = np.triu(np.ones(shape=(size, size)), k=1)
