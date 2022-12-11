@@ -3,20 +3,35 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to PARCS's documentation!
-=================================
+Welcome to PARCS documentation!
+===============================
 
-**PA**-rtially **R**-andomized **C**-ausal **S**-imulator is a simulation tool for causal inference. `to be continued`
+**PA**-rtially **R**-andomized **C**-ausal **S**-imulator is a simulation tool for causal methods. This library is designed to facilitate simulation study design and serve as a standard benchmarking tool for causal inference and discovery methods. PARCS generates simulation mechanisms based on causal DAGs and a wide range of adjustable parameters. Once the simulation setup is described via legible instructions and rules, PARCS automatically probes the space of all complying mechanisms and synthesizes data from both observational and interventional distributions.
+
+Install PARCS via the following command:
+
+.. code-block:: console
+
+    (.venv) $ pip install parcs
+
+.. _citation:
+
+Citation
+--------
 
 .. note::
-   This project is under active development
+   This project is under active development.
 
+Citation information will be put here in the near future.
+
+
+Documentation
+-------------
 
 .. toctree::
    :maxdepth: 1
    :caption: First Steps
 
-   first_steps/usage
    first_steps/theoretical_background
    first_steps/first_graph
    first_steps/function_list
@@ -27,23 +42,9 @@ Welcome to PARCS's documentation!
 
    features/interventions
    features/partial_randomization
-   features/adjusting_randomized
    features/looping
    features/more_graph_objects
    features/m_graphs
-   features/graph_templates
-
-.. toctree::
-   :maxdepth: 1
-   :caption: PARCS as a Latent Simulation
-
-   parcs_as_latent/timeseries
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Theoretical Details
-
-   theoretical/graph_interventions
 
 .. toctree::
    :maxdepth: 1

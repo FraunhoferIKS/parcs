@@ -1,5 +1,0 @@
-======================
-Time Series Simulation
-======================
-
-something
