@@ -65,9 +65,7 @@ We can also declare the parent and child name of the edge upon instantiation. Th
 .. literalinclude:: examples/cdag_examples/edge_identity.py
     :lines: 20-25
 
-However, when an edge object is instantiated independently and outside a graph object, it is not necessary to give any node names
-
-.. seealso:: :ref:`Edge API reference <edge_api>`
+However, when an edge object is instantiated independently and outside a graph object, it is not necessary to give any node names.
 
 .. _node_doc:
 
@@ -130,6 +128,5 @@ Graphs
 To create a graph for the example above, we can serialize and order the 3 nodes and 2 connection edges as follows:
 
 .. literalinclude:: examples/cdag_examples/graph_manual.py
-    :lines: 6-69
 
 This simulation can also be done using the ``Graph`` object.

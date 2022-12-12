@@ -1,3 +1,23 @@
+#  Copyright (c) 2022. Fraunhofer-Gesellschaft zur Foerderung der angewandten Forschung e.V.
+#  acting on behalf of its Fraunhofer-Institut für Kognitive Systeme IKS. All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, see <http://www.gnu.org/licenses/>.
+#
+#  https://www.gnu.de/documents/gpl-2.0.de.html
+#
+#  Contact: alireza.zamanian@iks.fraunhofer.de
+
 import numpy as np
 import pandas as pd
 from parcs.cdag.utils import topological_sort, EdgeCorrection
@@ -378,7 +398,7 @@ class Graph:
             return info
         elif report_type == 'md':
             with open(info_dir, 'w') as file:
-                file.write(info_md_parser(info))
+                file.write(info_md_parser())
             return None
 
     def _set_adj_matrix(self):
