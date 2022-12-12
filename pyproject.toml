@@ -1,0 +1,46 @@
+[project]
+name = "parcs"
+version = "0.0.2"
+description = "A simulation library for Causal Inference"
+authors = [
+    {name = "Alireza Zamanian", email = "alireza.zamanian@iks.fraunhofer.de"},
+    {name = "Leopold Mareis", email = "leopold.mareis@iks.fraunhofer.de"}
+]
+maintainers = [
+    {name = "Alireza Zamanian", email = "alireza.zamanian@iks.fraunhofer.de"}
+]
+license = {file = "LICENSE.txt"}
+readme = "README.md"
+requires-python = ">=3.5"
+keywords = ["simulation", "causal inference", "directed acyclic graphs"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: GPU",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
+    "Topic :: Education",
+    "Topic :: Scientific/Engineering :: Mathematics"
+]
+
+# Requirements: This is done differently by poetry!
+dependencies = [
+    "numpy~=1.22.2",
+    "pandas~=1.3.3",
+    "scipy~=1.7.3",
+    "matplotlib~=3.5.1",
+    "scikit-learn~=1.0.2",
+    "PyYAML~=6.0",
+    "typeguard"
+]
+[project.optional-dependencies]
+test = ["pytest"]
+doc = ["sphinx"]
+
+#[project.urls]
+#homepage = ""
+#documentation = ""
+#repository = ""
+
+[project.scripts]
+flit = "flit:main"
