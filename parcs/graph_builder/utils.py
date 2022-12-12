@@ -9,8 +9,8 @@ def config_parser(dir_):
     return conf
 
 
-def config_dumper(dict_, dir):
-    with open(dir, 'w') as outfile:
+def config_dumper(dict_, dir_):
+    with open(dir_, 'w') as outfile:
         yaml.dump(dict_, outfile, default_flow_style=False)
 
 
@@ -32,6 +32,7 @@ def empty_dist_param_coefs(dist):
         for param in DISTRIBUTION_PARAMS[dist]
     }
 
+
 def node_guideline_reader(obj):
     nodes = []
     for node_name in obj:
@@ -52,8 +53,9 @@ def node_guideline_reader(obj):
     return nodes
 
 
-def info_md_parser(info):
+def info_md_parser():
     raise NotImplementedError
+
 
 if __name__ == '__main__':
     example = {

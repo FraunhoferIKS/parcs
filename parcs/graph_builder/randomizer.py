@@ -14,7 +14,9 @@ import warnings
 from pathlib import Path
 from typing import Union, Optional, Iterable
 from typeguard import typechecked
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 @typechecked
 class ParamRandomizer:
@@ -26,7 +28,8 @@ class ParamRandomizer:
         # read fixed nodes and edges
         self.nodes, self.edges = parsers.graph_file_parser(graph_dir)
 
-    def directive_picker(self, directive: Union[list, int, float]):
+    @staticmethod
+    def directive_picker(directive: Union[list, int, float]):
         if isinstance(directive, list):
             if directive[0] == 'choice':
                 options = directive[1:]
@@ -34,7 +37,8 @@ class ParamRandomizer:
             else:
                 ranges = directive[1:]
                 # if multiple ranges are given
-                parcs_assert(len(ranges) % 2 == 0, DataError, f'The number of range numbers should be even, got {len(ranges)}')
+                parcs_assert(len(ranges) % 2 == 0, DataError,
+                             f'The number of range numbers should be even, got {len(ranges)}')
                 num_ranges = int(len(ranges) / 2)
                 # pick the range
                 range_ = np.random.randint(num_ranges)
@@ -133,6 +137,7 @@ class ParamRandomizer:
         self._setup()
         return self.nodes, self.edges
 
+
 @typechecked
 class ExtendRandomizer(ParamRandomizer):
     def __init__(self,
@@ -199,7 +204,7 @@ class ExtendRandomizer(ParamRandomizer):
 
     def _random_adj_matrix(self):
         density = self.directive_picker(self.guideline['graph']['graph_density'])
-        adj_matrix = np.random.choice([0, 1], p=[1-density, density], size=(self.num_nodes, self.num_nodes))
+        adj_matrix = np.random.choice([0, 1], p=[1 - density, density], size=(self.num_nodes, self.num_nodes))
         mask = np.triu(adj_matrix, k=1)
         adj_matrix = np.multiply(adj_matrix, mask)
         return pd.DataFrame(adj_matrix, columns=self.node_names, index=self.node_names)
@@ -228,17 +233,19 @@ class ExtendRandomizer(ParamRandomizer):
     def _update_param_coefs(self):
         return self
 
+
 @typechecked
 class FreeRandomizer(ExtendRandomizer):
     def __init__(self, guideline_dir: Optional[Union[str, Path]] = None):
         super().__init__(graph_dir=None, guideline_dir=guideline_dir)
 
+
 @typechecked
 class ConnectRandomizer(ParamRandomizer):
-    def __init__(self, 
-                 parent_graph_dir: Optional[Union[str, Path]] = None, 
+    def __init__(self,
+                 parent_graph_dir: Optional[Union[str, Path]] = None,
                  child_graph_dir: Optional[Union[str, Path]] = None,
-                 guideline_dir: Optional[Union[str, Path]] = None, 
+                 guideline_dir: Optional[Union[str, Path]] = None,
                  adj_matrix_mask: pd.DataFrame = None,
                  delete_temp_graph_description: bool = True):
         pgd = config_parser(parent_graph_dir)
@@ -253,7 +260,7 @@ class ConnectRandomizer(ParamRandomizer):
 
         # sample connection adj_matrix
         density = self.directive_picker(guideline['graph']['graph_density'])
-        adj_matrix = np.random.choice([0, 1], p=[1-density, density], size=(l_p, l_c))
+        adj_matrix = np.random.choice([0, 1], p=[1 - density, density], size=(l_p, l_c))
         adj_matrix = np.multiply(adj_matrix, adj_matrix_mask.values)
         adj_matrix = pd.DataFrame(adj_matrix, index=adj_matrix_mask.index, columns=adj_matrix_mask.columns)
         # make additional edges
@@ -264,7 +271,7 @@ class ConnectRandomizer(ParamRandomizer):
         }
         # modify receiving child nodes
         for n in n_c:
-            if adj_matrix[n].sum() == 0: # no added edge
+            if adj_matrix[n].sum() == 0:  # no added edge
                 # delete all stars and move on
                 cgd[n] = cgd[n].replace('*', '')
                 continue
@@ -274,13 +281,13 @@ class ConnectRandomizer(ParamRandomizer):
             star_flag = False
             for i in range(len(params)):
                 if params[i][0] != '*':
-                    if i == len(params)-1 and not star_flag: # last param and still no star
+                    if i == len(params) - 1 and not star_flag:  # last param and still no star
                         # remove the new edges which doesn't do anything
                         e_names = [i for i in add_edges if i.split('->')[1] == n]
                         for e in e_names:
                             del add_edges[e]
                     continue
-                star_flag = True # has at least one star param
+                star_flag = True  # has at least one star param
                 # remove '*'
                 params[i] = params[i][1:]
                 k, v = params[i].split('=')
@@ -290,14 +297,14 @@ class ConnectRandomizer(ParamRandomizer):
                 current_par = [p for p in n_c if '{}->{}'.format(p, n) in e_c]
                 new_par = [p for p in n_p if adj_matrix.loc[p, n] == 1]
 
-                ## linear terms
+                # linear terms
                 coefs = [self.directive_picker(guideline['nodes'][dist][k][1]) for _ in range(len(new_par))]
                 for coef, par in zip(coefs, new_par):
                     if coef > 0:
                         v += '+{}{}'.format(np.round(coef, 2), par)
                     elif coef < 0:
                         v += '{}{}'.format(np.round(coef, 2), par)
-                ## interaction terms
+                # interaction terms
                 terms = [i for i in combinations(new_par, 2)] + [i for i in product(new_par, current_par)]
                 terms = [''.join(i) for i in terms]
                 coefs = [self.directive_picker(guideline['nodes'][dist][k][2]) for _ in range(len(terms))]
@@ -315,8 +322,10 @@ class ConnectRandomizer(ParamRandomizer):
         if delete_temp_graph_description:
             os.remove('combined_gdf.yml')
 
+
 @typechecked
-def guideline_iterator(guideline_dir: Optional[Union[str, Path]] = None, to_iterate: str = None, steps: int = None, repeat: int = 1):
+def guideline_iterator(guideline_dir: Optional[Union[str, Path]] = None, to_iterate: str = None, steps: int = None,
+                       repeat: int = 1):
     @typechecked
     def _get_iterable(directive: list, steps: Optional[int]):
         # assert isinstance(directive, list), 'GuidelineIterator received fixed value as the directive'
@@ -325,7 +334,7 @@ def guideline_iterator(guideline_dir: Optional[Union[str, Path]] = None, to_iter
             return np.linspace(directive[1], directive[2], steps)
         elif directive[0] == 'i-range':
             assert len(directive) == 3, 'multirange doesn\'t work in guideline iterator'
-            return range(directive[1], directive[2]+1)
+            return range(directive[1], directive[2] + 1)
         elif directive[0] == 'choice':
             return directive[1:]
         # else:
@@ -370,9 +379,11 @@ def guideline_iterator(guideline_dir: Optional[Union[str, Path]] = None, to_iter
     generator = _generator(guideline, iterable, path, repeat)
     return generator
 
+
 if __name__ == '__main__':
     from parcs.cdag.graph_objects import Graph
     import numpy as np
+
     np.random.seed(1)
 
     rand = ParamRandomizer(
@@ -385,6 +396,7 @@ if __name__ == '__main__':
     data, errors = g.sample(size=500, cache_sampling=True, cache_name='exp_1', return_errors=True)
     print(data)
     from matplotlib import pyplot as plt
+
     plt.scatter(data['C'], data['A'], c=data['Y'])
     plt.show()
 

@@ -7,10 +7,12 @@ ALPHA_MIN, ALPHA_MAX = 0.1, 30
 BETA_MIN, BETA_MAX = -3, 3
 GAMMA_RANGE = [0, 1]
 
+
 def edge_empty(**kwargs):
     assert kwargs
     print('edge function not implemented')
     raise ValueError
+
 
 @typechecked
 def edge_sigmoid(array: np.ndarray = None,
@@ -45,14 +47,17 @@ def edge_sigmoid(array: np.ndarray = None,
     transformed_array : array-like
 
     """
-    parcs_assert(ALPHA_MIN <= alpha <= ALPHA_MAX, DataError, f'alpha should be a float in [{ALPHA_MIN}, {ALPHA_MAX}], got {alpha} instead')
-    parcs_assert(BETA_MIN <= beta <= BETA_MAX, DataError, f'beta should be a float in [{BETA_MIN}, {BETA_MAX}], got {beta} instead')
+    parcs_assert(ALPHA_MIN <= alpha <= ALPHA_MAX, DataError,
+                 f'alpha should be a float in [{ALPHA_MIN}, {ALPHA_MAX}], got {alpha} instead')
+    parcs_assert(BETA_MIN <= beta <= BETA_MAX, DataError,
+                 f'beta should be a float in [{BETA_MIN}, {BETA_MAX}], got {beta} instead')
     parcs_assert(gamma in GAMMA_RANGE, DataError, f'gamma should be an integer in {GAMMA_RANGE}, got {gamma} instead')
     parcs_assert(tau % 2 == 1, DataError, f'tau should be an odd integer, got {tau} instead')
 
-    expon = (-1)**gamma * alpha * ((array - beta)**tau)
+    expon = (-1) ** gamma * alpha * ((array - beta) ** tau)
 
     return expit(expon)
+
 
 @typechecked
 def edge_gaussian_rbf(array: np.ndarray = None,
@@ -86,14 +91,17 @@ def edge_gaussian_rbf(array: np.ndarray = None,
     transformed_array : array-like
 
     """
-    parcs_assert(ALPHA_MIN <= alpha <= ALPHA_MAX, DataError, f'alpha should be a float in [{ALPHA_MIN}, {ALPHA_MAX}], got {alpha} instead')
-    parcs_assert(BETA_MIN <= beta <= BETA_MAX, DataError, f'beta should be a float in [{BETA_MIN}, {BETA_MAX}], got {beta} instead')
+    parcs_assert(ALPHA_MIN <= alpha <= ALPHA_MAX, DataError,
+                 f'alpha should be a float in [{ALPHA_MIN}, {ALPHA_MAX}], got {alpha} instead')
+    parcs_assert(BETA_MIN <= beta <= BETA_MAX, DataError,
+                 f'beta should be a float in [{BETA_MIN}, {BETA_MAX}], got {beta} instead')
     parcs_assert(gamma in GAMMA_RANGE, DataError, f'gamma should be an integer in {GAMMA_RANGE}, got {gamma} instead')
     parcs_assert(tau % 2 == 0, DataError, f'tau should be an even integer, got {tau} instead')
 
-    expon = -alpha * ((array - beta)**tau)
+    expon = -alpha * ((array - beta) ** tau)
 
-    return gamma + ((-1)**gamma) * np.exp(expon)
+    return gamma + ((-1) ** gamma) * np.exp(expon)
+
 
 @typechecked
 def edge_arctan(array: np.ndarray = None,
@@ -125,11 +133,14 @@ def edge_arctan(array: np.ndarray = None,
     transformed_array : array-like
 
     """
-    parcs_assert(ALPHA_MIN <= alpha <= ALPHA_MAX, DataError, f'alpha should be a float in [{ALPHA_MIN}, {ALPHA_MAX}], got {alpha} instead')
-    parcs_assert(BETA_MIN <= beta <= BETA_MAX, DataError, f'beta should be a float in [{BETA_MIN}, {BETA_MAX}], got {beta} instead')
+    parcs_assert(ALPHA_MIN <= alpha <= ALPHA_MAX, DataError,
+                 f'alpha should be a float in [{ALPHA_MIN}, {ALPHA_MAX}], got {alpha} instead')
+    parcs_assert(BETA_MIN <= beta <= BETA_MAX, DataError,
+                 f'beta should be a float in [{BETA_MIN}, {BETA_MAX}], got {beta} instead')
     parcs_assert(gamma in GAMMA_RANGE, DataError, f'gamma should be an integer in {GAMMA_RANGE}, got {gamma} instead')
-    
-    return (-1)**gamma * np.arctan(alpha*(array-beta))
+
+    return (-1) ** gamma * np.arctan(alpha * (array - beta))
+
 
 @typechecked
 def edge_identity(array: np.ndarray = None) -> np.ndarray:
@@ -163,7 +174,6 @@ FUNCTION_PARAMS = {
     'arctan': ['alpha', 'beta', 'gamma']
 }
 
-
 if __name__ == '__main__':
     arr = np.random.normal(0, 1, size=300)
 
@@ -171,5 +181,6 @@ if __name__ == '__main__':
     v = edge_gaussian_rbf(array=arr, alpha=1, beta=-1, gamma=1)
 
     from matplotlib import pyplot as plt
+
     plt.scatter(arr, v)
     plt.show()

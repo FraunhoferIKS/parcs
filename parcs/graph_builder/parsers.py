@@ -1,15 +1,14 @@
 import re
 import numpy as np
-from pprint import pprint
 from parcs.graph_builder.utils import config_parser
 from parcs.cdag.output_distributions import DISTRIBUTION_PARAMS
 from parcs.cdag.mapping_functions import EDGE_FUNCTIONS, FUNCTION_PARAMS
 from parcs.cdag.utils import get_interactions_length, get_interactions_dict
 
 
-def term_parser(term, vars):
+def term_parser(term, vars_):
     pars = []
-    for var in vars:
+    for var in vars_:
         res = re.search(r'{}'.format(var), term)
         if res is not None:
             inds = res.span(0)
@@ -24,15 +23,16 @@ def term_parser(term, vars):
     return pars, coef
 
 
-def equation_parser(eq, vars):
+def equation_parser(eq, vars_):
     # 1. we split by +, so negative terms are + - ...
     eq = eq.replace('-', '+-')
     if eq[0] == '+':
         eq = eq[1:]
     eq = eq.split('+')
     # 2. split by vars
-    eq = [term_parser(term, vars) for term in eq]
+    eq = [term_parser(term, vars_) for term in eq]
     return eq
+
 
 def node_parser(line, parents):
     # preliminary: get order of interactions
@@ -65,7 +65,7 @@ def node_parser(line, parents):
         raw_value = res.group(1)
         if len(res.groups()) == 2:
             return {'value': float(raw_value)}
-        elif len(res.groups()) == 1: # doesn't have floating part
+        elif len(res.groups()) == 1:  # doesn't have floating part
             return {'value': int(raw_value)}
         else:
             raise AttributeError
@@ -109,7 +109,7 @@ def node_parser(line, parents):
         # all ?
         assert params == '?'
         keys_ = DISTRIBUTION_PARAMS[dist]
-        values_ = ['?']*len(keys_)
+        values_ = ['?'] * len(keys_)
 
     try:
         assert set(keys_) == set(DISTRIBUTION_PARAMS[dist])
@@ -133,8 +133,8 @@ def node_parser(line, parents):
         terms = equation_parser(params[p], parents)
         params[p] = {
             'bias': 0,
-            'linear': np.zeros(shape=(len(parents,))),
-            'interactions': np.zeros(shape=get_interactions_length(len(parents)),)
+            'linear': np.zeros(shape=(len(parents, ))),
+            'interactions': np.zeros(shape=get_interactions_length(len(parents)), )
         }
 
         for term in terms:
@@ -173,8 +173,9 @@ def node_parser(line, parents):
             'output_distribution': dist,
             'dist_params_coefs': params,
             'do_correction': do_correction,
-            'correction_config':correction_config
+            'correction_config': correction_config
         }
+
 
 def edge_parser(line):
     line = line.replace(' ', '')
@@ -226,6 +227,7 @@ def edge_parser(line):
         'do_correction': do_correction
     }
 
+
 def graph_file_parser(file_dir):
     """**Parser for graph description YAML files**
     This function reads the graph description ``.yml`` files and returns the list of nodes and edges.
@@ -270,8 +272,10 @@ def graph_file_parser(file_dir):
 
     return nodes, edges
 
+
 def guideline_parser(file_dir):
     return config_parser(file_dir)
+
 
 if __name__ == '__main__':
     obj = node_parser('gaussian(mu_=?, sigma_=1)', ['A', 'B', 'C'])

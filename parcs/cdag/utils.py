@@ -29,6 +29,7 @@ def topological_sort(adj_matrix: pd.DataFrame = None):
         print('adj_matrix is not acyclic')
         raise
 
+
 def is_adj_matrix_acyclic(adj_matrix):
     try:
         topological_sort(adj_matrix)
@@ -61,11 +62,11 @@ def get_interactions(data, max_terms=2):
     Examples
     --------
     >>> from parcs.cdag.utils import get_interactions
-    >>> data = np.array([
+    >>> data_ = np.array([
     ...     [1, 2, 4],
     ...     [3, 5, 7]
     ... ])
-    >>> get_interactions(data, max_terms=3)
+    >>> get_interactions(data_, max_terms=3)
     array([[  2,   4,   8,   8],
            [ 15,  21,  35, 105]])
     """
@@ -74,6 +75,7 @@ def get_interactions(data, max_terms=2):
         [np.prod(i) for r in range(2, len_ + 1) for i in comb(row, r)]
         for row in data
     ])
+
 
 def get_interactions_length(len_, max_terms=2):
     """ **Returns length of interaction terms**
@@ -96,8 +98,8 @@ def get_interactions_length(len_, max_terms=2):
     Examples
     --------
     >>> from parcs.cdag.utils import get_interactions, get_interactions_length
-    >>> import numpy as np
-    >>> data = np.random.normal(size=(9, 3))
+    >>> import numpy
+    >>> data = numpy.random.normal(size=(9, 3))
     >>> interactions = get_interactions(data)
     >>> interaction_len = get_interactions_length(data.shape[1])
     >>> interactions.shape[1] == interaction_len
@@ -110,6 +112,7 @@ def get_interactions_length(len_, max_terms=2):
         for r in range(2, max_t + 1)
         for i in comb(dummy_data, r)
     ])
+
 
 def get_interactions_dict(parents, max_terms=2):
     """ **gives parents pairings for each interaction term**
@@ -130,13 +133,14 @@ def get_interactions_dict(parents, max_terms=2):
     Examples
     --------
     >>> from parcs.cdag.utils import get_interactions, get_interactions_dict
-    >>> parents = ['a', 'b', 'c', 'd']
-    >>> get_interactions_dict(parents, max_terms=2)
+    >>> parents_ = ['a', 'b', 'c', 'd']
+    >>> get_interactions_dict(parents_, max_terms=2)
     [{'b', 'a'}, {'c', 'a'}, {'a', 'd'}, {'b', 'c'}, {'b', 'd'}, {'c', 'd'}]
 
     """
     len_ = min(len(parents), max_terms)
     return [set(i) for r in range(2, len_ + 1) for i in comb(parents, r)]
+
 
 def get_poly(data, n):
     return data ** n
@@ -191,21 +195,22 @@ class SigmoidCorrection:
     the functionality better, we make an example using the class:
 
     >>> from parcs.cdag.utils import SigmoidCorrection
-    >>> import numpy as np
-    >>> x = np.linspace(-10, 10, 200)
+    >>> import numpy
+    >>> x = numpy.linspace(-10, 10, 200)
     >>> sc = SigmoidCorrection(lower=-3, upper=2)
     >>> x_t = sc.transform(x)
-    >>> print(np.round(x_t.min(), 3), np.round(x_t.max(), 3), np.round(x_t.mean(), 3))
+    >>> print(numpy.round(x_t.min(), 3), numpy.round(x_t.max(), 3), numpy.round(x_t.mean(), 3))
     -3.0 2.0 -0.5
     >>> sc_2 = SigmoidCorrection(lower=0, upper=1, target_mean=0.8)
     >>> x_t = sc_2.transform(x)
-    >>> print(np.round(x_t.min(), 3), np.round(x_t.max(), 3), np.round(x_t.mean(), 3))
+    >>> print(numpy.round(x_t.min(), 3), numpy.round(x_t.max(), 3), numpy.round(x_t.mean(), 3))
     0.019 1.0 0.8
 
     .. note::
         If ``target_mean`` is given, sigmoid correction searches for an offset term to add to the input values,
         such that the required mean is obtained. The process is a manual search near the support of data points.
     """
+
     def __init__(self, lower=0, upper=1, target_mean=None, to_center=False):
         assert upper > lower
         if target_mean is not None:
@@ -251,7 +256,7 @@ class SigmoidCorrection:
                 # max - I = -6 -> I = max + 6
                 error = np.inf
                 theta = 0
-                for i in np.linspace(array.min() - 6, array.max() + 6, 1000):
+                for i in np.linspace(np.min(array) - 6, np.max(array) + 6, 1000):
                     h = U * expit(array - i) + L
                     new_error = abs(h.mean() - self.target_mean)
                     if new_error <= error:
@@ -262,8 +267,8 @@ class SigmoidCorrection:
                 self.config['offset'] = theta
             self.is_initialized = True
         return (self.config['upper'] - self.config['lower']) * \
-               expit(array - self.config['offset']) + \
-               self.config['lower']
+            expit(array - self.config['offset']) + \
+            self.config['lower']
 
 
 class EdgeCorrection:
@@ -279,24 +284,25 @@ class EdgeCorrection:
 
     Examples
     --------
-    This class is used internally by PARCS if `correction` parameter is chosen for a edge. However, to understand
+    This class is used internally by PARCS if `correction` parameter is chosen for an edge. However, to understand
     the functionality better, we make an example using the class:
 
     >>> from parcs.cdag.utils import EdgeCorrection
-    >>> import numpy as np
-    >>> x = np.random.normal(2, 10, size=200)
+    >>> import numpy
+    >>> x = numpy.random.normal(2, 10, size=200)
     >>> ec = EdgeCorrection()
     >>> # This is the first batch
     >>> x_t = ec.transform(x)
-    >>> print(np.round(x_t.mean(), 2), np.round(x_t.std(), 2))
+    >>> print(numpy.round(x_t.mean(), 2), numpy.round(x_t.std(), 2))
     0.0 1.0
     >>> # Give the second batch: mean and std are already fixed according to x batch.
-    >>> y = np.random.normal(-1, 2, size=300)
+    >>> y = numpy.random.normal(-1, 2, size=300)
     >>> y_t = ec.transform(y)
-    >>> print(np.round(y_t.mean(), 2), np.round(y_t.std(), 2))
+    >>> print(numpy.round(y_t.mean(), 2), numpy.round(y_t.std(), 2))
     -0.36 0.19
 
     """
+
     def __init__(self):
         self.is_initialized = False
         self.config = {

@@ -23,6 +23,7 @@ class GaussianDistribution:
     distribution.
 
     """
+
     def __init__(self,
                  coefs=None,
                  do_correction=True,
@@ -70,6 +71,7 @@ class BernoulliDistribution:
     distribution.
 
     """
+
     def __init__(self,
                  coefs=None,
                  do_correction=True,
@@ -112,17 +114,20 @@ class UniformDistribution:
     and does loc-scale to satisfy the given parameters.
 
     """
+
     def __init__(self,
                  coefs=None,
                  do_correction=False,
                  correction_config=None):
+        self.correction_config = correction_config
+        self.do_correction = do_correction
         self.params = ['mu_', 'diff_']
         self.coefs = coefs
 
     def calculate(self, data, errors):
         mu_ = dot_prod(data, self.coefs['mu_'])
         diff_ = dot_prod(data, self.coefs['diff_'])
-        low = mu_ - (diff_/2)
+        low = mu_ - (diff_ / 2)
 
         samples = errors * diff_ + low
 
@@ -138,6 +143,7 @@ class ExponentialDistribution:
     distribution.
 
     """
+
     def __init__(self,
                  coefs=None,
                  do_correction=True,
@@ -182,6 +188,7 @@ class PoissonDistribution:
     distribution.
 
     """
+
     def __init__(self,
                  coefs=None,
                  do_correction=True,
@@ -226,6 +233,7 @@ class LogNormalDistribution:
     distribution.
 
     """
+
     def __init__(self,
                  coefs=None,
                  do_correction=True,
