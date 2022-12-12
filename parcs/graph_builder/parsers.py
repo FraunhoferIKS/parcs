@@ -68,7 +68,7 @@ def node_parser(line, parents):
     # check if data node
     try:
         data_pattern = re.compile(
-            'data\((.*)\)'
+            r'data\((.*)\)'
         )
         res = data_pattern.search(line)
         return {'csv_dir': res.group(1)}
@@ -79,7 +79,7 @@ def node_parser(line, parents):
     # check if node is constant
     try:
         const_pattern = re.compile(
-            'constant\(([0-9]+(\.[0-9]+)?)\)'
+            r'constant\(([0-9]+(\.[0-9]+)?)\)'
         )
         res = const_pattern.search(line)
         raw_value = res.group(1)
@@ -95,7 +95,7 @@ def node_parser(line, parents):
     # check if node is deterministic
     try:
         det_pattern = re.compile(
-            'deterministic\((.*),(.*)\)'.format('|'.join(DISTRIBUTION_PARAMS.keys()))
+            r'deterministic\((.*),(.*)\)'.format('|'.join(DISTRIBUTION_PARAMS.keys()))
         )
         res = det_pattern.search(line)
         directory = res.group(1)
@@ -113,7 +113,7 @@ def node_parser(line, parents):
 
     # find the dist(p1=v1, ...) pattern
     output_params_pattern = re.compile(
-        '({})\((.*)\)'.format('|'.join(DISTRIBUTION_PARAMS.keys()))
+        r'({})\((.*)\)'.format('|'.join(DISTRIBUTION_PARAMS.keys()))
     )
     try:
         res = output_params_pattern.search(line)
@@ -169,7 +169,7 @@ def node_parser(line, parents):
                 params[p]['interactions'][ind] = coef
 
     # do correction
-    pattern = re.compile('correction\[(.*)]')
+    pattern = re.compile(r'correction\[(.*)]')
     res = pattern.search(line)
     # default values
     do_correction = False
@@ -207,7 +207,7 @@ def edge_parser(line):
         }
     # find the func(p1=v1, ...) pattern
     output_params_pattern = re.compile(
-        '({})\((.*)\)'.format('|'.join(EDGE_FUNCTIONS.keys()))
+        r'({})\((.*)\)'.format('|'.join(EDGE_FUNCTIONS.keys()))
     )
     try:
         res = output_params_pattern.search(line)
@@ -234,7 +234,7 @@ def edge_parser(line):
             k: '?' for k in FUNCTION_PARAMS[func]
         }
     # do correction:
-    correct = re.compile('correction\[]')
+    correct = re.compile(r'correction\[]')
     res = correct.findall(line)
     if len(res) == 0:
         do_correction = False
