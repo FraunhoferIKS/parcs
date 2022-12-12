@@ -24,7 +24,7 @@ from parcs.exceptions import DataError, parcs_assert
 from typeguard import typechecked
 
 ALPHA_MIN, ALPHA_MAX = 0.1, 30
-BETA_MIN, BETA_MAX = -3, 3
+BETA_MIN, BETA_MAX = -5, 5
 GAMMA_RANGE = [0, 1]
 
 
