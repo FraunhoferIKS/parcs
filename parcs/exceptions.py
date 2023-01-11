@@ -23,7 +23,7 @@ class DistributionError(Exception):
         super().__init__(msg)
 
 
-class DataError(Exception):
+class EdgeFunctionError(Exception):
     def __init__(self, msg):
         super().__init__(msg)
 

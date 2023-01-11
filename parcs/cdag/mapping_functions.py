@@ -20,10 +20,10 @@
 
 import numpy as np
 from scipy.special import expit
-from parcs.exceptions import DataError, parcs_assert
+from parcs.exceptions import EdgeFunctionError, parcs_assert
 from typeguard import typechecked
 
-ALPHA_MIN, ALPHA_MAX = 0.1, 30
+ALPHA_MIN, ALPHA_MAX = 0.1, 10
 BETA_MIN, BETA_MAX = -5, 5
 GAMMA_RANGE = [0, 1]
 
@@ -67,12 +67,13 @@ def edge_sigmoid(array: np.ndarray = None,
     transformed_array : array-like
 
     """
-    parcs_assert(ALPHA_MIN <= alpha <= ALPHA_MAX, DataError,
+    parcs_assert(ALPHA_MIN <= alpha <= ALPHA_MAX, EdgeFunctionError,
                  f'alpha should be a float in [{ALPHA_MIN}, {ALPHA_MAX}], got {alpha} instead')
-    parcs_assert(BETA_MIN <= beta <= BETA_MAX, DataError,
+    parcs_assert(BETA_MIN <= beta <= BETA_MAX, EdgeFunctionError,
                  f'beta should be a float in [{BETA_MIN}, {BETA_MAX}], got {beta} instead')
-    parcs_assert(gamma in GAMMA_RANGE, DataError, f'gamma should be an integer in {GAMMA_RANGE}, got {gamma} instead')
-    parcs_assert(tau % 2 == 1, DataError, f'tau should be an odd integer, got {tau} instead')
+    parcs_assert(gamma in GAMMA_RANGE, EdgeFunctionError,
+                 f'gamma should be an integer in {GAMMA_RANGE}, got {gamma} instead')
+    parcs_assert(tau % 2 == 1, EdgeFunctionError, f'tau should be an odd integer, got {tau} instead')
 
     expon = (-1) ** gamma * alpha * ((array - beta) ** tau)
 
@@ -111,12 +112,13 @@ def edge_gaussian_rbf(array: np.ndarray = None,
     transformed_array : array-like
 
     """
-    parcs_assert(ALPHA_MIN <= alpha <= ALPHA_MAX, DataError,
+    parcs_assert(ALPHA_MIN <= alpha <= ALPHA_MAX, EdgeFunctionError,
                  f'alpha should be a float in [{ALPHA_MIN}, {ALPHA_MAX}], got {alpha} instead')
-    parcs_assert(BETA_MIN <= beta <= BETA_MAX, DataError,
+    parcs_assert(BETA_MIN <= beta <= BETA_MAX, EdgeFunctionError,
                  f'beta should be a float in [{BETA_MIN}, {BETA_MAX}], got {beta} instead')
-    parcs_assert(gamma in GAMMA_RANGE, DataError, f'gamma should be an integer in {GAMMA_RANGE}, got {gamma} instead')
-    parcs_assert(tau % 2 == 0, DataError, f'tau should be an even integer, got {tau} instead')
+    parcs_assert(gamma in GAMMA_RANGE, EdgeFunctionError,
+                 f'gamma should be an integer in {GAMMA_RANGE}, got {gamma} instead')
+    parcs_assert(tau % 2 == 0, EdgeFunctionError, f'tau should be an even integer, got {tau} instead')
 
     expon = -alpha * ((array - beta) ** tau)
 
@@ -153,11 +155,12 @@ def edge_arctan(array: np.ndarray = None,
     transformed_array : array-like
 
     """
-    parcs_assert(ALPHA_MIN <= alpha <= ALPHA_MAX, DataError,
+    parcs_assert(ALPHA_MIN <= alpha <= ALPHA_MAX, EdgeFunctionError,
                  f'alpha should be a float in [{ALPHA_MIN}, {ALPHA_MAX}], got {alpha} instead')
-    parcs_assert(BETA_MIN <= beta <= BETA_MAX, DataError,
+    parcs_assert(BETA_MIN <= beta <= BETA_MAX, EdgeFunctionError,
                  f'beta should be a float in [{BETA_MIN}, {BETA_MAX}], got {beta} instead')
-    parcs_assert(gamma in GAMMA_RANGE, DataError, f'gamma should be an integer in {GAMMA_RANGE}, got {gamma} instead')
+    parcs_assert(gamma in GAMMA_RANGE, EdgeFunctionError,
+                 f'gamma should be an integer in {GAMMA_RANGE}, got {gamma} instead')
 
     return (-1) ** gamma * np.arctan(alpha * (array - beta))
 
