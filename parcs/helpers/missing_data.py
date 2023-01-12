@@ -21,13 +21,53 @@
 import pandas as pd
 import numpy as np
 from itertools import combinations
+from parcs.exceptions import parcs_assert, DescriptionFileError
 
 
 def m_graph_convert(data: pd.DataFrame, missingness_prefix='R', indicator_is_missed=0, shared_subscript=True):
-    assert missingness_prefix[-1] != '_', '''
+    """
+    This helper functions converts the synthesized data set of fully-observed variables and missingness indicators
+    into a standard observational variable with missing entries.
+
+    The function expects either one of the following naming styles for the columns:
+        1. name of variables: XXX -> name of miss. indicators: <prefix>_XXX
+        2. name of variables: X_Y -> name of miss. indicators: <prefix>_Y
+    First option is suitable when you have distinct var names such as: "A, B, ..." or "age, sex, ..."
+    Second option is suitable when you have single var name with numbers such as: "Z_1, Z_2, ..."
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        The PARCS-synthesized data of variables and miss. indicators
+    missingness_prefix : str, default='R'
+        prefix for miss. indicators
+    indicator_is_missed : {0, 1}, default=0
+        the value of miss. indicator which corresponds to masking the variable. e.g. if `0`, then
+        `Z_1` is `NaN` if `R_1=0`.
+    shared_subscript : bool, default=True
+        to choose the naming style. if `True`, then {Z_1, R_1}. If `False` then {A, R_A}
+
+    Returns
+    -------
+    masked_dataset : pd.DataFrame
+
+    Raises
+    ------
+    DescriptionFileError
+        If the prefix ends with underscore. The function automatically assumes the underscore.
+    ValueError
+        If missingness indicators are not binary (0, 1)
+
+    """
+    parcs_assert(
+        missingness_prefix[-1] != '_',
+        DescriptionFileError,
+        '''
         missing prefix should not end with underscore _.
         The underscore for connecting prefix and subscripts will be considered automatically.
-    '''
+        '''
+    )
+
     temp_data = data.copy(deep=True)
     len_prefix = len(missingness_prefix)
     # take Rs: it starts with prefix, and subtracting the prefix gives the name of another node
@@ -51,6 +91,13 @@ def m_graph_convert(data: pd.DataFrame, missingness_prefix='R', indicator_is_mis
         z_columns = r_indices
     assert len(set(z_columns).intersection(set(data.columns))) != 0
 
+    # check if r_columns are binary
+    for r in r_columns:
+        parcs_assert(
+            set(temp_data[r].unique()) == {0, 1},
+            ValueError,
+            "Miss. indicator column {} is not binary.".format(r)
+        )
     # masking
     for z, r in zip(z_columns, r_columns):
         temp_data[z][temp_data[r] == indicator_is_missed] = np.nan
@@ -68,18 +115,6 @@ def sc_mask(size=None):
 def block_conditional_mask(size=None):
     return np.triu(np.ones(shape=(size, size)), k=1)
 
-#
-# def fully_observed_mar(shape=None, fully_observed_indices=None):
-#     assert len(fully_observed_indices) == shape[0] - shape[1]
-#     mask = np.zeros(shape=shape)
-#     mask[fully_observed_indices,:] = 1
-#
-#
-# def partially_observed_mar(size=None, fully_observed_indices=None):
-#     mask = np.ones(shape=(size, size))
-#     mask[fully_observed_indices, :] = 0
-#     mask[:, fully_observed_indices] = 0
-#     return mask
 
 def R_adj_matrix(size=None, shuffle=False, density=1.0):
     adj_matrix = np.triu(np.ones(shape=(size, size)), k=1)
@@ -91,6 +126,7 @@ def R_adj_matrix(size=None, shuffle=False, density=1.0):
         adj_matrix = adj_matrix[inds, :][:, inds]
     return adj_matrix
 
+
 def R_attrition_adj_matrix(size=None, step=None, density=1.0):
     adj_matrix = R_adj_matrix(size=size, shuffle=False, density=density)
     adj_matrix = np.multiply(
@@ -98,6 +134,7 @@ def R_attrition_adj_matrix(size=None, step=None, density=1.0):
         np.tril(np.ones(shape=(size, size)), k=step)
     )
     return adj_matrix
+
 
 def indicator_graph_description_file(adj_matrix=None, node_names=None, prefix='R', subscript_only=False,
                                      file_dir=None, miss_ratio=None, supress_asteriks=False):

@@ -68,7 +68,7 @@ class Node:
                  correction_config=None):
         if correction_config is None:
             correction_config = {}
-        parcs_assert(output_distribution in OUTPUT_DISTRIBUTIONS_KEYS, DataError,
+        parcs_assert(output_distribution in OUTPUT_DISTRIBUTIONS_KEYS, DistributionError,
                      f'output_distribution should be in {OUTPUT_DISTRIBUTIONS_KEYS}, got {output_distribution} instead')
         # basic attributes
         self.name = name
@@ -270,7 +270,7 @@ class Edge:
                  function_params: dict = {},
                  do_correction=False,
                  name: Optional[str] = None):
-        parcs_assert(function_name in EDGE_FUNCTIONS_KEYS, DataError,
+        parcs_assert(function_name in EDGE_FUNCTIONS_KEYS, DistributionError,
                      f'function_name should be in f{EDGE_FUNCTIONS_KEYS}, got {function_name} instead')
         self.name = name
         self.do_correction = do_correction
@@ -389,7 +389,7 @@ class Graph:
             If `type='raw'`
 
         """
-        parcs_assert(type in REPORT_TYPES, DataError, f'type should be in {REPORT_TYPES}, got {type} instead')
+        parcs_assert(type in REPORT_TYPES, DistributionError, f'type should be in {REPORT_TYPES}, got {type} instead')
         info = {
             'nodes': {n: self.nodes[n].get_info() for n in self.nodes},
             'edges': {e: self.edges[e].get_info() for e in self.edges}
@@ -500,7 +500,7 @@ class Graph:
             for i in range(1, len(data_nodes)):
                 parcs_assert(
                     all(sampled_errors[data_nodes[i]].values == sampled_errors[data_nodes[0]]),
-                    DataError,
+                    DistributionError,
                     'sampled errors for data nodes are inconsistent.'
                 )
         return sampled_errors

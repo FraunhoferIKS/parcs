@@ -1,8 +1,0 @@
-# nodes
-C: gaussian(mu_=0, sigma_=1)
-A: gaussian(mu_=2C-1, sigma_=0.1C+1)
-Y: gaussian(mu_=C+A-0.3AC, sigma_=2)
-# edges
-C->A: identity()
-C->Y: identity()
-A->Y: identity()

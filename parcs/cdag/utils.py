@@ -23,31 +23,56 @@ import numpy as np
 import pandas as pd
 from scipy.special import expit
 from itertools import combinations as comb
+from parcs.exceptions import parcs_assert
 
 
 def topological_sort(adj_matrix: pd.DataFrame = None):
-    try:
-        adjm = adj_matrix.copy(deep=True).values
-        ordered_list = []
-        covered_nodes = 0
-        while covered_nodes < adjm.shape[0]:
-            # sum r/x -> r edges
-            sum_c = adjm.sum(axis=0)
-            # find nodes with no parents
-            parent_inds = list(np.where(sum_c == 0)[0])
-            assert len(parent_inds) != 0
+    """
+    performs topological sorting of a given adjacency matrix. It is an implementation of Kahn's algorithm.
 
-            covered_nodes += len(parent_inds)
-            # add to the list
-            ordered_list += parent_inds
-            # remove parent edges
-            adjm[parent_inds, :] = 0
-            # eliminate from columns by assigning values
-            adjm[:, parent_inds] = 10
-        return [adj_matrix.columns.tolist()[idx] for idx in ordered_list]
-    except AssertionError:
-        print('adj_matrix is not acyclic')
-        raise
+    Parameters
+    ----------
+    adj_matrix : pd.DataFrame
+        the adjacency matrix to be sorted
+
+    Returns
+    -------
+    sorted_nodes : list(str)
+        sorted list of all nodes
+
+
+    Raises
+    ------
+    ValueError
+        If index and column names doesn't match
+    ValueError
+        If the adjacency matrix is not acyclic
+
+    """
+    parcs_assert(
+        set(adj_matrix.columns) == set(adj_matrix.index),
+        ValueError,
+        "index and column names in the adjacency matrix doesn't match"
+    )
+
+    adjm = adj_matrix.copy(deep=True).values
+    ordered_list = []
+    covered_nodes = 0
+    while covered_nodes < adjm.shape[0]:
+        # sum r/x -> r edges
+        sum_c = adjm.sum(axis=0)
+        # find nodes with no parents
+        parent_inds = list(np.where(sum_c == 0)[0])
+        parcs_assert(len(parent_inds) != 0, ValueError, "Adjacency matrix is not acyclic")
+
+        covered_nodes += len(parent_inds)
+        # add to the list
+        ordered_list += parent_inds
+        # remove parent edges
+        adjm[parent_inds, :] = 0
+        # eliminate from columns by assigning values
+        adjm[:, parent_inds] = 10
+    return [adj_matrix.columns.tolist()[idx] for idx in ordered_list]
 
 
 def is_adj_matrix_acyclic(adj_matrix):
