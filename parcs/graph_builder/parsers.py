@@ -24,26 +24,82 @@ from parcs.graph_builder.utils import config_parser
 from parcs.cdag.output_distributions import DISTRIBUTION_PARAMS
 from parcs.cdag.mapping_functions import EDGE_FUNCTIONS, FUNCTION_PARAMS
 from parcs.cdag.utils import get_interactions_length, get_interactions_dict
+from parcs.exceptions import *
+from typeguard import typechecked
+from typing import List, Tuple
 
 
-def term_parser(term, vars_):
+@typechecked
+def term_parser(term: str, vars_: List[str]) -> Tuple[list, float]:
+    """
+    parses the terms (between plus signs). gives list of parents and the multiplicative coef of the term
+
+    Parameters
+    ----------
+    term : str
+        the term to be processed
+    vars_ : list(str)
+        the list of possible parents to extract from the term
+
+    Returns
+    -------
+    pars : list(str)
+        list of present parents in the term
+    coef : float
+        the multiplicative coefficient
+
+    Raises
+    ------
+    DescriptionFileError
+        If the terms are invalid. Cases: non-existing parents, terms other than bias, linear, interactions, etc.
+    """
+    err_msg = "The term {} in the description file is invalid.".format(term)  # for potential errors
     pars = []
     for var in vars_:
+        # check if X^2 exists:
+        res = re.search(r'{}\^2'.format(var), term)
+        if res is not None:  # a term like 'X^2' exists
+            parcs_assert(len(pars) == 0, DescriptionFileError, err_msg)  # quad parent must be the only parent
+            inds = res.span(0)
+            parcs_assert(len(term) == inds[1], DescriptionFileError, err_msg)  # '^2' must be the last char
+            pars = [var, var]
+            term = term[0:inds[0]] + term[inds[1]:]
+            break  # do not check other variables because we cannot have 'YX^2'
+        # it's not quadratic. check other possibilities
         res = re.search(r'{}'.format(var), term)
         if res is not None:
             inds = res.span(0)
             pars.append(var)
             term = term[0:inds[0]] + term[inds[1]:]
-    if term == '-':
+    if term == '-':  # something like '-X'
         coef = -1
-    elif term == '':
+    elif term == '':  # something like 'X'
         coef = 1
     else:
-        coef = float(term)
+        try:
+            coef = float(term)
+        except ValueError:
+            raise DescriptionFileError(err_msg)  # there are other chars apart from quad term and coef.
     return pars, coef
 
 
-def equation_parser(eq, vars_):
+def equation_parser(eq: str, vars_: List[str]) -> List[Tuple[List[str], float]]:
+    """
+    parses the equation strings as lists of terms. each term includes tuples of parent lists and coefficient.
+    Parameters
+    ----------
+    eq : str
+        the equation string e.g. '1 + 2X_1 - X_2^2'
+    vars_ : list(str)
+        list of potential variables in the equation
+
+    Returns
+    -------
+    parsed equation : list(tuple(list(str), float))
+        list of parsed terms. each term is a tuple of parent list and the coefficient float
+    """
+    # 0. remove spaces
+    eq = eq.replace(' ', '')
     # 1. we split by +, so negative terms are + - ...
     eq = eq.replace('-', '+-')
     if eq[0] == '+':
@@ -51,36 +107,71 @@ def equation_parser(eq, vars_):
     eq = eq.split('+')
     # 2. split by vars
     eq = [term_parser(term, vars_) for term in eq]
+    # 3. check for duplicates
+    parents = [frozenset(e[0]) for e in eq]
+    parcs_assert(len(set(parents)) == len(parents),
+                 DescriptionFileError, "Duplicated terms exist in equation {}".format(eq))
+
     return eq
 
 
-def node_parser(line, parents):
-    # preliminary: get order of interactions
-    interactions_dict = get_interactions_dict(parents)
-    # remove spaces
-    line = line.replace(' ', '')
-    # First check: if dist = random
+@typechecked
+def node_parser(line: str, parents: List[str]) -> dict:
+    """
+    Parses a line in graph description file, and gives the appropriate dictionary to initiate a node. Keys are
+    - for stochastic node: 'output_distribution', 'dist_params_coefs', 'do_correction', 'correction_config'
+    - for constant node: 'value'
+    - for data node: 'csv_dir'
+    - for deterministic node: 'function'
+
+    Parameters
+    ----------
+    line : str
+        one line of the graph description file
+    parents : list(str)
+        list of parents of the corresponding node
+
+    Returns
+    -------
+    node config : dict
+        depending on the node type, returns the dict to initiate the node. see main description.
+
+    """
+    # 0. preliminaries
+    interactions_dict = get_interactions_dict(parents)  # get order of interactions
+    line = line.replace(' ', '')  # remove spaces
+
+    data_pattern = re.compile(r'data\((.*)\)')  # data node regex pattern
+    const_pattern = re.compile(r'constant\((-?[0-9]+(\.[0-9]+)?)\)')  # constant node regex pattern
+    det_pattern = re.compile(
+        r'deterministic\((.*),(.*)\)'.format('|'.join(DISTRIBUTION_PARAMS.keys())))  # deterministic node regex pattern
+    stoch_pattern = re.compile(
+        r'({})\((.*)\)'.format('|'.join(DISTRIBUTION_PARAMS.keys())))  # stochastic node regex pattern
+
+    # 1. random node (stochastic)
     if line == 'random':
         return {
             'output_distribution': '?',
             'do_correction': True
         }
-    # check if data node
+
+    # 2. data node
     try:
-        data_pattern = re.compile(
-            r'data\((.*)\)'
-        )
         res = data_pattern.search(line)
-        return {'csv_dir': res.group(1)}
+        dir_ = res.group(1)
+        # IF "dir_" is not null, then next parcs assertion must be made
+        parcs_assert(
+            parents == [],
+            DescriptionFileError,
+            "data nodes cannot have parents."
+        )
+        return {'csv_dir': dir_}
     except AttributeError:
         # it's not constant
         pass
 
-    # check if node is constant
+    # 3. constant node
     try:
-        const_pattern = re.compile(
-            r'constant\(([0-9]+(\.[0-9]+)?)\)'
-        )
         res = const_pattern.search(line)
         raw_value = res.group(1)
         if len(res.groups()) == 2:
@@ -92,18 +183,22 @@ def node_parser(line, parents):
     except AttributeError:
         # it's not constant
         pass
-    # check if node is deterministic
+
+    # 4. deterministic node
     try:
-        det_pattern = re.compile(
-            r'deterministic\((.*),(.*)\)'.format('|'.join(DISTRIBUTION_PARAMS.keys()))
-        )
         res = det_pattern.search(line)
         directory = res.group(1)
         assert directory[-3:] == '.py'
         directory = directory[:-3]
         function_name = res.group(2)
-        function_file = __import__(directory)
-        function = getattr(function_file, function_name)
+        try:
+            function_file = __import__(directory)
+        except ModuleNotFoundError:
+            raise ExternalResourceError('Python script {} containing the function does not exist.'.format(directory))
+        try:
+            function = getattr(function_file, function_name)
+        except AttributeError:
+            raise ExternalResourceError('Python function {} not existing in script {}'.format(function_name, directory))
         return {
             'function': function
         }
@@ -111,16 +206,19 @@ def node_parser(line, parents):
         # it's not deterministic
         pass
 
-    # find the dist(p1=v1, ...) pattern
-    output_params_pattern = re.compile(
-        r'({})\((.*)\)'.format('|'.join(DISTRIBUTION_PARAMS.keys()))
-    )
+    # 5. stochastic (non "random") nodes
     try:
-        res = output_params_pattern.search(line)
+        res = stoch_pattern.search(line)
         dist = res.group(1)
         params = res.group(2)
     except AttributeError:
-        raise NameError('distribution "{}" unknown'.format(line.split('(')[0]))
+        raise DescriptionFileError(
+            '''description line '{}' cannot be parsed. check the following:
+                - distribution names
+                - input arguments for a node type
+                - unwanted invalid characters
+            '''.format(line)
+        )
     # split into param - value
     try:
         keys_ = [p.split('=')[0] for p in params.split(',')]
@@ -131,14 +229,16 @@ def node_parser(line, parents):
         keys_ = DISTRIBUTION_PARAMS[dist]
         values_ = ['?'] * len(keys_)
 
-    try:
-        assert set(keys_) == set(DISTRIBUTION_PARAMS[dist])
-    except AssertionError:
-        raise KeyError('params not valid')
-    try:
-        assert len(set(keys_)) == len(keys_)
-    except AssertionError:
-        raise KeyError('duplicate params')
+    parcs_assert(
+        set(keys_) == set(DISTRIBUTION_PARAMS[dist]),
+        DescriptionFileError,
+        "params {} not valid for distribution '{}'".format(set(keys_), dist)
+    )
+    parcs_assert(
+        len(set(keys_)) == len(keys_),
+        DescriptionFileError,
+        "duplicate params for distribution '{}'".format(dist)
+    )
     params = {
         k: v for k, v in zip(keys_, values_)
     }
@@ -295,10 +395,3 @@ def graph_file_parser(file_dir):
 
 def guideline_parser(file_dir):
     return config_parser(file_dir)
-
-
-if __name__ == '__main__':
-    obj = node_parser('gaussian(mu_=?, sigma_=1)', ['A', 'B', 'C'])
-    print(obj)
-    # obj = edge_parser('sigmoid(alpha=2.0, beta=1.8), correct[]')
-    # graph_file_parser('../../graph_templates/causal_triangle.yml')

@@ -22,7 +22,7 @@ import warnings
 import numpy as np
 import pandas as pd
 from scipy.special import expit
-from itertools import combinations as comb
+from itertools import combinations_with_replacement as comb_w_repl
 from parcs.exceptions import parcs_assert
 
 
@@ -88,8 +88,8 @@ def get_interactions(data, max_terms=2):
 
     Returns the columns of product of interaction terms. The interaction terms are of length
     ``2, 3, ..., min(max_terms, data.shape[1])``. The order of interaction terms follow the order
-    of ``itertools.combination`` module. Example: for ``[X,Y,Z]`` the method returns:
-    ``[XY, YZ, XZ, XYZ]``.
+    of ``itertools.combination_with_replacement`` module. Example: for ``[X,Y,Z]`` the method for r=2 returns:
+    ``[XX, XY, XZ, YY, YZ, ZZ]``.
 
     Parameters
     ----------
@@ -107,17 +107,14 @@ def get_interactions(data, max_terms=2):
     Examples
     --------
     >>> from parcs.cdag.utils import get_interactions
-    >>> data_ = np.array([
-    ...     [1, 2, 4],
-    ...     [3, 5, 7]
-    ... ])
-    >>> get_interactions(data_, max_terms=3)
-    array([[  2,   4,   8,   8],
-           [ 15,  21,  35, 105]])
+    >>> data_ = np.array([[1, 2, 3], [10, 12, 20]])
+    >>> get_interactions(data_, max_terms=2)
+    array([[  1,   2,   3,   4,   6,   9],
+           [100, 120, 200, 144, 240, 400]])
     """
     len_ = min(data.shape[1], max_terms)
     return np.array([
-        [np.prod(i) for r in range(2, len_ + 1) for i in comb(row, r)]
+        [np.prod(i) for r in range(2, len_ + 1) for i in comb_w_repl(row, r)]
         for row in data
     ])
 
@@ -155,7 +152,7 @@ def get_interactions_length(len_, max_terms=2):
     return len([
         np.prod(i)
         for r in range(2, max_t + 1)
-        for i in comb(dummy_data, r)
+        for i in comb_w_repl(dummy_data, r)
     ])
 
 
@@ -184,7 +181,7 @@ def get_interactions_dict(parents, max_terms=2):
 
     """
     len_ = min(len(parents), max_terms)
-    return [set(i) for r in range(2, len_ + 1) for i in comb(parents, r)]
+    return [set(i) for r in range(2, len_ + 1) for i in comb_w_repl(parents, r)]
 
 
 def get_poly(data, n):

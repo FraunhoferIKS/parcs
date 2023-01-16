@@ -43,6 +43,11 @@ class DescriptionFileError(Exception):
         super().__init__(msg)
 
 
+class ExternalResourceError(Exception):
+    def __init__(self, msg):
+        super().__init__(msg)
+
+
 class RandomizerError(Exception):
     def __init__(self, msg):
         super().__init__(msg)
