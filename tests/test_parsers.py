@@ -180,6 +180,18 @@ class TestNodeParser:
         # parentless nodes: only test one distribution since logic is the same
         ('bernoulli(p_=2)', [], 'bernoulli',
          {'p_': {'bias': 2, 'linear': [], 'interactions': []}}, False, {}),
+        # partially randomized cases
+        ('bernoulli(?)', ['A'], 'bernoulli',
+         {'p_': {'bias': '?', 'linear': '?', 'interactions': '?'}}, False, {}),
+        ('gaussian(mu_=?, sigma_=2A)', ['A', 'B'], 'gaussian',
+         {'mu_': {'bias': '?', 'linear': '?', 'interactions': '?'},
+          'sigma_': {'bias': 0, 'linear': [2, 0], 'interactions': [0, 0, 0]}}, False, {}),
+        ('gaussian(mu_=?, sigma_=?)', ['A', 'B'], 'gaussian',
+         {'mu_': {'bias': '?', 'linear': '?', 'interactions': '?'},
+          'sigma_': {'bias': '?', 'linear': '?', 'interactions': '?'}}, False, {}),
+        ('lognormal(?)', ['A', 'B'], 'lognormal',
+         {'mu_': {'bias': '?', 'linear': '?', 'interactions': '?'},
+          'sigma_': {'bias': '?', 'linear': '?', 'interactions': '?'}}, False, {}),
     ])
     def test_parse_stochastic_node(line, parents, dist, param_coefs, do_correction, correction_config):
         out = node_parser(line, parents)
@@ -201,7 +213,8 @@ class TestNodeParser:
         ('bernoulli(mu_=2A+B^2)', ['A', 'B']),  # wrong parameter name
         ('gaussian(mu_=2A+B^2, mu_=2, sigma_=3)', ['A', 'B']),  # duplicate params
         ('exponential(lambda_=2A+B^2)', []),  # wrong parents
-        ('poisson(lambda_=B^2)', ['A'])  # wrong parents
+        ('poisson(lambda_=B^2)', ['A']),  # wrong parents
+        ('poisson(lambda_=B^2+?A)', ['A'])  # wrong randomization
     ])
     def test_parse_stochastic_node_raises_error(line, parents):
         with pytest.raises(DescriptionFileError):
@@ -245,3 +258,73 @@ class TestNodeParser:
     def test_parse_random_stochastic_node():
         out = node_parser('random', ['A', 'B'])
         assert out == {'output_distribution': '?', 'do_correction': True}
+
+    @staticmethod
+    @pytest.mark.parametrize('line,parents,expected_config', [
+        ('bernoulli(p_=A), correction[target_mean=0.3, lower=0, upper=1]', ['A'], {
+            'target_mean': 0.3, 'lower': 0, 'upper': 1}),
+        ('bernoulli(p_=A), correction[]', ['A'], {})
+    ])
+    def test_do_correction(line, parents, expected_config):
+        out = node_parser(line, parents)
+        assert out['do_correction'] is True
+
+    @staticmethod
+    @pytest.mark.parametrize('line,parents', [
+        ('bernoulli(p_=A), correction[lower=1, upper=2+X]', ['A']),  # non-float values
+    ])
+    def test_do_correction_raises_error(line, parents):
+        """
+        This functionality is only 'parsing'. for correctness of the params etc., we will have
+        other tests e.g. in SigmoidCorrection section
+        """
+        with pytest.raises(DescriptionFileError):
+            node_parser(line, parents)
+
+
+class TestEdgeParser:
+    @staticmethod
+    @pytest.mark.parametrize('line,func_name,func_params,do_correction', [
+        # normal
+        ('identity()', 'identity', {}, False),
+        ('sigmoid(alpha=2, beta=1, gamma=0, tau=1)', 'sigmoid',
+         {'alpha': 2, 'beta': 1, 'gamma': 0, 'tau': 1}, False),
+        ('gaussian_rbf(alpha=2, beta=1, gamma=0, tau=1)', 'gaussian_rbf',
+         {'alpha': 2, 'beta': 1, 'gamma': 0, 'tau': 1}, False),
+        ('arctan(alpha=2, beta=1, gamma=0)', 'arctan',
+         {'alpha': 2, 'beta': 1, 'gamma': 0}, False),
+        # partially randomized
+        ('sigmoid(alpha=?, beta=1, gamma=?, tau=1), correction[]', 'sigmoid',
+         {'alpha': '?', 'beta': 1, 'gamma': '?', 'tau': 1}, True),
+        ('gaussian_rbf(?)', 'gaussian_rbf',
+         {'alpha': '?', 'beta': '?', 'gamma': '?', 'tau': '?'}, False)
+    ])
+    def test_parse_edge(line, func_name, func_params, do_correction):
+        out = edge_parser(line)
+        assert func_name == out['function_name']
+        assert func_params == out['function_params']
+        assert do_correction == out['do_correction']
+
+    @staticmethod
+    def test_parse_random_edge():
+        out = edge_parser('random')
+        assert out['function_name'] == '?' and out['do_correction'] is True
+
+    @staticmethod
+    def test_parse_edge_correction():
+        out = edge_parser('identity(), correction[]')
+        assert out['function_name'] == 'identity'
+        assert out['function_params'] == {}
+        assert out['do_correction'] is True
+
+    @staticmethod
+    @pytest.mark.parametrize('line', [
+        # normal
+        'fakeedge(alpha=1)',  # wrong edge function name
+        'identity(alpha=1)',  # wrong params
+        'gaussian_rbf(alpha=2, beta=1)',  # incomplete params
+        'gaussian_rbf(alpha=2, beta=1, gamma=2, tau=A)',  # incomplete params
+    ])
+    def test_parse_edge_raises_error(line):
+        with pytest.raises(DescriptionFileError):
+            edge_parser(line)

@@ -147,6 +147,7 @@ def node_parser(line: str, parents: List[str]) -> dict:
         r'deterministic\((.*),(.*)\)'.format('|'.join(DISTRIBUTION_PARAMS.keys())))  # deterministic node regex pattern
     stoch_pattern = re.compile(
         r'({})\((.*)\)'.format('|'.join(DISTRIBUTION_PARAMS.keys())))  # stochastic node regex pattern
+    correction_pattern = re.compile(r'correction\[(.*)]')  # correction regex pattern, only for stochastic
 
     # 1. random node (stochastic)
     if line == 'random':
@@ -269,8 +270,7 @@ def node_parser(line: str, parents: List[str]) -> dict:
                 params[p]['interactions'][ind] = coef
 
     # do correction
-    pattern = re.compile(r'correction\[(.*)]')
-    res = pattern.search(line)
+    res = correction_pattern.search(line)
     # default values
     do_correction = False
     correction_config = {}
@@ -281,30 +281,31 @@ def node_parser(line: str, parents: List[str]) -> dict:
             for conf in corrs.split(',')
         }
         do_correction = True
-    except IndexError:
-        # correction given but with default params
+    except IndexError:  # correction given but with default params
         correction_config = {}
         do_correction = True
-    except AttributeError:
-        # default values
+    except AttributeError:  # default values
         pass
-    finally:
-        return {
-            'output_distribution': dist,
-            'dist_params_coefs': params,
-            'do_correction': do_correction,
-            'correction_config': correction_config
-        }
+    except ValueError:  # the values are not float
+        raise DescriptionFileError("correction params are invalid: {}".format(res))
+
+    return {
+        'output_distribution': dist,
+        'dist_params_coefs': params,
+        'do_correction': do_correction,
+        'correction_config': correction_config
+    }
 
 
 def edge_parser(line):
     line = line.replace(' ', '')
-    # First check: if dist = ?
+    # 1. function is "?"
     if line == 'random':
         return {
             'function_name': '?',
             'do_correction': True
         }
+
     # find the func(p1=v1, ...) pattern
     output_params_pattern = re.compile(
         r'({})\((.*)\)'.format('|'.join(EDGE_FUNCTIONS.keys()))
@@ -314,7 +315,7 @@ def edge_parser(line):
         func = res.group(1)
         params = res.group(2)
     except AttributeError:
-        raise NameError('edge function "{}" unknown'.format(line.split('(')[0]))
+        raise DescriptionFileError("edge function '{}' unknown".format(line.split('(')[0]))
 
     # split into param - value
     try:
@@ -324,7 +325,18 @@ def edge_parser(line):
             try:
                 func_params[p.split('=')[0]] = float(p.split('=')[1])
             except ValueError:
-                func_params[p.split('=')[0]] = p.split('=')[1]
+                # only ? is allowed as non float
+                parcs_assert(p.split('=')[1] == '?', DescriptionFileError, "wrong param input: {}".format(line))
+                func_params[p.split('=')[0]] = '?'
+        parcs_assert(
+            set(func_params.keys()) == set(FUNCTION_PARAMS[func]),
+            DescriptionFileError,
+            '''
+            edge function params are invalid or incomplete. if you want to leave a parameter random,
+            specify it explicitly by param=?.
+            faulty description file line is: {}
+            '''.format(line)
+        )
     except IndexError:
         # function has no params
         func_params = {}
