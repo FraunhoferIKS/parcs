@@ -222,9 +222,6 @@ class SigmoidCorrection:
     target_mean : float, default=None
         If a float value (not ``None``), then the mean of transformed value is fixed. This value must be
         in the `[L, U]` range.
-    to_center : bool, default=False
-        If set to `True` then the input variable is normalized before being passed to the sigmoid function.
-        If `target_mean != None` then this parameter is ignored.
 
     Raises
     ------
@@ -253,7 +250,7 @@ class SigmoidCorrection:
         such that the required mean is obtained. The process is a manual search near the support of data points.
     """
 
-    def __init__(self, lower=0, upper=1, target_mean=None, to_center=False):
+    def __init__(self, lower=0, upper=1, target_mean=None):
         assert upper > lower
         if target_mean is not None:
             assert lower < target_mean < upper
@@ -263,7 +260,6 @@ class SigmoidCorrection:
             'offset': 0
         }
         self.is_initialized = False
-        self.to_center = to_center
         self.target_mean = target_mean
 
     def get_params(self):
@@ -285,10 +281,6 @@ class SigmoidCorrection:
             transformed array by the sigmoid correction
         """
         if not self.is_initialized:
-            # center
-            if self.to_center:
-                self.config['offset'] = array.mean()
-
             # transform by sigmoid
             U = (self.config['upper'] - self.config['lower'])
             L = self.config['lower']
