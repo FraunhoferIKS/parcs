@@ -142,6 +142,7 @@ class TestNodeParser:
     """
     This parser parses lines of description files to give config dicts for nodes.
     """
+
     @staticmethod
     @pytest.mark.parametrize('line,parents,dict_output', [
         ('constant(2)', ['A', 'B'], {'value': 2}),
@@ -328,3 +329,101 @@ class TestEdgeParser:
     def test_parse_edge_raises_error(line):
         with pytest.raises(DescriptionFileError):
             edge_parser(line)
+
+
+class TestGraphFileParser:
+    """
+    In this step, we are certain of node and edge parsers. We only need to make sure the respective lines
+    in the description file have been parsed with the correct parsers, therefore we only check
+    the function/distribution names.
+
+    Parser only cares for the correct parsing. consistency of the nodes and edges will be checked in graph
+    """
+    @staticmethod
+    @pytest.fixture(params=[
+        [("A: bernoulli(p_=0.2)\n"
+          "B: gaussian(mu_=2A, sigma_=1)\n"
+          "A->B: identity()"),
+         # nodes
+         {'A': 'bernoulli', 'B': 'gaussian'},
+         # edges
+         {'A->B': 'identity'}],
+        [("A: bernoulli(p_=0.2)\n"
+          "B: gaussian(mu_=1, sigma_=1)"),
+         # nodes
+         {'A': 'bernoulli', 'B': 'gaussian'},
+         # edges
+         {}],
+        ["A: bernoulli(p_=0.2)",
+         # nodes
+         {'A': 'bernoulli'},
+         # edges
+         {}],
+    ])
+    def setup_gdf(request):
+        # setup
+        desc = request.param[0]
+        nodes = request.param[1]
+        edges = request.param[2]
+
+        file_name = 'gdf.yml'
+        with open(file_name, 'w') as f:
+            f.write(desc)
+        # test
+        yield file_name, nodes, edges
+        # teardown
+        os.remove(file_name)
+
+    @staticmethod
+    def test_parses_gdf_correctly(setup_gdf):
+        nodes, edges = graph_file_parser(setup_gdf[0])
+        # Nodes
+        # 1. names
+        assert len(nodes) == len(setup_gdf[1])
+        extracted_node_names = [i['name'] for i in nodes]
+        assert set(extracted_node_names) == set(setup_gdf[1].keys())
+        # 2. distributions
+        for node in nodes:
+            assert setup_gdf[1][node['name']] == node['output_distribution']
+
+        # Edges
+        assert len(edges) == len(setup_gdf[2])
+        extracted_edge_names = [i['name'] for i in edges]
+        assert set(extracted_edge_names) == set(setup_gdf[2].keys())
+        # 2. distributions
+        for edge in edges:
+            assert setup_gdf[2][edge['name']] == edge['function_name']
+
+    @staticmethod
+    @pytest.fixture(params=[
+        # edge has node name which doesn't exist
+        ("A: bernoulli(p_=0.2)\n"
+         "B: gaussian(mu_=2A, sigma_=1)\n"
+         "A->C: identity()"),
+        # node names other than Letter+underscore+number
+        "A*&: random",  # characters other than letter + number + underscore
+        "A-: random",  # characters other than letter + number + underscore
+        "1_n: random",  # starting with number
+        "A_: random",  # ending with underscore
+        "_A: random",  # starting with underscore
+        # bad yml file
+        ("A; bernoulli(p_=0.2)\n\t\t"
+         "B: gaussian(mu_=2A, sigma_=1)\n"
+         "A->B: identity()")
+    ])
+    def setup_wrong_gdf(request):
+        # setup
+        desc = request.param
+
+        file_name = 'gdf.yml'
+        with open(file_name, 'w') as f:
+            f.write(desc)
+        # test
+        yield file_name
+        # teardown
+        os.remove(file_name)
+
+    @staticmethod
+    def test_parses_gdf_raises_error(setup_wrong_gdf):
+        with pytest.raises(DescriptionFileError):
+            graph_file_parser(setup_wrong_gdf)

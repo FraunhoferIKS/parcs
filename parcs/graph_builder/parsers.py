@@ -380,8 +380,10 @@ def graph_file_parser(file_dir):
     # if file is empty
     if file_dir is None:
         return [], []
-
-    file = config_parser(file_dir)
+    try:
+        file = config_parser(file_dir)
+    except Exception as e:
+        raise DescriptionFileError("Error in parsing YAML file. The native error from yaml package: {}".format(e))
     # edges
     edges = [{
         'name': e,
@@ -389,6 +391,24 @@ def graph_file_parser(file_dir):
     } for e in file if '->' in e]
     # node list
     node_list = [n for n in file if '->' not in n]
+
+    # PARCS asserts:
+    # 0. names are standard
+    name_standard = r'^[a-zA-Z](?:[a-zA-Z0-9_]*[a-zA-Z0-9])?$'
+    parcs_assert(
+        all(re.match(name_standard, node_name) for node_name in node_list),
+        DescriptionFileError,
+        "One or more node names does not follow the PARCS naming conventions. Please see the docs."
+    )
+    # 1. node in edges are also in node list
+    edge_names = [e['name'] for e in edges]
+    node_in_edge = set([i for element in edge_names for i in element.split('->')])
+    parcs_assert(
+        node_in_edge.issubset(set(node_list)),
+        DescriptionFileError,
+        "A parent/child node in the edge list does not exist in node lines."
+    )
+
     parent_dict = {
         node: sorted([
             e['name'].split('->')[0] for e in edges
@@ -406,4 +426,7 @@ def graph_file_parser(file_dir):
 
 
 def guideline_parser(file_dir):
-    return config_parser(file_dir)
+    try:
+        return config_parser(file_dir)
+    except Exception as e:
+        raise GuidelineError("Error in parsing YAML file. The native error from yaml package: {}".format(e))
