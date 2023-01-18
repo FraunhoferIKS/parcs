@@ -25,7 +25,7 @@ from parcs.cdag.utils import get_interactions_length, topological_sort
 from itertools import product, combinations
 from parcs.graph_builder.utils import config_parser, config_dumper
 from parcs.cdag.output_distributions import OUTPUT_DISTRIBUTIONS, DISTRIBUTION_PARAMS
-from parcs.exceptions import parcs_assert, DataError
+from parcs.exceptions import parcs_assert, DescriptionFileError
 import pandas as pd
 import numpy as np
 import re
@@ -57,7 +57,7 @@ class ParamRandomizer:
             else:
                 ranges = directive[1:]
                 # if multiple ranges are given
-                parcs_assert(len(ranges) % 2 == 0, DataError,
+                parcs_assert(len(ranges) % 2 == 0, DescriptionFileError,
                              f'The number of range numbers should be even, got {len(ranges)}')
                 num_ranges = int(len(ranges) / 2)
                 # pick the range

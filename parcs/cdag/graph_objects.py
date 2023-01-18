@@ -132,7 +132,7 @@ class DetNode:
     --------
     >>> from parcs.cdag.graph_objects import DetNode
     >>> import pandas
-    >>> n_0 = DetNode(name='N_0', func=lambda a,b: a+b)
+    >>> n_0 = DetNode(name='N_0', function=lambda d: d['N_1']+d['N_2'])
     >>> data = pandas.DataFrame([[1, 2], [2, 2], [3, 3]], columns=('N_1', 'N_2'))
     >>> n_0.calculate(data, ['N_1', 'N_2'])
     array([3, 4, 6])
@@ -144,12 +144,17 @@ class DetNode:
         self.name = name
         self.info = {'node_type': 'deterministic'}
         self.function = function
+        validate_deterministic_function(self.function, self.name)
 
     def get_info(self):
         return self.info
 
-    def calculate(self, data: pd.DataFrame, parents: List[str]):
-        return self.function(data[parents]).values
+    @typechecked
+    def calculate(self, data: pd.DataFrame):
+        try:
+            return self.function(data).values
+        except KeyError:
+            raise ExternalResourceError("assumed parent names for node")
 
 
 @typechecked
@@ -177,7 +182,7 @@ class ConstNode:
     """
 
     def __init__(self,
-                 value,
+                 value: np.number,
                  name: Optional[str] = None):
         self.name = name
         self.info = {'node_type': 'constant', 'value': value}
@@ -207,17 +212,17 @@ class DataNode:
     def __init__(self,
                  csv_dir: Union[str, Path],
                  name: str):
+        self.name = name
         self.samples = pd.read_csv(csv_dir)[name]
         self.info = {'node_type': 'data', 'size': len(self.samples)}
 
     def get_info(self):
         return self.info
 
-    def calculate(self, sampled_errors: pd.Series):
+    @typechecked
+    def calculate(self, sampled_errors: pd.Series) -> np.ndarray:
+        validate_error_term(sampled_errors, self.name)
         ind = np.floor(sampled_errors * len(self.samples))
-        # if full data, last row is 1. only one row must be 1
-        assert len(ind[ind == self.info['size']]) <= 1, 'wrong sampled error for data node'
-        ind[ind == self.info['size']] = self.info['size'] - 1
         return self.samples.iloc[ind].values
 
 

@@ -17,6 +17,9 @@
 #  https://www.gnu.de/documents/gpl-2.0.de.html
 #
 #  Contact: alireza.zamanian@iks.fraunhofer.de
+import numpy as np
+import inspect
+
 
 class DistributionError(Exception):
     def __init__(self, msg):
@@ -53,10 +56,45 @@ class RandomizerError(Exception):
         super().__init__(msg)
 
 
+class NodeError(Exception):
+    def __init__(self, msg):
+        super().__init__(msg)
+
+
 def parcs_assert(condition, action, msg):
     if not condition:
         raise action(msg)
 
 
-if __name__ == '__main__':
-    parcs_assert(False, RandomizerError, 'hi man')
+def validate_error_term(arr, node_name):
+    try:
+        parcs_assert(
+            np.all(0 <= arr) and np.all(1 > arr),
+            ValueError,
+            '''Error for Node {}:
+            Error term must be in the range [0,1)'''.format(node_name)
+        )
+    except Exception as e:
+        raise ValueError('''Error for Node {}:
+        Error while reading error terms: {}'''.format(node_name, e))
+
+
+def validate_deterministic_function(func, node_name):
+    sig = inspect.signature(func)
+    parcs_assert(
+        len(sig.parameters) == 1,
+        ExternalResourceError,
+        '''Error for Node {}:
+        Deterministic function {} has more than 1 input parameter.
+        To process parent nodes, you must assume the input is a pandas DataFrame, and treat parents as columns
+        of the DataFrame. You should not assume parents to be given to the function separately.
+        Example: lambda data: data['Z_1'] + data['Z_2']
+        '''.format(node_name, func.__name__)
+    )
+    param_type = next(iter(sig.parameters.items()))[1].kind
+    parcs_assert(
+        param_type == inspect.Parameter.POSITIONAL_OR_KEYWORD,
+        ExternalResourceError,
+        '''Error for Node {}:
+        The parameter of function {} is not positional (or keyword)'''.format(node_name, func.__name__)
+    )
