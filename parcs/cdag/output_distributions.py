@@ -34,101 +34,145 @@ DISTRIBUTION_PARAMS = {
 }
 
 
-class GaussianDistribution:
+class DistParam:
+    def __init__(self, name: str, coef: np.array, corrector):
+        self.name = name
+        self.coef = coef
+        self.corrector = corrector
+
+    def calculate(self, data):
+        raw = dot_prod(data, self.coef)
+        if self.corrector is not None:
+            raw = self.corrector.transform(raw)
+        return raw
+
+
+class PARCSDistribution:
+    def __init__(self,
+                 icdf=None,
+                 params=None,
+                 coefs=None,
+                 correctors=None):
+        self.params = {
+            p_name: DistParam(
+                name=p_name,
+                coef=coefs[p_name],
+                corrector=None if correctors[p_name] is None else correctors[p_name]
+            ) for p_name in params
+        }
+        self.icdf = icdf
+
+    def _validate_params(self, params):
+        pass
+
+    @staticmethod
+    def _parcs_to_icdf_map_param(params):
+        return params
+
+    def calculate(self, data, errors):
+        """
+        calculate the realizations of the distribution based on given errors.
+
+        Parameters
+        ----------
+        data : np.array
+            the input data needed to calculate the distribution parameters
+        errors : pd.Series
+            sampled uniform errors
+
+        Returns
+        -------
+        sampled realizations : np.ndarray
+            calculated values based on distribution parameters and sampled errors
+        """
+        param_realization = {
+            param: self.params[param].calculate(data)
+            for param in self.params
+        }  # for each param, calculate the values based on parents values
+        self._validate_params(param_realization)  # validate the range of the params (e.g. bernoulli p > 1 is invalid)
+        # calculate the realizations based on the error
+        return self.icdf(errors, **self._parcs_to_icdf_map_param(param_realization))
+
+
+class BernoulliDistribution(PARCSDistribution):
+    """ **Bernoulli distribution**
+
+    Constructed based on
+    `Scipy Bernoulli distribution
+    <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bernoulli.html>`_
+    distribution.
+    """
+    def __init__(self,
+                 coefs=None,
+                 do_correction=True,
+                 correction_configs=None):
+        super().__init__(
+            icdf=dists.bernoulli.ppf,
+            params=['p_'],
+            coefs=coefs,
+            correctors={'p_': SigmoidCorrection(**correction_configs['p_']) if do_correction else None}
+        )
+
+    def _validate_params(self, params):
+        p_ = params['p_']
+        if isinstance(p_, np.ndarray):
+            parcs_assert(
+                (p_ <= 1).sum() == len(p_),
+                DistributionError,
+                "Bern(p) probabilities are out of [0, 1] range"
+            )
+        else:
+            parcs_assert(
+                0 <= p_ <= 1,
+                DistributionError,
+                "Bern(p) probabilities are out of [0, 1] range"
+            )
+
+    @staticmethod
+    def _parcs_to_icdf_map_param(params):
+        return {'p': params['p_']}
+
+
+class GaussianNormalDistribution(PARCSDistribution):
     """ **Gaussian normal distribution**
 
     Constructed based on
     `Scipy norm distribution
     <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.norm.html#scipy.stats.norm>`_
     distribution.
-
     """
-
     def __init__(self,
                  coefs=None,
                  do_correction=True,
-                 correction_config=None):
-        self.params = ['mu_', 'sigma_']
-        self.coefs = coefs
+                 correction_configs=None):
+        super().__init__(
+            icdf=dists.bernoulli.ppf,
+            params=['mu_', 'sigma_'],
+            coefs=coefs,
+            correctors={
+                'mu_': None,
+                'sigma_': SigmoidCorrection(**correction_configs['sigma_']) if do_correction else None,
+            }
+        )
 
-        self.do_correction = do_correction
-        if do_correction:
-            self.sigma_correction = SigmoidCorrection(**correction_config)
-
-    def _correct_param(self, mu_, sigma_):
-        sigma_ = self.sigma_correction.transform(sigma_)
-        return mu_, sigma_
-
-    def calculate(self, data, errors):
-        mu_ = dot_prod(data, self.coefs['mu_'])
-        sigma_ = dot_prod(data, self.coefs['sigma_'])
-        if self.do_correction:
-            mu_, sigma_ = self._correct_param(mu_, sigma_)
-        elif isinstance(sigma_, np.ndarray):
-            parcs_assert(
-                (sigma_ >= 0).sum() == len(sigma_),
-                DistributionError,
-                'Gaussian sigma_ has negative values'
-            )
+    def _validate_params(self, params):
+        sigma_ = params['sigma_']
+        if isinstance(sigma_, np.ndarray):
+            parcs_assert((sigma_ >= 0).sum() == len(sigma_),
+                         DistributionError,
+                         "Gaussian normal sigma_ has negative values")
         else:
-            parcs_assert(
-                sigma_ >= 0,
-                DistributionError,
-                'Gaussian sigma_ has negative values'
-            )
+            parcs_assert(sigma_ >= 0,
+                         DistributionError,
+                         "Gaussian normal sigma_ has negative values")
 
-        samples = dists.norm.ppf(errors, loc=mu_, scale=sigma_)
-
-        return samples
-
-
-class BernoulliDistribution:
-    """ **Gaussian normal distribution**
-
-    Constructed based on
-    `Scipy Bernoulli distribution
-    <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bernoulli.html>`_
-    distribution.
-
-    """
-
-    def __init__(self,
-                 coefs=None,
-                 do_correction=True,
-                 correction_config=None):
-        self.params = ['p_']
-        self.coefs = coefs
-
-        self.do_correction = do_correction
-        if do_correction:
-            self.sigma_correction = SigmoidCorrection(**correction_config)
-
-    def _correct_param(self, p_):
-        return self.sigma_correction.transform(p_)
-
-    def calculate(self, data, errors):
-        p_ = dot_prod(data, self.coefs['p_'])
-        if self.do_correction:
-            p_ = self._correct_param(p_)
-        elif isinstance(p_, np.ndarray):
-            parcs_assert(
-                (p_ <= 1).sum() == len(p_),
-                DistributionError,
-                'Bern(p) probabilities are out of [0, 1] range'
-            )
-        else:
-            parcs_assert(
-                0 <= p_ <= 1,
-                DistributionError,
-                'Bern(p) probabilities are out of [0, 1] range'
-            )
-        samples = dists.bernoulli.ppf(errors, p_)
-
-        return samples
+    @staticmethod
+    def _parcs_to_icdf_map_param(params):
+        return {'loc': params['mu_'], 'scale': params['sigma_']}
 
 
 class UniformDistribution:
-    """ **Gaussian normal distribution**
+    """ **Uniform distribution**
 
     Since the distribution of the sampled errors is Uniform, this class takes the samples as they are,
     and does loc-scale to satisfy the given parameters.
