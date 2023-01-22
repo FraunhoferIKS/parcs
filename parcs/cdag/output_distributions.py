@@ -106,27 +106,17 @@ class BernoulliDistribution(PARCSDistribution):
                  coefs=None,
                  do_correction=True,
                  correction_configs=None):
-        super().__init__(
-            icdf=dists.bernoulli.ppf,
-            params=['p_'],
-            coefs=coefs,
-            correctors={'p_': SigmoidCorrection(**correction_configs['p_']) if do_correction else None}
-        )
+        super().__init__(icdf=dists.bernoulli.ppf, params=['p_'], coefs=coefs,
+                         correctors={'p_': SigmoidCorrection(**correction_configs['p_']) if do_correction else None})
 
     def _validate_params(self, params):
         p_ = params['p_']
         if isinstance(p_, np.ndarray):
-            parcs_assert(
-                (p_ <= 1).sum() == len(p_),
-                DistributionError,
-                "Bern(p) probabilities are out of [0, 1] range"
-            )
+            parcs_assert((p_ <= 1).sum() == len(p_),
+                         DistributionError,
+                         "Bern(p) probabilities are out of [0, 1] range")
         else:
-            parcs_assert(
-                0 <= p_ <= 1,
-                DistributionError,
-                "Bern(p) probabilities are out of [0, 1] range"
-            )
+            parcs_assert(0 <= p_ <= 1, DistributionError, "Bern(p) probabilities are out of [0, 1] range")
 
     @staticmethod
     def _parcs_to_icdf_map_param(params):
@@ -145,15 +135,11 @@ class GaussianNormalDistribution(PARCSDistribution):
                  coefs=None,
                  do_correction=True,
                  correction_configs=None):
-        super().__init__(
-            icdf=dists.bernoulli.ppf,
-            params=['mu_', 'sigma_'],
-            coefs=coefs,
-            correctors={
-                'mu_': None,
-                'sigma_': SigmoidCorrection(**correction_configs['sigma_']) if do_correction else None,
-            }
-        )
+        super().__init__(icdf=dists.norm.ppf, params=['mu_', 'sigma_'], coefs=coefs,
+                         correctors={
+                             'mu_': None,
+                             'sigma_': SigmoidCorrection(**correction_configs['sigma_']) if do_correction else None,
+                         })
 
     def _validate_params(self, params):
         sigma_ = params['sigma_']
@@ -162,182 +148,138 @@ class GaussianNormalDistribution(PARCSDistribution):
                          DistributionError,
                          "Gaussian normal sigma_ has negative values")
         else:
-            parcs_assert(sigma_ >= 0,
-                         DistributionError,
-                         "Gaussian normal sigma_ has negative values")
+            parcs_assert(sigma_ >= 0, DistributionError, "Gaussian normal sigma_ has negative values")
 
     @staticmethod
     def _parcs_to_icdf_map_param(params):
         return {'loc': params['mu_'], 'scale': params['sigma_']}
 
 
-class UniformDistribution:
+class UniformDistribution(PARCSDistribution):
     """ **Uniform distribution**
 
     Since the distribution of the sampled errors is Uniform, this class takes the samples as they are,
     and does loc-scale to satisfy the given parameters.
-
     """
-
     def __init__(self,
                  coefs=None,
                  do_correction=False,
-                 correction_config=None):
-        self.correction_config = correction_config
-        self.do_correction = do_correction
-        self.params = ['mu_', 'diff_']
-        self.coefs = coefs
+                 correction_configs=None):
+        parcs_assert(
+            not do_correction and correction_configs is None,
+            DistributionError,
+            "Uniform distribution does not accept any node correction."
+        )
 
-    def calculate(self, data, errors):
-        mu_ = dot_prod(data, self.coefs['mu_'])
-        diff_ = dot_prod(data, self.coefs['diff_'])
-        low = mu_ - (diff_ / 2)
+        def yield_icdf():
+            def uniform_icdf(errors, mu_=None, diff_=None):
+                return mu_ + (np.array(errors) - 0.5) * diff_
 
-        samples = errors * diff_ + low
+            return uniform_icdf
+        super().__init__(icdf=yield_icdf(), params=['mu_', 'diff_'], coefs=coefs,
+                         correctors={'mu_': None, 'diff_': None})
 
-        return samples
 
-
-class ExponentialDistribution:
-    """ **Gaussian normal distribution**
+class ExponentialDistribution(PARCSDistribution):
+    """ **Exponential distribution**
 
     Constructed based on
     `Scipy Exponential distribution
     <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.expon.html>`_
     distribution.
-
     """
-
     def __init__(self,
                  coefs=None,
                  do_correction=True,
-                 correction_config=None):
-        self.params = ['lambda_']
-        self.coefs = coefs
+                 correction_configs=None):
+        super().__init__(
+            icdf=dists.expon.ppf,
+            params=['lambda_'],
+            coefs=coefs,
+            correctors={'lambda_': SigmoidCorrection(**correction_configs['lambda_']) if do_correction else None}
+        )
 
-        self.do_correction = do_correction
-        if do_correction:
-            self.sigma_correction = SigmoidCorrection(**correction_config)
-
-    def _correct_param(self, lambda_):
-        return self.sigma_correction.transform(lambda_)
-
-    def calculate(self, data, errors):
-        lambda_ = dot_prod(data, self.coefs['lambda_'])
-        if self.do_correction:
-            lambda_ = self._correct_param(lambda_)
-        elif isinstance(lambda_, np.ndarray):
-            parcs_assert(
-                (lambda_ > 0).sum() == len(lambda_),
-                DistributionError,
-                'Expon lambda has non-positive values'
-            )
+    def _validate_params(self, params):
+        lambda_ = params['lambda_']
+        if isinstance(lambda_, np.ndarray):
+            parcs_assert((lambda_ > 0).sum() == len(lambda_),
+                         DistributionError,
+                         "Exponential lambda has non-positive values")
         else:
-            parcs_assert(
-                lambda_ > 0,
-                DistributionError,
-                'Expon lambda has non-positive values'
-            )
-        samples = dists.expon.ppf(errors, lambda_)
+            parcs_assert(lambda_ > 0, DistributionError, "Exponential lambda has non-positive values")
 
-        return samples
+    @staticmethod
+    def _parcs_to_icdf_map_param(params):
+        return {'loc': params['lambda_']}
 
 
-class PoissonDistribution:
-    """ **Gaussian normal distribution**
+class PoissonDistribution(PARCSDistribution):
+    """ **Poisson distribution**
 
     Constructed based on
     `Scipy Poisson distribution
     <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.poisson.html>`_
     distribution.
-
     """
-
     def __init__(self,
                  coefs=None,
                  do_correction=True,
-                 correction_config=None):
-        self.params = ['lambda_']
-        self.coefs = coefs
+                 correction_configs=None):
+        super().__init__(
+            icdf=dists.poisson.ppf,
+            params=['lambda_'],
+            coefs=coefs,
+            correctors={'lambda_': SigmoidCorrection(**correction_configs['lambda_']) if do_correction else None}
+        )
 
-        self.do_correction = do_correction
-        if do_correction:
-            self.sigma_correction = SigmoidCorrection(**correction_config)
-
-    def _correct_param(self, lambda_):
-        return self.sigma_correction.transform(lambda_)
-
-    def calculate(self, data, errors):
-        lambda_ = dot_prod(data, self.coefs['lambda_'])
-        if self.do_correction:
-            lambda_ = self._correct_param(lambda_)
-        elif isinstance(lambda_, np.ndarray):
-            parcs_assert(
-                (lambda_ >= 0).sum() == len(lambda_),
-                DistributionError,
-                'Poisson lambda has negative values'
-            )
+    def _validate_params(self, params):
+        lambda_ = params['lambda_']
+        if isinstance(lambda_, np.ndarray):
+            parcs_assert((lambda_ > 0).sum() == len(lambda_),
+                         DistributionError,
+                         "Poisson lambda has non-positive values")
         else:
-            parcs_assert(
-                lambda_ >= 0,
-                DistributionError,
-                'Poisson lambda has negative values'
-            )
-        samples = dists.poisson.ppf(errors, lambda_)
+            parcs_assert(lambda_ > 0, DistributionError, "Poisson lambda has non-positive values")
 
-        return samples
+    @staticmethod
+    def _parcs_to_icdf_map_param(params):
+        return {'mu': params['lambda_']}
 
 
-class LogNormalDistribution:
+class LogNormalDistribution(PARCSDistribution):
     """ **Gaussian normal distribution**
 
     Constructed based on
     `Scipy lognorm distribution
     <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.lognorm.html>`_
     distribution.
-
     """
-
     def __init__(self,
                  coefs=None,
                  do_correction=True,
-                 correction_config=None):
-        self.params = ['mu_', 'sigma_']
-        self.coefs = coefs
+                 correction_configs=None):
+        super().__init__(icdf=dists.lognorm.ppf, params=['mu_', 'sigma_'], coefs=coefs,
+                         correctors={
+                             'mu_': None,
+                             'sigma_': SigmoidCorrection(**correction_configs['sigma_']) if do_correction else None,
+                         })
 
-        self.do_correction = do_correction
-        if do_correction:
-            self.sigma_correction = SigmoidCorrection(**correction_config)
-
-    def _correct_param(self, mu_, sigma_):
-        sigma_ = self.sigma_correction.transform(sigma_)
-        return mu_, sigma_
-
-    def calculate(self, data, errors):
-        mu_ = dot_prod(data, self.coefs['mu_'])
-        sigma_ = dot_prod(data, self.coefs['sigma_'])
-        if self.do_correction:
-            mu_, sigma_ = self._correct_param(mu_, sigma_)
-        elif isinstance(sigma_, np.ndarray):
-            parcs_assert(
-                (sigma_ >= 0).sum() == len(sigma_),
-                DistributionError,
-                'Log normal sigma_ has negative values'
-            )
+    def _validate_params(self, params):
+        sigma_ = params['sigma_']
+        if isinstance(sigma_, np.ndarray):
+            parcs_assert((sigma_ >= 0).sum() == len(sigma_),
+                         DistributionError,
+                         "log normal sigma_ has negative values")
         else:
-            parcs_assert(
-                sigma_ >= 0,
-                DistributionError,
-                'Log normal sigma_ has negative values'
-            )
+            parcs_assert(sigma_ >= 0, DistributionError, "log normal sigma_ has negative values")
 
-        samples = dists.lognorm.ppf(errors, loc=mu_, scale=sigma_)
-
-        return samples
+    @staticmethod
+    def _parcs_to_icdf_map_param(params):
+        return {'loc': params['mu_'], 's': params['sigma_']}
 
 
 OUTPUT_DISTRIBUTIONS = {
-    'gaussian': GaussianDistribution,
+    'gaussian': GaussianNormalDistribution,
     'lognormal': LogNormalDistribution,
     'bernoulli': BernoulliDistribution,
     'uniform': UniformDistribution,

@@ -107,3 +107,81 @@ class TestPARCSDistributions:
             )
         )
 
+    @staticmethod
+    @pytest.mark.parametrize('coefs,errors,data', [
+        ({'mu_': {'bias': 0, 'linear': [], 'interactions': []},
+          'diff_': {'bias': 1, 'linear': [], 'interactions': []}}, [0.2, 0.3], np.array([])),
+        ({'mu_': {'bias': 0, 'linear': [1, -0.5], 'interactions': [1, 0, 2]},
+          'diff_': {'bias': 3, 'linear': [0, 0], 'interactions': [-1, -2, 0]}}, [0.01], np.array([[1, 4]])),
+    ])
+    def test_uniform_distribution(coefs, errors, data):
+        dist = UniformDistribution(coefs=coefs, do_correction=False)
+        out = dist.calculate(data, errors)
+        mu = dot_prod(data, coefs['mu_'])
+        diff = dot_prod(data, coefs['diff_'])
+        assert np.array_equal(
+            out,
+            mu + (np.array(errors) - 0.5) * diff
+        )
+
+    @staticmethod
+    @pytest.mark.parametrize('coefs,errors,data', [
+        ({'mu_': {'bias': 0, 'linear': [], 'interactions': []},
+          'sigma_': {'bias': 1, 'linear': [], 'interactions': []}}, [0.2, 0.3], np.array([])),
+        ({'mu_': {'bias': 0, 'linear': [1, -0.5], 'interactions': [1, 0, 2]},
+          'sigma_': {'bias': 3, 'linear': [0, 0], 'interactions': [1, 2, 0]}}, [0.01], np.array([[1, 4]])),
+    ])
+    def test_normal_distribution(coefs, errors, data):
+        dist = GaussianNormalDistribution(coefs=coefs, do_correction=False)
+        out = dist.calculate(data, errors)
+
+        assert np.array_equal(
+            out,
+            dists.norm.ppf(errors, dot_prod(data, coefs['mu_']), dot_prod(data, coefs['sigma_']))
+        )
+
+    @staticmethod
+    @pytest.mark.parametrize('coefs,errors,data', [
+        ({'lambda_': {'bias': 0.2, 'linear': [], 'interactions': []}}, [0.2, 0.3], np.array([])),
+        ({'lambda_': {'bias': 0, 'linear': [2], 'interactions': []}}, [0.1, 0.9], np.array([[0.1], [0.3]])),
+        ({'lambda_': {'bias': 0, 'linear': [1, 2], 'interactions': [3, 0.1, 4]}},
+         [0.3, 0.1], np.array([[0.1, 0.5], [0.3, 2]])),
+    ])
+    def test_exponential_distribution(coefs, errors, data):
+        dist = ExponentialDistribution(coefs=coefs, do_correction=False)
+        out = dist.calculate(data, errors)
+        assert np.array_equal(
+            out,
+            dists.expon.ppf(errors, dot_prod(data, coefs['lambda_']))
+        )
+
+    @staticmethod
+    @pytest.mark.parametrize('coefs,errors,data', [
+        ({'lambda_': {'bias': 0.2, 'linear': [], 'interactions': []}}, [0.2, 0.3], np.array([])),
+        ({'lambda_': {'bias': 0, 'linear': [2], 'interactions': []}}, [0.1, 0.9], np.array([[0.1], [0.3]])),
+        ({'lambda_': {'bias': 0, 'linear': [1, 2], 'interactions': [3, 0.1, 4]}},
+         [0.3, 0.1], np.array([[0.1, 0.5], [0.3, 2]])),
+    ])
+    def test_poisson_distribution(coefs, errors, data):
+        dist = PoissonDistribution(coefs=coefs, do_correction=False)
+        out = dist.calculate(data, errors)
+        assert np.array_equal(
+            out,
+            dists.poisson.ppf(errors, dot_prod(data, coefs['lambda_']))
+        )
+
+    @staticmethod
+    @pytest.mark.parametrize('coefs,errors,data', [
+        ({'mu_': {'bias': 0, 'linear': [], 'interactions': []},
+          'sigma_': {'bias': 1, 'linear': [], 'interactions': []}}, [0.2, 0.7], np.array([])),
+        ({'mu_': {'bias': 0, 'linear': [1, -0.5], 'interactions': [1, 0, 2]},
+          'sigma_': {'bias': 3, 'linear': [0, 0], 'interactions': [1, 2, 0]}}, [0.1], np.array([[1, 4]])),
+    ])
+    def test_lognormal_distribution(coefs, errors, data):
+        dist = LogNormalDistribution(coefs=coefs, do_correction=False)
+        out = dist.calculate(data, errors)
+
+        assert np.array_equal(
+            out,
+            dists.lognorm.ppf(errors, loc=dot_prod(data, coefs['mu_']), s=dot_prod(data, coefs['sigma_']))
+        )
