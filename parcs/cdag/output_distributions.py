@@ -105,9 +105,9 @@ class BernoulliDistribution(PARCSDistribution):
     def __init__(self,
                  coefs=None,
                  do_correction=True,
-                 correction_configs=None):
+                 correction_config=None):
         super().__init__(icdf=dists.bernoulli.ppf, params=['p_'], coefs=coefs,
-                         correctors={'p_': SigmoidCorrection(**correction_configs['p_']) if do_correction else None})
+                         correctors={'p_': SigmoidCorrection(**correction_config) if do_correction else None})
 
     def _validate_params(self, params):
         p_ = params['p_']
@@ -134,11 +134,11 @@ class GaussianNormalDistribution(PARCSDistribution):
     def __init__(self,
                  coefs=None,
                  do_correction=True,
-                 correction_configs=None):
+                 correction_config=None):
         super().__init__(icdf=dists.norm.ppf, params=['mu_', 'sigma_'], coefs=coefs,
                          correctors={
                              'mu_': None,
-                             'sigma_': SigmoidCorrection(**correction_configs['sigma_']) if do_correction else None,
+                             'sigma_': SigmoidCorrection(**correction_config) if do_correction else None,
                          })
 
     def _validate_params(self, params):
@@ -164,9 +164,9 @@ class UniformDistribution(PARCSDistribution):
     def __init__(self,
                  coefs=None,
                  do_correction=False,
-                 correction_configs=None):
+                 correction_config=None):
         parcs_assert(
-            not do_correction and correction_configs is None,
+            not do_correction and correction_config is None,
             DistributionError,
             "Uniform distribution does not accept any node correction."
         )
@@ -191,12 +191,12 @@ class ExponentialDistribution(PARCSDistribution):
     def __init__(self,
                  coefs=None,
                  do_correction=True,
-                 correction_configs=None):
+                 correction_config=None):
         super().__init__(
             icdf=dists.expon.ppf,
             params=['lambda_'],
             coefs=coefs,
-            correctors={'lambda_': SigmoidCorrection(**correction_configs['lambda_']) if do_correction else None}
+            correctors={'lambda_': SigmoidCorrection(**correction_config) if do_correction else None}
         )
 
     def _validate_params(self, params):
@@ -224,12 +224,12 @@ class PoissonDistribution(PARCSDistribution):
     def __init__(self,
                  coefs=None,
                  do_correction=True,
-                 correction_configs=None):
+                 correction_config=None):
         super().__init__(
             icdf=dists.poisson.ppf,
             params=['lambda_'],
             coefs=coefs,
-            correctors={'lambda_': SigmoidCorrection(**correction_configs['lambda_']) if do_correction else None}
+            correctors={'lambda_': SigmoidCorrection(**correction_config) if do_correction else None}
         )
 
     def _validate_params(self, params):
@@ -257,11 +257,11 @@ class LogNormalDistribution(PARCSDistribution):
     def __init__(self,
                  coefs=None,
                  do_correction=True,
-                 correction_configs=None):
+                 correction_config=None):
         super().__init__(icdf=dists.lognorm.ppf, params=['mu_', 'sigma_'], coefs=coefs,
                          correctors={
                              'mu_': None,
-                             'sigma_': SigmoidCorrection(**correction_configs['sigma_']) if do_correction else None,
+                             'sigma_': SigmoidCorrection(**correction_config) if do_correction else None,
                          })
 
     def _validate_params(self, params):

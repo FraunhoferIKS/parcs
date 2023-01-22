@@ -83,21 +83,18 @@ def is_adj_matrix_acyclic(adj_matrix):
         return False
 
 
-def get_interactions(data, max_terms=2):
+def get_interactions(data):
     """ **Creates interaction terms**
 
-    Returns the columns of product of interaction terms. The interaction terms are of length
-    ``2, 3, ..., min(max_terms, data.shape[1])``. The order of interaction terms follow the order
-    of ``itertools.combination_with_replacement`` module. Example: for ``[X,Y,Z]`` the method for r=2 returns:
+    Returns the columns of product of interaction terms. The interaction terms are of length 2.
+    The order of interaction terms follow the order
+    of ``itertools.combination_with_replacement`` module. Example: for ``[X,Y,Z]`` the method returns:
     ``[XX, XY, XZ, YY, YZ, ZZ]``.
 
     Parameters
     ----------
     data : array-like
         with `n x m` shape, `m` being the number of features
-    max_terms : int, default=2
-        the largest number of features in the interaction term. if `max_terms > m` then it will be ignored and `m`
-        will be the largest number
 
     Returns
     -------
@@ -108,18 +105,22 @@ def get_interactions(data, max_terms=2):
     --------
     >>> from parcs.cdag.utils import get_interactions
     >>> data_ = np.array([[1, 2, 3], [10, 12, 20]])
-    >>> get_interactions(data_, max_terms=2)
+    >>> get_interactions(data_)
     array([[  1,   2,   3,   4,   6,   9],
            [100, 120, 200, 144, 240, 400]])
+    >>> data_ = np.array([[1], [2]])
+    >>> get_interactions(data_)
+    array([[1],
+           [4]])
     """
-    len_ = min(data.shape[1], max_terms)
-    return np.array([
-        [np.prod(i) for r in range(2, len_ + 1) for i in comb_w_repl(row, r)]
+    out = np.array([
+        [np.prod(i) for i in comb_w_repl(row, 2)]
         for row in data
     ])
+    return out
 
 
-def get_interactions_length(len_, max_terms=2):
+def get_interactions_length(len_):
     """ **Returns length of interaction terms**
 
     This function returns the length of the output of :func:`~cdag.parcs.utils.get_interactions`.
@@ -128,9 +129,6 @@ def get_interactions_length(len_, max_terms=2):
     ----------
     len_ : int
         `shape[1]` of the raw data (number of columns)
-    max_terms : int, default=2
-        similar to `max_terms` in :func:`~cdag.parcs.utils.get_interactions`,
-        maximum number of parents in an interaction term.
 
     Returns
     -------
@@ -148,15 +146,13 @@ def get_interactions_length(len_, max_terms=2):
     True
     """
     dummy_data = np.ones(shape=(len_,))
-    max_t = min(len_, max_terms)
     return len([
         np.prod(i)
-        for r in range(2, max_t + 1)
-        for i in comb_w_repl(dummy_data, r)
+        for i in comb_w_repl(dummy_data, 2)
     ])
 
 
-def get_interactions_dict(parents, max_terms=2):
+def get_interactions_dict(parents):
     """ **gives parents pairings for each interaction term**
 
     This function is used to trace which parents are making an interaction term in some index.
@@ -165,8 +161,7 @@ def get_interactions_dict(parents, max_terms=2):
     ----------
     parents : list of str
         list of parents
-    max_terms : int, default=2
-        similar to :func:`~cdag.parcs.utils.get_interactions`
+
     Returns
     -------
     pairings : list of tuple
@@ -175,24 +170,27 @@ def get_interactions_dict(parents, max_terms=2):
     Examples
     --------
     >>> from parcs.cdag.utils import get_interactions, get_interactions_dict
-    >>> parents_ = ['a', 'b', 'c', 'd']
-    >>> get_interactions_dict(parents_, max_terms=2)
-    [{'b', 'a'}, {'c', 'a'}, {'a', 'd'}, {'b', 'c'}, {'b', 'd'}, {'c', 'd'}]
+    >>> parents_ = ['a', 'b', 'c']
+    >>> get_interactions_dict(parents_)
+    [('a', 'a'), ('a', 'b'), ('a', 'c'), ('b', 'b'), ('b', 'c'), ('c', 'c')]
 
     """
-    len_ = min(len(parents), max_terms)
-    return [set(i) for r in range(2, len_ + 1) for i in comb_w_repl(parents, r)]
-
-
-def get_poly(data, n):
-    return data ** n
+    return [sorted(i) for i in comb_w_repl(parents, 2)]
 
 
 def dot_prod(data, coef):
+    """
+    dot product of data and bias/linear/interactions coefs
+
+    >>> import numpy
+    >>> data = numpy.array([[1], [2]])
+    >>> coef = {'bias': 0, 'linear': [1], 'interactions': numpy.array([1])}
+    >>> dot_prod(data, coef)
+    array([2, 6])
+    """
     if data.shape[0] == 0:
         data_augmented = [np.array([]) for _ in range(3)]
     else:
-        # data_augmented = [data, get_poly(data, 2), get_interactions(data)]
         data_augmented = [data, get_interactions(data)]
 
     return coef['bias'] + np.array([

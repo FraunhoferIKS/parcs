@@ -32,7 +32,7 @@ class TestConstantNodes:
         assert np.array_equal(result, [value, value, value, value])
 
     @staticmethod
-    @pytest.mark.parametrize('value', ['A', None, False])
+    @pytest.mark.parametrize('value', ['A', None])
     def test_constant_node_raise_errors(value):
         with pytest.raises(TypeError):
             ConstNode(value=value)

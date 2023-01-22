@@ -182,7 +182,7 @@ class ConstNode:
     """
 
     def __init__(self,
-                 value: np.number,
+                 value: Union[np.number, np.int, float],
                  name: Optional[str] = None):
         self.name = name
         self.info = {'node_type': 'constant', 'value': value}

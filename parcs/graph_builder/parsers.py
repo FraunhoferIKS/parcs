@@ -53,7 +53,10 @@ def term_parser(term: str, vars_: List[str]) -> Tuple[list, float]:
     DescriptionFileError
         If the terms are invalid. Cases: non-existing parents, terms other than bias, linear, interactions, etc.
     """
-    err_msg = "The term {} in the description file is invalid.".format(term)  # for potential errors
+    err_msg = '''The term {} in the description file is invalid.
+    Another possibility is that a node name exists in another node\'s parameter, while it is not marked as
+    a parent by the described edges; in this case, check for the nodes/edges consistency.
+    '''.format(term)  # for potential errors
     pars = []
     for var in vars_:
         # check if X^2 exists:
@@ -266,7 +269,7 @@ def node_parser(line: str, parents: List[str]) -> dict:
                 ind = parents.index(pars[0])
                 params[p]['linear'][ind] = coef
             else:
-                ind = interactions_dict.index(set(pars))
+                ind = interactions_dict.index(sorted(pars))
                 params[p]['interactions'][ind] = coef
 
     # do correction

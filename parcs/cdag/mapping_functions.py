@@ -36,7 +36,7 @@ def edge_empty(**kwargs):
 
 @typechecked
 def edge_sigmoid(array: np.ndarray = None,
-                 alpha: float = 2.0, beta: float = 0.0, gamma: np.int_ = 0, tau: int = 1) -> np.ndarray:
+                 alpha: float = 2.0, beta: float = 0.0, gamma: float = 0, tau: float = 1) -> np.ndarray:
     r"""
     This edge function transforms input variable according to the following equation:
 
@@ -82,7 +82,7 @@ def edge_sigmoid(array: np.ndarray = None,
 
 @typechecked
 def edge_gaussian_rbf(array: np.ndarray = None,
-                      alpha: float = 1.0, beta: float = 0, gamma: np.int_ = 0, tau: int = 2) -> np.ndarray:
+                      alpha: float = 1.0, beta: float = 0, gamma: float = 0, tau: float = 2) -> np.ndarray:
     r"""
     .. math::
         \begin{align}
@@ -127,7 +127,7 @@ def edge_gaussian_rbf(array: np.ndarray = None,
 
 @typechecked
 def edge_arctan(array: np.ndarray = None,
-                alpha: float = 2, beta: float = 0, gamma: np.int_ = 0) -> np.ndarray:
+                alpha: float = 2, beta: float = 0, gamma: float = 0) -> np.ndarray:
     r"""
     .. math::
         \begin{align}
@@ -196,14 +196,3 @@ FUNCTION_PARAMS = {
     'gaussian_rbf': ['alpha', 'beta', 'gamma', 'tau'],
     'arctan': ['alpha', 'beta', 'gamma']
 }
-
-if __name__ == '__main__':
-    arr = np.random.normal(0, 1, size=300)
-
-    # v = edge_sigmoid_new(array=arr)
-    v = edge_gaussian_rbf(array=arr, alpha=1, beta=-1, gamma=1)
-
-    from matplotlib import pyplot as plt
-
-    plt.scatter(arr, v)
-    plt.show()
