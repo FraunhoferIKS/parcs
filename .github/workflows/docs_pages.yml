@@ -2,26 +2,27 @@ name: Build and Deploy Sphinx Docs
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
 
 jobs:
-  build-and-deploy:
+  build_docs_job:
     runs-on: ubuntu-latest
-
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2.3.4
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v2.2.1
       with:
-        python-version: 3.x
+        python-version: 3.9
 
     - name: Install dependencies
       run: |
-        pip install sphinx
-        pip install sphinx-rtd-theme
+        python -m pip install -U sphinx
+        python -m pip install sphinx-rtd-theme
 
     - name: Build documentation
       run: |
@@ -37,6 +38,9 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git commit -m 'deploy'
+    
+    - name: Force push to destination branch
+      uses: ad-,/github-push-action@v0.5.0
       with:
         github_token: ${{ secrets.ACCESS_TOKEN }}
         branch: gh-pages
