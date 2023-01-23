@@ -3,7 +3,7 @@
 Create the First Graph
 ======================
 
-We define a causal DAG in PARCS by specifying the output distributions and parameter coefficient vectors of the nodes, along with edges and their edge functions. This can be done using the :func:`~parcs.cdag.graph_objects.Graph` class, and a ``.yml`` description file.
+We define a causal DAG in PARCS by specifying the output distributions and parameter coefficient vectors of the nodes, along with edges and their edge functions. This can be done using the :func:`~pyparcs.cdag.graph_objects.Graph` class, and a ``.yml`` description file.
 
 .. literalinclude:: code_blocks/b1/graph_description.yml
     :caption: :code:`graph_description.yml`
@@ -74,7 +74,7 @@ In this example, the correction transformation for Bernoulli distribution, is a 
 .. _node_correction_node:
 
 .. note::
-    **Node correction is always initialized upon the first batch of data**. For example, if `target_mean` option is set for node correction in the example above, the output values will be transformed such that the output has the mean equal to the `target_mean`. This is done by learning an `offset` term from the first batch which satisfies the `mean` requirements. This values will be then used for next simulations. For this purpose, the graph object always `burns` the first 500 samples, to initialize the corrections. Read more about sigmoid correction at :func:`~parcs.cdag.utils.SigmoidCorrection`.
+    **Node correction is always initialized upon the first batch of data**. For example, if `target_mean` option is set for node correction in the example above, the output values will be transformed such that the output has the mean equal to the `target_mean`. This is done by learning an `offset` term from the first batch which satisfies the `mean` requirements. This values will be then used for next simulations. For this purpose, the graph object always `burns` the first 500 samples, to initialize the corrections. Read more about sigmoid correction at :func:`~pyparcs.cdag.utils.SigmoidCorrection`.
 
 Reading graph info
 ------------------

@@ -12,7 +12,7 @@ Install PARCS via the following command:
 
 .. code-block:: console
 
-    (.venv) $ pip install .
+    (.venv) $ pip install pyparcs
 
 .. _citation:
 

@@ -157,4 +157,4 @@ In this example, the variable Y has the mean of `1.0` because of the mean of A a
     :lines: 5-9, 11
 
 .. note::
-    Similar to :ref:`Node correction <node_correction_node>` **edge correction parameters (i.e. mean and standard deviation) is always initialized upon the first batch of data**. For this purpose, the graph object always `burns` the first 500 samples, to initialize the corrections. Read more about edge correction at :func:`~parcs.cdag.utils.EdgeCorrection`.
+    Similar to :ref:`Node correction <node_correction_node>` **edge correction parameters (i.e. mean and standard deviation) is always initialized upon the first batch of data**. For this purpose, the graph object always `burns` the first 500 samples, to initialize the corrections. Read more about edge correction at :func:`~pyparcs.cdag.utils.EdgeCorrection`.

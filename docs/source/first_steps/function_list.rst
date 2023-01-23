@@ -58,7 +58,7 @@ Read more about each edge function by clicking the link in the table title.
 ``identity``
 ------------
 
-.. list-table:: :func:`~parcs.cdag.mapping_functions.edge_identity`
+.. list-table:: :func:`~pyparcs.cdag.mapping_functions.edge_identity`
    :widths: 20 60 20
    :header-rows: 1
 
@@ -73,7 +73,7 @@ Read more about each edge function by clicking the link in the table title.
 ``sigmoid``
 -----------
 
-.. list-table:: :func:`~parcs.cdag.mapping_functions.edge_sigmoid`
+.. list-table:: :func:`~pyparcs.cdag.mapping_functions.edge_sigmoid`
    :widths: 20 60 20
    :header-rows: 1
 
@@ -99,7 +99,7 @@ Read more about each edge function by clicking the link in the table title.
 ``gaussian_rbf``
 ----------------
 
-.. list-table:: :func:`~parcs.cdag.mapping_functions.edge_gaussian_rbf`
+.. list-table:: :func:`~pyparcs.cdag.mapping_functions.edge_gaussian_rbf`
    :widths: 20 60 20
    :header-rows: 1
 
@@ -125,7 +125,7 @@ Read more about each edge function by clicking the link in the table title.
 ``arctan``
 ----------------
 
-.. list-table:: :func:`~parcs.cdag.mapping_functions.edge_arctan`
+.. list-table:: :func:`~pyparcs.cdag.mapping_functions.edge_arctan`
    :widths: 20 60 20
    :header-rows: 1
 
@@ -154,7 +154,7 @@ Corrections
 Sigmoid Correction
 ------------------
 
-.. list-table:: :func:`~parcs.cdag.utils.SigmoidCorrection`
+.. list-table:: :func:`~pyparcs.cdag.utils.SigmoidCorrection`
    :widths: 10 70 10 10
    :header-rows: 1
 
@@ -180,7 +180,7 @@ Sigmoid Correction
 Edge Correction
 ------------------
 
-.. list-table:: :func:`~parcs.cdag.utils.EdgeCorrection`
+.. list-table:: :func:`~pyparcs.cdag.utils.EdgeCorrection`
    :widths: 10 70 10 10
    :header-rows: 1
 
