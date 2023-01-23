@@ -1,4 +1,4 @@
-from parcs.helpers.missing_data import *
+from parcs.helpers.missing_data import indicator_graph_description_file, m_graph_convert, R_adj_matrix
 from parcs.graph_builder.randomizer import ConnectRandomizer
 from parcs.cdag.graph_objects import Graph
 from tqdm import tqdm
@@ -11,25 +11,32 @@ import numpy as np
 data = pd.read_csv('normalized_data.csv')
 N = len(data)  # number of samples
 N_total = len(data.columns) # number of total variables
+N_O = 4  # number of fully observed variables
+N_m = N_total - N_O  # number of missing features
 miss_ratio = 0.5  # missing ratio in total
-total_v = sorted(list(data.columns))
-total_r = ['R_{}'.format(i.split('_')[1]) for i in total_v]
 
 def get_miss_dataset():
+    # 2. fully and partially observed variables
+    obs_v = sorted(rand.sample(['Z_{}'.format(i) for i in range(N_total)], N_O))
+    miss_v = sorted(list(set(data.columns) - set(obs_v)))
+    total_v = sorted(obs_v + miss_v)
     # 3. write GDF for R
-    r_adj = R_adj_matrix(size=N_total, density=1)
+    r_adj = R_adj_matrix(size=N_m, shuffle=True, density=0.0)
     indicator_graph_description_file(adj_matrix=r_adj,
-                                     node_names=total_v, miss_ratio=miss_ratio, subscript_only=True,
-                                     file_dir='./graph_description_files/gdf_R.yml')
+                                     node_names=miss_v, miss_ratio=miss_ratio, subscript_only=True,
+                                     file_dir='graph_description_files/gdf_R.yml')
+    # 4. randomize
+    mask = pd.DataFrame(np.zeros(shape=(N_total, N_m)), index=total_v,
+                        columns=['R_{}'.format(i.split('_')[1]) for i in miss_v])
+    mask.loc[obs_v, :] = 1
 
-    # 4. mask
-    mask = pd.DataFrame(np.ones(shape=(N_total, N_total)), index=total_v, columns=total_r)
-    rndz = ConnectRandomizer(parent_graph_dir='gdf_Z.yml', child_graph_dir='./graph_description_files/gdf_R.yml',
-                             guideline_dir='./guidelines/guideline_1.yml',
+    rndz = ConnectRandomizer(parent_graph_dir='gdf_Z.yml', child_graph_dir='graph_description_files/gdf_R.yml',
+                             guideline_dir='guidelines/guideline_nonlin.yml',
                              adj_matrix_mask=mask)
     # 5. samples
     nodes, edges = rndz.get_graph_params()
     g = Graph(nodes=nodes, edges=edges)
+    # s = g.sample(N)
     s = g.sample(full_data=True)
     # outputs
     gt = s[total_v]
@@ -51,7 +58,7 @@ from hyperimpute.utils.distributions import enable_reproducible_results
 import warnings
 warnings.filterwarnings("ignore")
 
-iters = 30
+iters = 10
 rmse_hi = []
 rmse_mf = []
 for it in tqdm(range(iters)):
@@ -68,5 +75,5 @@ for it in tqdm(range(iters)):
 
 results = {'hyperimpute': rmse_hi, 'missforest': rmse_mf}
 #
-with open('./results/MNAR_general_30.json', 'w') as f:
+with open('results/MAR_nonlin.json', 'w') as f:
     json.dump(results, f)

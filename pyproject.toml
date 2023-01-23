@@ -38,10 +38,10 @@ dependencies = [
 test = ["pytest"]
 doc = ["sphinx"]
 
-#[project.urls]
+[project.urls]
 #homepage = ""
 #documentation = ""
-#repository = ""
+repository = "https://github.com/alireza-zamanian/parcs"
 
 [project.scripts]
 flit = "flit:main"

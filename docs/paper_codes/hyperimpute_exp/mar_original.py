@@ -1,4 +1,4 @@
-from parcs.helpers.missing_data import indicator_graph_description_file, m_graph_convert, R_adj_matrix
+from parcs.helpers.missing_data import indicator_graph_description_file, m_graph_convert
 from parcs.graph_builder.randomizer import ConnectRandomizer
 from parcs.cdag.graph_objects import Graph
 from tqdm import tqdm
@@ -21,17 +21,16 @@ def get_miss_dataset():
     miss_v = sorted(list(set(data.columns) - set(obs_v)))
     total_v = sorted(obs_v + miss_v)
     # 3. write GDF for R
-    r_adj = R_adj_matrix(size=N_m, shuffle=True, density=0.0)
-    indicator_graph_description_file(adj_matrix=r_adj,
+    indicator_graph_description_file(adj_matrix=np.zeros(shape=(N_m, N_m)),
                                      node_names=miss_v, miss_ratio=miss_ratio, subscript_only=True,
-                                     file_dir='./graph_description_files/gdf_R.yml')
+                                     file_dir='graph_description_files/gdf_R.yml')
     # 4. randomize
     mask = pd.DataFrame(np.zeros(shape=(N_total, N_m)), index=total_v,
                         columns=['R_{}'.format(i.split('_')[1]) for i in miss_v])
     mask.loc[obs_v, :] = 1
 
-    rndz = ConnectRandomizer(parent_graph_dir='gdf_Z.yml', child_graph_dir='./graph_description_files/gdf_R.yml',
-                             guideline_dir='./guidelines/guideline_nonlin.yml',
+    rndz = ConnectRandomizer(parent_graph_dir='gdf_Z.yml', child_graph_dir='graph_description_files/gdf_R.yml',
+                             guideline_dir='guidelines/guideline_1.yml',
                              adj_matrix_mask=mask)
     # 5. samples
     nodes, edges = rndz.get_graph_params()
@@ -75,5 +74,5 @@ for it in tqdm(range(iters)):
 
 results = {'hyperimpute': rmse_hi, 'missforest': rmse_mf}
 #
-with open('./results/MAR_nonlin.json', 'w') as f:
+with open('results/MAR_ZR_10.json', 'w') as f:
     json.dump(results, f)
