@@ -1,5 +1,5 @@
-from parcs.cdag.graph_objects import Graph
-from parcs.graph_builder.randomizer import FreeRandomizer
+from pyparcs.cdag.graph_objects import Graph
+from pyparcs.graph_builder.randomizer import FreeRandomizer
 
 rndz = FreeRandomizer(
     guideline_dir='simple_guideline.yml'

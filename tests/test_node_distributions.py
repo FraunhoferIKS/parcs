@@ -20,8 +20,8 @@
 import pytest
 import numpy as np
 from scipy import stats as dists
-from parcs.cdag.output_distributions import *
-from parcs.cdag.utils import *
+from pyparcs.cdag.output_distributions import *
+from pyparcs.cdag.utils import *
 
 
 class TestUtils:

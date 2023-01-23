@@ -1,6 +1,6 @@
-from parcs.helpers.missing_data import m_graph_convert
-from parcs.graph_builder.parsers import graph_file_parser
-from parcs.cdag.graph_objects import Graph
+from pyparcs.helpers.missing_data import m_graph_convert
+from pyparcs.graph_builder.parsers import graph_file_parser
+from pyparcs.cdag.graph_objects import Graph
 import numpy as np
 np.random.seed(2022)
 

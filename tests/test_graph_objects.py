@@ -20,7 +20,7 @@
 import numpy
 import pytest
 import os
-from parcs.cdag.graph_objects import *
+from pyparcs.cdag.graph_objects import *
 
 
 class TestConstantNodes:

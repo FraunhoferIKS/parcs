@@ -1,5 +1,5 @@
 import numpy as np
-from parcs.helpers.missing_data import indicator_graph_description_file
+from pyparcs.helpers.missing_data import indicator_graph_description_file
 
 indicator_graph_description_file(
     adj_matrix=np.zeros(shape=(4, 4)),

@@ -1,6 +1,6 @@
-from parcs.cdag.graph_objects import Graph
-from parcs.graph_builder.parsers import graph_file_parser
-from parcs.graph_builder.randomizer import ParamRandomizer
+from pyparcs.cdag.graph_objects import Graph
+from pyparcs.graph_builder.parsers import graph_file_parser
+from pyparcs.graph_builder.randomizer import ParamRandomizer
 
 rndz = ParamRandomizer(
     graph_dir='graph_description_1.yml',

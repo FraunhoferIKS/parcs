@@ -23,7 +23,7 @@ import numpy as np
 import pandas as pd
 from scipy.special import expit
 from itertools import combinations_with_replacement as comb_w_repl
-from parcs.exceptions import parcs_assert
+from pyparcs.exceptions import parcs_assert
 
 
 def topological_sort(adj_matrix: pd.DataFrame = None):
@@ -103,7 +103,7 @@ def get_interactions(data):
 
     Examples
     --------
-    >>> from parcs.cdag.utils import get_interactions
+    >>> from pyparcs.cdag.utils import get_interactions
     >>> data_ = np.array([[1, 2, 3], [10, 12, 20]])
     >>> get_interactions(data_)
     array([[  1,   2,   3,   4,   6,   9],
@@ -137,7 +137,7 @@ def get_interactions_length(len_):
 
     Examples
     --------
-    >>> from parcs.cdag.utils import get_interactions, get_interactions_length
+    >>> from pyparcs.cdag.utils import get_interactions, get_interactions_length
     >>> import numpy
     >>> data = numpy.random.normal(size=(9, 3))
     >>> interactions = get_interactions(data)
@@ -169,7 +169,7 @@ def get_interactions_dict(parents):
 
     Examples
     --------
-    >>> from parcs.cdag.utils import get_interactions, get_interactions_dict
+    >>> from pyparcs.cdag.utils import get_interactions, get_interactions_dict
     >>> parents_ = ['a', 'b', 'c']
     >>> get_interactions_dict(parents_)
     [('a', 'a'), ('a', 'b'), ('a', 'c'), ('b', 'b'), ('b', 'c'), ('c', 'c')]
@@ -231,7 +231,7 @@ class SigmoidCorrection:
     This class is used internally by PARCS if `correction` parameter is chosen for a node. However, to understand
     the functionality better, we make an example using the class:
 
-    >>> from parcs.cdag.utils import SigmoidCorrection
+    >>> from pyparcs.cdag.utils import SigmoidCorrection
     >>> import numpy
     >>> x = numpy.linspace(-10, 10, 200)
     >>> sc = SigmoidCorrection(lower=-3, upper=2)
@@ -319,7 +319,7 @@ class EdgeCorrection:
     This class is used internally by PARCS if `correction` parameter is chosen for an edge. However, to understand
     the functionality better, we make an example using the class:
 
-    >>> from parcs.cdag.utils import EdgeCorrection
+    >>> from pyparcs.cdag.utils import EdgeCorrection
     >>> import numpy
     >>> x = numpy.random.normal(2, 10, size=200)
     >>> ec = EdgeCorrection()

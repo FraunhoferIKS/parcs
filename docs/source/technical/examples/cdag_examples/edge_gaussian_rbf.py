@@ -1,4 +1,4 @@
-from parcs.cdag.graph_objects import Edge
+from pyparcs.cdag.graph_objects import Edge
 import numpy as np
 
 edge = Edge(

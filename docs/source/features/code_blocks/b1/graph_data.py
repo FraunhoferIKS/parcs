@@ -1,5 +1,5 @@
-from parcs.cdag.graph_objects import Graph
-from parcs.graph_builder.parsers import graph_file_parser
+from pyparcs.cdag.graph_objects import Graph
+from pyparcs.graph_builder.parsers import graph_file_parser
 import pandas as pd
 import numpy
 numpy.random.seed(2022)

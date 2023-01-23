@@ -1,5 +1,5 @@
-from parcs.cdag.graph_objects import Graph
-from parcs.graph_builder.randomizer import FreeRandomizer, guideline_iterator
+from pyparcs.cdag.graph_objects import Graph
+from pyparcs.graph_builder.randomizer import FreeRandomizer, guideline_iterator
 
 for dir_, epoch, value in guideline_iterator(guideline_dir='simple_guideline.yml',
                                              to_iterate='graph/num_nodes',

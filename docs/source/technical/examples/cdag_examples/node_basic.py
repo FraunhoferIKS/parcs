@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from parcs.cdag.graph_objects import Node
+from pyparcs.cdag.graph_objects import Node
 np.random.seed(1)
 
 node = Node(

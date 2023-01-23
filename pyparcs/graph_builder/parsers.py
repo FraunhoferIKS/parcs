@@ -20,11 +20,11 @@
 
 import re
 import numpy as np
-from parcs.graph_builder.utils import config_parser
-from parcs.cdag.output_distributions import DISTRIBUTION_PARAMS
-from parcs.cdag.mapping_functions import EDGE_FUNCTIONS, FUNCTION_PARAMS
-from parcs.cdag.utils import get_interactions_length, get_interactions_dict
-from parcs.exceptions import *
+from pyparcs.graph_builder.utils import config_parser
+from pyparcs.cdag.output_distributions import DISTRIBUTION_PARAMS
+from pyparcs.cdag.mapping_functions import EDGE_FUNCTIONS, FUNCTION_PARAMS
+from pyparcs.cdag.utils import get_interactions_length, get_interactions_dict
+from pyparcs.exceptions import *
 from typeguard import typechecked
 from typing import List, Tuple
 
@@ -163,7 +163,7 @@ def node_parser(line: str, parents: List[str]) -> dict:
     try:
         res = data_pattern.search(line)
         dir_ = res.group(1)
-        # IF "dir_" is not null, then next parcs assertion must be made
+        # IF "dir_" is not null, then next pyparcs assertion must be made
         parcs_assert(
             parents == [],
             DescriptionFileError,
@@ -366,7 +366,7 @@ def edge_parser(line):
 def graph_file_parser(file_dir):
     """**Parser for graph description YAML files**
     This function reads the graph description ``.yml`` files and returns the list of nodes and edges.
-    These lists are used to instantiate a :func:`~parcs.cdag.graph_objects.Graph` object.
+    These lists are used to instantiate a :func:`~pyparcs.cdag.graph_objects.Graph` object.
 
     See Also
     --------

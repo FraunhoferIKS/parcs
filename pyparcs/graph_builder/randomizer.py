@@ -19,13 +19,13 @@
 #  Contact: alireza.zamanian@iks.fraunhofer.de
 
 from copy import deepcopy
-from parcs.cdag.mapping_functions import FUNCTION_PARAMS
-from parcs.graph_builder import parsers
-from parcs.cdag.utils import get_interactions_length, topological_sort
+from pyparcs.cdag.mapping_functions import FUNCTION_PARAMS
+from pyparcs.graph_builder import parsers
+from pyparcs.cdag.utils import get_interactions_length, topological_sort
 from itertools import product, combinations
-from parcs.graph_builder.utils import config_parser, config_dumper
-from parcs.cdag.output_distributions import OUTPUT_DISTRIBUTIONS, DISTRIBUTION_PARAMS
-from parcs.exceptions import parcs_assert, DescriptionFileError
+from pyparcs.graph_builder.utils import config_parser, config_dumper
+from pyparcs.cdag.output_distributions import OUTPUT_DISTRIBUTIONS, DISTRIBUTION_PARAMS
+from pyparcs.exceptions import parcs_assert, DescriptionFileError
 import pandas as pd
 import numpy as np
 import re
@@ -401,7 +401,7 @@ def guideline_iterator(guideline_dir: Optional[Union[str, Path]] = None, to_iter
 
 
 if __name__ == '__main__':
-    from parcs.cdag.graph_objects import Graph
+    from pyparcs.cdag.graph_objects import Graph
     import numpy as np
 
     np.random.seed(1)

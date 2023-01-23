@@ -20,7 +20,7 @@
 
 import yaml
 import numpy as np
-from parcs.cdag.output_distributions import DISTRIBUTION_PARAMS
+from pyparcs.cdag.output_distributions import DISTRIBUTION_PARAMS
 
 
 def config_parser(dir_):

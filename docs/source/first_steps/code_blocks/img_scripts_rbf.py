@@ -1,4 +1,4 @@
-from parcs.cdag.mapping_functions import *
+from pyparcs.cdag.mapping_functions import *
 from matplotlib import pyplot as plt
 import matplotlib
 import numpy as np

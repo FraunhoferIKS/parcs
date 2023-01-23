@@ -1,6 +1,6 @@
-from parcs.helpers.missing_data import indicator_graph_description_file, m_graph_convert, R_adj_matrix
-from parcs.graph_builder.randomizer import ConnectRandomizer
-from parcs.cdag.graph_objects import Graph
+from pyparcs.helpers.missing_data import indicator_graph_description_file, m_graph_convert, R_adj_matrix
+from pyparcs.graph_builder.randomizer import ConnectRandomizer
+from pyparcs.cdag.graph_objects import Graph
 from tqdm import tqdm
 import random as rand
 import pandas as pd

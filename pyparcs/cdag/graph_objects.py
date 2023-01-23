@@ -20,11 +20,11 @@
 
 import numpy as np
 import pandas as pd
-from parcs.cdag.utils import topological_sort, EdgeCorrection
-from parcs.cdag.output_distributions import OUTPUT_DISTRIBUTIONS
-from parcs.cdag.mapping_functions import EDGE_FUNCTIONS
-from parcs.graph_builder.utils import info_md_parser
-from parcs.exceptions import *
+from pyparcs.cdag.utils import topological_sort, EdgeCorrection
+from pyparcs.cdag.output_distributions import OUTPUT_DISTRIBUTIONS
+from pyparcs.cdag.mapping_functions import EDGE_FUNCTIONS
+from pyparcs.graph_builder.utils import info_md_parser
+from pyparcs.exceptions import *
 from typeguard import typechecked
 from typing import Optional, Union, List, Callable
 from pathlib import Path
@@ -39,7 +39,7 @@ class Node:
     """ **Node object in causal DAGs**
 
     Use this class to create a node, independent of any graphs.
-    If you want to construct a causal DAG, please use the :func:`~parcs.cdag.graph_objects.Graph` class instead.
+    If you want to construct a causal DAG, please use the :func:`~pyparcs.cdag.graph_objects.Graph` class instead.
     Node can be sampled by passing the data and error terms (``pd.DataFrame``) to the ``.calculate()`` method.
 
     Parameters
@@ -130,7 +130,7 @@ class DetNode:
 
     Examples
     --------
-    >>> from parcs.cdag.graph_objects import DetNode
+    >>> from pyparcs.cdag.graph_objects import DetNode
     >>> import pandas
     >>> n_0 = DetNode(name='N_0', function=lambda d: d['N_1']+d['N_2'])
     >>> data = pandas.DataFrame([[1, 2], [2, 2], [3, 3]], columns=('N_1', 'N_2'))
@@ -173,7 +173,7 @@ class ConstNode:
 
     Examples
     --------
-    >>> from parcs.cdag.graph_objects import ConstNode
+    >>> from pyparcs.cdag.graph_objects import ConstNode
     >>> import pandas
     >>> n_0 = ConstNode(name='N_0', value=2)
     >>> data = pandas.DataFrame([[1, 2], [2, 2], [3, 3]], columns=('N_1', 'N_2'))
@@ -199,7 +199,7 @@ class DataNode:
     """ **Data Node object in causal DAGs**
 
     Use this class to create a node with the samples being read from an external data file.
-    If you want to construct a causal DAG, please use the :func:`~parcs.cdag.graph_objects.Graph` class instead.
+    If you want to construct a causal DAG, please use the :func:`~pyparcs.cdag.graph_objects.Graph` class instead.
 
     Parameters
     ----------
@@ -257,7 +257,7 @@ class Edge:
     Examples
     --------
     >>> import numpy
-    >>> from parcs.cdag.graph_objects import Edge
+    >>> from pyparcs.cdag.graph_objects import Edge
     >>> # a standard Sigmoid activation
     >>> edge = Edge(
     ...     function_name='sigmoid',
@@ -331,9 +331,9 @@ class Graph:
     Parameters
     ----------
     nodes : list of dicts
-        List of dictionaries whose keys are kwargs of the :func:`~parcs.cdag.graph_objects.Node` object.
+        List of dictionaries whose keys are kwargs of the :func:`~pyparcs.cdag.graph_objects.Node` object.
     edges : list of dicts
-        List of dictionaries whose keys are kwargs of the :func:`~parcs.cdag.graph_objects.Edge` object.
+        List of dictionaries whose keys are kwargs of the :func:`~pyparcs.cdag.graph_objects.Edge` object.
     dummy_node_prefix : str
         the prefix in the graph description file which identifies dummy nodes: dummy nodes will be suppressed
         from the output
@@ -585,7 +585,7 @@ class Graph:
         Parameters
         ----------
         size, use_sampled_errors, sampled_errors, return_errors, cache_sampling, cache_name
-            see :func:`~parcs.cdag.graph_objects.Graph.sample`
+            see :func:`~pyparcs.cdag.graph_objects.Graph.sample`
         interventions : dict
             dictionary of interventions in the form of ``{'<node_to_be_intervened>': <intervention_value>}``
 
@@ -593,9 +593,9 @@ class Graph:
         Returns
         -------
         samples : pd.DataFrame
-            If ``return_errors=False``. See :func:`~parcs.cdag.graph_objects.Graph.sample`
+            If ``return_errors=False``. See :func:`~pyparcs.cdag.graph_objects.Graph.sample`
         samples, errors : pd.DataFrame, pd.DataFrame
-            If ``return_errors=True``. See :func:`~parcs.cdag.graph_objects.Graph.sample`
+            If ``return_errors=True``. See :func:`~pyparcs.cdag.graph_objects.Graph.sample`
         """
         for i in interventions:
             assert i not in self.dummy_names, 'cannot intervene on dummy node {}'.format(i)
@@ -632,7 +632,7 @@ class Graph:
         Parameters
         ----------
         size, use_sampled_errors, sampled_errors, return_errors, cache_sampling, cache_name
-            see :func:`~parcs.cdag.graph_objects.Graph.sample`
+            see :func:`~pyparcs.cdag.graph_objects.Graph.sample`
         intervene_on : str
             name of the node subjected to intervention
         inputs : list of str
@@ -644,9 +644,9 @@ class Graph:
         Returns
         -------
         samples : pd.DataFrame
-            If ``return_errors=False``. See :func:`~parcs.cdag.graph_objects.Graph.sample`
+            If ``return_errors=False``. See :func:`~pyparcs.cdag.graph_objects.Graph.sample`
         samples, errors : pd.DataFrame, pd.DataFrame
-            If ``return_errors=True``. See :func:`~parcs.cdag.graph_objects.Graph.sample`
+            If ``return_errors=True``. See :func:`~pyparcs.cdag.graph_objects.Graph.sample`
         """
         assert intervene_on not in self.dummy_names, 'cannot intervene on dummy node {}'.format(intervene_on)
         data = pd.DataFrame([])
@@ -686,7 +686,7 @@ class Graph:
         Parameters
         ----------
         size, use_sampled_errors, sampled_errors, return_errors, cache_sampling, cache_name
-            see :func:`~parcs.cdag.graph_objects.Graph.sample`
+            see :func:`~pyparcs.cdag.graph_objects.Graph.sample`
         intervene_on : str
             name of the node subjected to intervention
         func : callable
@@ -695,9 +695,9 @@ class Graph:
         Returns
         -------
         samples : pd.DataFrame
-            If ``return_errors=False``. See :func:`~parcs.cdag.graph_objects.Graph.sample`
+            If ``return_errors=False``. See :func:`~pyparcs.cdag.graph_objects.Graph.sample`
         samples, errors : pd.DataFrame, pd.DataFrame
-            If ``return_errors=True``. See :func:`~parcs.cdag.graph_objects.Graph.sample`
+            If ``return_errors=True``. See :func:`~pyparcs.cdag.graph_objects.Graph.sample`
         """
         assert intervene_on not in self.dummy_names, 'cannot intervene on dummy node {}'.format(intervene_on)
         data = pd.DataFrame([])

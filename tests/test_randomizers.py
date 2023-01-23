@@ -19,7 +19,7 @@
 #  Contact: alireza.zamanian@iks.fraunhofer.de
 import os
 import pytest
-from parcs.graph_builder.randomizer import *
+from pyparcs.graph_builder.randomizer import *
 
 
 class TestParamRandomizer:

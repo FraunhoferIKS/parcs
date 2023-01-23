@@ -17,9 +17,9 @@
 #  https://www.gnu.de/documents/gpl-2.0.de.html
 #
 #  Contact: alireza.zamanian@iks.fraunhofer.de
-from parcs.cdag.graph_objects import *
-from parcs.graph_builder.parsers import *
-from parcs.cdag.mapping_functions import *
+from pyparcs.cdag.graph_objects import *
+from pyparcs.graph_builder.parsers import *
+from pyparcs.cdag.mapping_functions import *
 import os
 import pandas as pd
 

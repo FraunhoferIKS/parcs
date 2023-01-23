@@ -20,7 +20,7 @@
 
 import numpy as np
 from scipy.special import expit
-from parcs.exceptions import EdgeFunctionError, parcs_assert
+from pyparcs.exceptions import EdgeFunctionError, parcs_assert
 from typeguard import typechecked
 
 ALPHA_MIN, ALPHA_MAX = 0.1, 10

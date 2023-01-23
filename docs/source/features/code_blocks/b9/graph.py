@@ -1,8 +1,8 @@
-from parcs.cdag.graph_objects import Graph
-from parcs.graph_builder.randomizer import ConnectRandomizer
+from pyparcs.cdag.graph_objects import Graph
+from pyparcs.graph_builder.randomizer import ConnectRandomizer
 import pandas as pd
 from matplotlib import pyplot as plt
-from parcs.helpers.missing_data import sc_mask, m_graph_convert
+from pyparcs.helpers.missing_data import sc_mask, m_graph_convert
 import numpy as np
 np.random.seed(2022)
 

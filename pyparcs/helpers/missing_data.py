@@ -21,7 +21,7 @@
 import pandas as pd
 import numpy as np
 from itertools import combinations
-from parcs.exceptions import parcs_assert, DescriptionFileError
+from pyparcs.exceptions import parcs_assert, DescriptionFileError
 
 
 def m_graph_convert(data: pd.DataFrame, missingness_prefix='R', indicator_is_missed=0, shared_subscript=True):

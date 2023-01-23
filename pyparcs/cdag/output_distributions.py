@@ -18,11 +18,11 @@
 #
 #  Contact: alireza.zamanian@iks.fraunhofer.de
 
-from parcs.cdag.utils import dot_prod
-from parcs.cdag.utils import SigmoidCorrection
+from pyparcs.cdag.utils import dot_prod
+from pyparcs.cdag.utils import SigmoidCorrection
 from scipy import stats as dists
 import numpy as np
-from parcs.exceptions import *
+from pyparcs.exceptions import *
 
 DISTRIBUTION_PARAMS = {
     'gaussian': ['mu_', 'sigma_'],

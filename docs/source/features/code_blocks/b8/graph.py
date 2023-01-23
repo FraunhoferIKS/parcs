@@ -1,5 +1,5 @@
-from parcs.cdag.graph_objects import Graph
-from parcs.graph_builder.randomizer import ConnectRandomizer
+from pyparcs.cdag.graph_objects import Graph
+from pyparcs.graph_builder.randomizer import ConnectRandomizer
 import pandas as pd
 import numpy as np
 np.random.seed(2022)

@@ -20,8 +20,8 @@
 import numpy as np
 import os
 import pytest
-from parcs.graph_builder.parsers import *
-from parcs.exceptions import *
+from pyparcs.graph_builder.parsers import *
+from pyparcs.exceptions import *
 
 
 class TestTermParser:
