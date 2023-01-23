@@ -1,13 +1,7 @@
-# simulator
-Welcome to project simulator. The name of the project as a python package, is `rad_sim`.
+# PARCS: a Python Package for Causal Simulation
 
-This is version 0.0.1. The main SEM code alongside the AE simulation and timeseries simulations are ready. However, this release is only for timeseries use. see the module `rad_sim.sem.basic` and `rad_sim.simulators.tempora`. See below for tutorials.
+**PA**-rtially **R**-andomized **C**-ausal **S**-imulator is a simulation tool for causal methods. This library is designed to facilitate simulation study design and serve as a standard benchmarking tool for causal inference and discovery methods. PARCS generates simulation mechanisms based on causal DAGs and a wide range of adjustable parameters. Once the simulation setup is described via legible instructions and rules, PARCS automatically probes the space of all complying mechanisms and synthesizes data from both observational and interventional distributions.
 
-## Installation
+For a complete introduction and documentation, please read the docs at <>
 
-1. clone the project
-2. `cd` into the directory and do `pip3 install .`. you need the `setuptools` package installed.
-3. check the installation with `pip3 freeze`. you must see `rad_sim_0.0.1` installed.
-
-## Tutorial
-Check the notebooks folder for examples and tutorials
+**NOTE:** The corresponding research paper will be announced here for citation and reference.

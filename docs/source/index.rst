@@ -12,7 +12,7 @@ Install PARCS via the following command:
 
 .. code-block:: console
 
-    (.venv) $ pip install parcs
+    (.venv) $ pip install .
 
 .. _citation:
 

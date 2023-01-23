@@ -1,7 +1,7 @@
 [project]
 name = "parcs"
-version = "0.0.2"
-description = "A simulation library for Causal Inference"
+version = "0.1.0"
+description = "A simulation package for causal methods"
 authors = [
     {name = "Alireza Zamanian", email = "alireza.zamanian@iks.fraunhofer.de"},
     {name = "Leopold Mareis", email = "leopold.mareis@iks.fraunhofer.de"}
@@ -31,6 +31,7 @@ dependencies = [
     "matplotlib~=3.5.1",
     "scikit-learn~=1.0.2",
     "PyYAML~=6.0",
+    "cycler~=0.11.0",
     "typeguard"
 ]
 [project.optional-dependencies]
