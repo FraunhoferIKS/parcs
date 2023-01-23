@@ -1,9 +1,0 @@
-# === A causal Triangle: Treatment, Outcome, Confounder ===
-# nodes
-C_1_2: gaussian(mu_=0, sigma_=1)
-A: gaussian(mu_=2C_1_2-1, sigma_=1)
-Y: gaussian(mu_=A+C_1_2, sigma_=1)
-# edges
-C_1_2->A: identity()
-C_1_2->Y: identity()
-A->Y: identity()

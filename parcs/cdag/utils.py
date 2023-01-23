@@ -1,33 +1,79 @@
+#  Copyright (c) 2022. Fraunhofer-Gesellschaft zur Foerderung der angewandten Forschung e.V.
+#  acting on behalf of its Fraunhofer-Institut für Kognitive Systeme IKS. All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, see <http://www.gnu.org/licenses/>.
+#
+#  https://www.gnu.de/documents/gpl-2.0.de.html
+#
+#  Contact: alireza.zamanian@iks.fraunhofer.de
+
 import warnings
 import numpy as np
 import pandas as pd
 from scipy.special import expit
-from itertools import combinations as comb
+from itertools import combinations_with_replacement as comb_w_repl
+from parcs.exceptions import parcs_assert
 
 
 def topological_sort(adj_matrix: pd.DataFrame = None):
-    try:
-        adjm = adj_matrix.copy(deep=True).values
-        ordered_list = []
-        covered_nodes = 0
-        while covered_nodes < adjm.shape[0]:
-            # sum r/x -> r edges
-            sum_c = adjm.sum(axis=0)
-            # find nodes with no parents
-            parent_inds = list(np.where(sum_c == 0)[0])
-            assert len(parent_inds) != 0
+    """
+    performs topological sorting of a given adjacency matrix. It is an implementation of Kahn's algorithm.
 
-            covered_nodes += len(parent_inds)
-            # add to the list
-            ordered_list += parent_inds
-            # remove parent edges
-            adjm[parent_inds, :] = 0
-            # eliminate from columns by assigning values
-            adjm[:, parent_inds] = 10
-        return [adj_matrix.columns.tolist()[idx] for idx in ordered_list]
-    except AssertionError:
-        print('adj_matrix is not acyclic')
-        raise
+    Parameters
+    ----------
+    adj_matrix : pd.DataFrame
+        the adjacency matrix to be sorted
+
+    Returns
+    -------
+    sorted_nodes : list(str)
+        sorted list of all nodes
+
+
+    Raises
+    ------
+    ValueError
+        If index and column names doesn't match
+    ValueError
+        If the adjacency matrix is not acyclic
+
+    """
+    parcs_assert(
+        set(adj_matrix.columns) == set(adj_matrix.index),
+        ValueError,
+        "index and column names in the adjacency matrix doesn't match"
+    )
+
+    adjm = adj_matrix.copy(deep=True).values
+    ordered_list = []
+    covered_nodes = 0
+    while covered_nodes < adjm.shape[0]:
+        # sum r/x -> r edges
+        sum_c = adjm.sum(axis=0)
+        # find nodes with no parents
+        parent_inds = list(np.where(sum_c == 0)[0])
+        parcs_assert(len(parent_inds) != 0, ValueError, "Adjacency matrix is not acyclic")
+
+        covered_nodes += len(parent_inds)
+        # add to the list
+        ordered_list += parent_inds
+        # remove parent edges
+        adjm[parent_inds, :] = 0
+        # eliminate from columns by assigning values
+        adjm[:, parent_inds] = 10
+    return [adj_matrix.columns.tolist()[idx] for idx in ordered_list]
+
 
 def is_adj_matrix_acyclic(adj_matrix):
     try:
@@ -37,21 +83,18 @@ def is_adj_matrix_acyclic(adj_matrix):
         return False
 
 
-def get_interactions(data, max_terms=2):
+def get_interactions(data):
     """ **Creates interaction terms**
 
-    Returns the columns of product of interaction terms. The interaction terms are of length
-    ``2, 3, ..., min(max_terms, data.shape[1])``. The order of interaction terms follow the order
-    of ``itertools.combination`` module. Example: for ``[X,Y,Z]`` the method returns:
-    ``[XY, YZ, XZ, XYZ]``.
+    Returns the columns of product of interaction terms. The interaction terms are of length 2.
+    The order of interaction terms follow the order
+    of ``itertools.combination_with_replacement`` module. Example: for ``[X,Y,Z]`` the method returns:
+    ``[XX, XY, XZ, YY, YZ, ZZ]``.
 
     Parameters
     ----------
     data : array-like
         with `n x m` shape, `m` being the number of features
-    max_terms : int, default=2
-        the largest number of features in the interaction term. if `max_terms > m` then it will be ignored and `m`
-        will be the largest number
 
     Returns
     -------
@@ -61,21 +104,23 @@ def get_interactions(data, max_terms=2):
     Examples
     --------
     >>> from parcs.cdag.utils import get_interactions
-    >>> data = np.array([
-    ...     [1, 2, 4],
-    ...     [3, 5, 7]
-    ... ])
-    >>> get_interactions(data, max_terms=3)
-    array([[  2,   4,   8,   8],
-           [ 15,  21,  35, 105]])
+    >>> data_ = np.array([[1, 2, 3], [10, 12, 20]])
+    >>> get_interactions(data_)
+    array([[  1,   2,   3,   4,   6,   9],
+           [100, 120, 200, 144, 240, 400]])
+    >>> data_ = np.array([[1], [2]])
+    >>> get_interactions(data_)
+    array([[1],
+           [4]])
     """
-    len_ = min(data.shape[1], max_terms)
-    return np.array([
-        [np.prod(i) for r in range(2, len_ + 1) for i in comb(row, r)]
+    out = np.array([
+        [np.prod(i) for i in comb_w_repl(row, 2)]
         for row in data
     ])
+    return out
 
-def get_interactions_length(len_, max_terms=2):
+
+def get_interactions_length(len_):
     """ **Returns length of interaction terms**
 
     This function returns the length of the output of :func:`~cdag.parcs.utils.get_interactions`.
@@ -84,9 +129,6 @@ def get_interactions_length(len_, max_terms=2):
     ----------
     len_ : int
         `shape[1]` of the raw data (number of columns)
-    max_terms : int, default=2
-        similar to `max_terms` in :func:`~cdag.parcs.utils.get_interactions`,
-        maximum number of parents in an interaction term.
 
     Returns
     -------
@@ -96,22 +138,21 @@ def get_interactions_length(len_, max_terms=2):
     Examples
     --------
     >>> from parcs.cdag.utils import get_interactions, get_interactions_length
-    >>> import numpy as np
-    >>> data = np.random.normal(size=(9, 3))
+    >>> import numpy
+    >>> data = numpy.random.normal(size=(9, 3))
     >>> interactions = get_interactions(data)
     >>> interaction_len = get_interactions_length(data.shape[1])
     >>> interactions.shape[1] == interaction_len
     True
     """
     dummy_data = np.ones(shape=(len_,))
-    max_t = min(len_, max_terms)
     return len([
         np.prod(i)
-        for r in range(2, max_t + 1)
-        for i in comb(dummy_data, r)
+        for i in comb_w_repl(dummy_data, 2)
     ])
 
-def get_interactions_dict(parents, max_terms=2):
+
+def get_interactions_dict(parents):
     """ **gives parents pairings for each interaction term**
 
     This function is used to trace which parents are making an interaction term in some index.
@@ -120,8 +161,7 @@ def get_interactions_dict(parents, max_terms=2):
     ----------
     parents : list of str
         list of parents
-    max_terms : int, default=2
-        similar to :func:`~cdag.parcs.utils.get_interactions`
+
     Returns
     -------
     pairings : list of tuple
@@ -130,23 +170,27 @@ def get_interactions_dict(parents, max_terms=2):
     Examples
     --------
     >>> from parcs.cdag.utils import get_interactions, get_interactions_dict
-    >>> parents = ['a', 'b', 'c', 'd']
-    >>> get_interactions_dict(parents, max_terms=2)
-    [{'b', 'a'}, {'c', 'a'}, {'a', 'd'}, {'b', 'c'}, {'b', 'd'}, {'c', 'd'}]
+    >>> parents_ = ['a', 'b', 'c']
+    >>> get_interactions_dict(parents_)
+    [('a', 'a'), ('a', 'b'), ('a', 'c'), ('b', 'b'), ('b', 'c'), ('c', 'c')]
 
     """
-    len_ = min(len(parents), max_terms)
-    return [set(i) for r in range(2, len_ + 1) for i in comb(parents, r)]
-
-def get_poly(data, n):
-    return data ** n
+    return [sorted(i) for i in comb_w_repl(parents, 2)]
 
 
 def dot_prod(data, coef):
+    """
+    dot product of data and bias/linear/interactions coefs
+
+    >>> import numpy
+    >>> data = numpy.array([[1], [2]])
+    >>> coef = {'bias': 0, 'linear': [1], 'interactions': numpy.array([1])}
+    >>> dot_prod(data, coef)
+    array([2, 6])
+    """
     if data.shape[0] == 0:
         data_augmented = [np.array([]) for _ in range(3)]
     else:
-        # data_augmented = [data, get_poly(data, 2), get_interactions(data)]
         data_augmented = [data, get_interactions(data)]
 
     return coef['bias'] + np.array([
@@ -176,9 +220,6 @@ class SigmoidCorrection:
     target_mean : float, default=None
         If a float value (not ``None``), then the mean of transformed value is fixed. This value must be
         in the `[L, U]` range.
-    to_center : bool, default=False
-        If set to `True` then the input variable is normalized before being passed to the sigmoid function.
-        If `target_mean != None` then this parameter is ignored.
 
     Raises
     ------
@@ -191,22 +232,23 @@ class SigmoidCorrection:
     the functionality better, we make an example using the class:
 
     >>> from parcs.cdag.utils import SigmoidCorrection
-    >>> import numpy as np
-    >>> x = np.linspace(-10, 10, 200)
+    >>> import numpy
+    >>> x = numpy.linspace(-10, 10, 200)
     >>> sc = SigmoidCorrection(lower=-3, upper=2)
     >>> x_t = sc.transform(x)
-    >>> print(np.round(x_t.min(), 3), np.round(x_t.max(), 3), np.round(x_t.mean(), 3))
+    >>> print(numpy.round(x_t.min(), 3), numpy.round(x_t.max(), 3), numpy.round(x_t.mean(), 3))
     -3.0 2.0 -0.5
     >>> sc_2 = SigmoidCorrection(lower=0, upper=1, target_mean=0.8)
     >>> x_t = sc_2.transform(x)
-    >>> print(np.round(x_t.min(), 3), np.round(x_t.max(), 3), np.round(x_t.mean(), 3))
+    >>> print(numpy.round(x_t.min(), 3), numpy.round(x_t.max(), 3), numpy.round(x_t.mean(), 3))
     0.019 1.0 0.8
 
     .. note::
         If ``target_mean`` is given, sigmoid correction searches for an offset term to add to the input values,
         such that the required mean is obtained. The process is a manual search near the support of data points.
     """
-    def __init__(self, lower=0, upper=1, target_mean=None, to_center=False):
+
+    def __init__(self, lower=0, upper=1, target_mean=None):
         assert upper > lower
         if target_mean is not None:
             assert lower < target_mean < upper
@@ -216,7 +258,6 @@ class SigmoidCorrection:
             'offset': 0
         }
         self.is_initialized = False
-        self.to_center = to_center
         self.target_mean = target_mean
 
     def get_params(self):
@@ -238,10 +279,6 @@ class SigmoidCorrection:
             transformed array by the sigmoid correction
         """
         if not self.is_initialized:
-            # center
-            if self.to_center:
-                self.config['offset'] = array.mean()
-
             # transform by sigmoid
             U = (self.config['upper'] - self.config['lower'])
             L = self.config['lower']
@@ -251,7 +288,7 @@ class SigmoidCorrection:
                 # max - I = -6 -> I = max + 6
                 error = np.inf
                 theta = 0
-                for i in np.linspace(array.min() - 6, array.max() + 6, 1000):
+                for i in np.linspace(np.min(array) - 6, np.max(array) + 6, 1000):
                     h = U * expit(array - i) + L
                     new_error = abs(h.mean() - self.target_mean)
                     if new_error <= error:
@@ -262,8 +299,8 @@ class SigmoidCorrection:
                 self.config['offset'] = theta
             self.is_initialized = True
         return (self.config['upper'] - self.config['lower']) * \
-               expit(array - self.config['offset']) + \
-               self.config['lower']
+            expit(array - self.config['offset']) + \
+            self.config['lower']
 
 
 class EdgeCorrection:
@@ -279,24 +316,25 @@ class EdgeCorrection:
 
     Examples
     --------
-    This class is used internally by PARCS if `correction` parameter is chosen for a edge. However, to understand
+    This class is used internally by PARCS if `correction` parameter is chosen for an edge. However, to understand
     the functionality better, we make an example using the class:
 
     >>> from parcs.cdag.utils import EdgeCorrection
-    >>> import numpy as np
-    >>> x = np.random.normal(2, 10, size=200)
+    >>> import numpy
+    >>> x = numpy.random.normal(2, 10, size=200)
     >>> ec = EdgeCorrection()
     >>> # This is the first batch
     >>> x_t = ec.transform(x)
-    >>> print(np.round(x_t.mean(), 2), np.round(x_t.std(), 2))
+    >>> print(numpy.round(x_t.mean(), 2), numpy.round(x_t.std(), 2))
     0.0 1.0
     >>> # Give the second batch: mean and std are already fixed according to x batch.
-    >>> y = np.random.normal(-1, 2, size=300)
+    >>> y = numpy.random.normal(-1, 2, size=300)
     >>> y_t = ec.transform(y)
-    >>> print(np.round(y_t.mean(), 2), np.round(y_t.std(), 2))
+    >>> print(numpy.round(y_t.mean(), 2), numpy.round(y_t.std(), 2))
     -0.36 0.19
 
     """
+
     def __init__(self):
         self.is_initialized = False
         self.config = {

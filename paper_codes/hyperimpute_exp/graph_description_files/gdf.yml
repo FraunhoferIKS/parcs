@@ -1,0 +1,10 @@
+nodes:
+  bernoulli:
+    p_: [ 0 , [i-range, 1, 5], 0 ]
+edges:
+  identity: null
+  gaussian_rbf:
+    alpha: [choice, 0.5, 1, 1.5]
+    beta: [f-range, -0.8, 0.8]
+
+

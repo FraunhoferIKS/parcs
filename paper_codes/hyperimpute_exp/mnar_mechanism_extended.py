@@ -51,7 +51,7 @@ from hyperimpute.utils.distributions import enable_reproducible_results
 import warnings
 warnings.filterwarnings("ignore")
 
-iters = 10
+iters = 30
 rmse_hi = []
 rmse_mf = []
 for it in tqdm(range(iters)):
@@ -68,5 +68,5 @@ for it in tqdm(range(iters)):
 
 results = {'hyperimpute': rmse_hi, 'missforest': rmse_mf}
 #
-with open('./results/MNAR_general.json', 'w') as f:
+with open('./results/MNAR_general_30.json', 'w') as f:
     json.dump(results, f)

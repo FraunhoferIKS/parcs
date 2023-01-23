@@ -4,8 +4,6 @@
 Available functions and distributions
 =====================================
 
-For all functions and distributions, you can find a link to the API doc on top of the parameters table, including more details.
-
 .. _available_output_distributions:
 
 Output distributions
@@ -13,58 +11,49 @@ Output distributions
 
 The distributions are provided by `Scipy's` `stats <https://docs.scipy.org/doc/scipy/reference/stats.html>`_ module. Instead of calling the ``.rvs()`` method, however, we use the ``.ppf()`` (percent point function) method to obtain realizations given the error terms.
 
-``bernoulli``
--------------
+For the parameters with described *range*, we can specify correction.
 
 .. list-table::
    :widths: 20 60 20
    :header-rows: 1
 
-   * - Parameter
-     - Description
-     - Correction
-   * - ``p_``
-     - success probability.
-     - :ref:`Sigmoid correction <sigmoid_correction>`
-
-``gaussian``
-------------
-
-.. list-table::
-   :widths: 20 60 20
-   :header-rows: 1
-
-   * - Parameter
-     - Description
-     - Correction
-   * - ``mu_``
-     - mean of the distribution
-     - N/A
-   * - ``sigma_``
-     - standard deviation of the distribution
-     - :ref:`Sigmoid correction <sigmoid_correction>`
-
-``uniform``
-------------
-
-.. list-table::
-   :widths: 20 60 20
-   :header-rows: 1
-
-   * - Parameter
-     - Description
-     - Correction
-   * - ``mu_``
-     - middle point of uniform range
-     - N/A
-   * - ``diff_``
-     - `high - low`. can be negative
-     - N/A
+   * - Distribution
+     - Parameters
+     - Range
+   * - ``bernoulli``
+     - ``p_``: success probability
+     - :math:`[0, 1]`
+   * - ``uniform``
+     - ``mu_``: center point: `(a+b)/2`
+     -
+   * -
+     - ``diff_``: range: `b-a`
+     -
+   * - ``gaussian``
+     - ``mu_``: mean
+     -
+   * -
+     - ``sigma_``: standard deviation
+     - :math:`[0, \infty)`
+   * - ``lognormal``
+     - ``mu_``: mean
+     -
+   * -
+     - ``sigma_``: standard deviation
+     - :math:`[0, \infty)`
+   * - ``poisson``
+     - ``lambda_``: rate
+     - :math:`[0, \infty)`
+   * - ``Exponential``
+     - ``lambda_``: rate
+     - :math:`[0, \infty)`
 
 .. _available_edge_functions:
 
 Edge functions
 ==============
+
+Read more about each edge function by clicking the link in the table title.
 
 ``identity``
 ------------
@@ -93,15 +82,15 @@ Edge functions
      - Default
    * - :math:`\alpha`: ``alpha``
      - | Scale of the Sigmoid. Takes positive values
-       | The reasonable range is approx. :math:`[0.5, 6]`
-     - ``1``
+       | The reasonable range is approx. :math:`[1, 3]`
+     - ``2``
    * - :math:`\beta`: ``beta``
      - | offset of the Sigmoid. Takes real values.
-       | The reasonable range is approx. :math:`[-0.8, 0.8]`
+       | The reasonable range is approx. :math:`[-2, 2]`
      - ``0``
    * - :math:`\gamma`: ``gamma``
      - mirroring on x-axis. Takes :math:`\{0, 1\}`
-     - ``1``
+     - ``0``
    * - :math:`\tau`: ``tau``
      - | induces a dwelling region in the center of the function.
        | Takes odd values :math:`\{1, 3, \dots\}`
@@ -110,7 +99,7 @@ Edge functions
 ``gaussian_rbf``
 ----------------
 
-.. list-table:: :func:`~parcs.cdag.mapping_functions.gaussian_rbf`
+.. list-table:: :func:`~parcs.cdag.mapping_functions.edge_gaussian_rbf`
    :widths: 20 60 20
    :header-rows: 1
 
@@ -119,11 +108,11 @@ Edge functions
      - Default
    * - :math:`\alpha`: ``alpha``
      - | Scale of the RBF. Takes positive values
-       | The reasonable range is approx. :math:`[0.5, 6]`
-     - ``1``
+       | The reasonable range is approx. :math:`[1, 3]`
+     - ``2``
    * - :math:`\beta`: ``beta``
      - | offset of the RBF. Takes real values.
-       | The reasonable range is approx. :math:`[-0.8, 0.8]`
+       | The reasonable range is approx. :math:`[-2, 2]`
      - ``0``
    * - :math:`\gamma`: ``gamma``
      - mirroring on y-axis. Takes :math:`\{0, 1\}`
@@ -132,6 +121,30 @@ Edge functions
      - | induces a dwelling region in the center of the function.
        | Takes even values :math:`\{2, 4, \dots\}`
      - ``2``
+
+``arctan``
+----------------
+
+.. list-table:: :func:`~parcs.cdag.mapping_functions.edge_arctan`
+   :widths: 20 60 20
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+     - Default
+   * - :math:`\alpha`: ``alpha``
+     - | Scale of the RBF. Takes positive values
+       | The reasonable range is approx. :math:`[1, 3]`
+     - ``2``
+   * - :math:`\beta`: ``beta``
+     - | offset of the RBF. Takes real values.
+       | The reasonable range is approx. :math:`[-2, 2]`
+     - ``0``
+   * - :math:`\gamma`: ``gamma``
+     - mirroring on y-axis. Takes :math:`\{0, 1\}`
+     - ``0``
+
+.. _corrections:
 
 Corrections
 ===========

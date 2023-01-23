@@ -20,15 +20,19 @@ Graph objects
 Mapping functions
 -----------------
 
-.. autoclass:: parcs.cdag.mapping_functions.edge_sigmoid
-
-------------------------------------------
-
 .. autoclass:: parcs.cdag.mapping_functions.edge_identity
 
 ------------------------------------------
 
+.. autoclass:: parcs.cdag.mapping_functions.edge_sigmoid
+
+------------------------------------------
+
 .. autoclass:: parcs.cdag.mapping_functions.edge_gaussian_rbf
+
+------------------------------------------
+
+.. autoclass:: parcs.cdag.mapping_functions.edge_arctan
 
 Corrections
 -----------

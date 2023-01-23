@@ -1,0 +1,17 @@
+graph:
+  num_nodes: [i-range, 2, 8]
+  graph_density: [f-range, 0.8, 1]
+  node_name_prefix: H
+nodes:
+  bernoulli:
+    p_: [ [f-range, 1, 2] , 0 , [f-range, 2, 3] ]
+  gaussian:
+    mu_: [ [i-range, -2, 2] , [f-range, -2, 2] , 0 ]
+    sigma_: [ [f-range, 1, 3] , 0 , 0 ]
+edges:
+  identity: null
+  gaussian_rbf:
+    alpha: [f-range, 0.5, 3]
+    beta: [f-range, -0.8, 0.8]
+    gamma: [choice, 0, 1]
+    tau: 2
