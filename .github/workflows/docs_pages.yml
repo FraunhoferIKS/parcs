@@ -1,0 +1,44 @@
+name: Build and Deploy Sphinx Docs
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+
+    - name: Install dependencies
+      run: |
+        pip install sphinx
+        pip install sphinx-rtd-theme
+
+    - name: Build documentation
+      run: |
+        make -C docs clean
+        make -C docs html
+
+    - name: Init new repo in dist folder and commit generated files
+      run: |
+        cd docs/build/html/
+        git init
+        touch .nojekyll
+        git add -A
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git commit -m 'deploy'
+      with:
+        github_token: ${{ secrets.ACCESS_TOKEN }}
+        branch: gh-pages
+        force: true
+        directory: ./docs/build/html
