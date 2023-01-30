@@ -1,6 +1,6 @@
 [project]
 name = "pyparcs"
-version = "0.1.0"
+version = "0.1.1"
 description = "A simulation package for causal methods"
 authors = [
     {name = "Alireza Zamanian", email = "alireza.zamanian@iks.fraunhofer.de"},
