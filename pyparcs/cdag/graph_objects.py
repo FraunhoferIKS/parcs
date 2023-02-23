@@ -440,7 +440,7 @@ class Graph:
         # calculate node
         parents = sorted(list(self.adj_matrix[self.adj_matrix[node_name] == 1].index))
 
-        return self.nodes[node_name].calculate(inputs, parents)
+        return self.nodes[node_name].calculate(inputs)
 
     def _single_const_round(self, node_name: str, size_: int):
         return self.nodes[node_name].calculate(size_)
