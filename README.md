@@ -1,3 +1,6 @@
+[![DOI](https://zenodo.org/badge/592506885.svg)](https://zenodo.org/badge/latestdoi/592506885)
+![PyPI](https://img.shields.io/pypi/v/pyparcs)
+
 # PARCS: a Python Package for Causal Simulation
 
 **PA**-rtially **R**-andomized **C**-ausal **S**-imulator is a simulation tool for causal methods. This library is designed to facilitate simulation study design and serve as a standard benchmarking tool for causal inference and discovery methods. PARCS generates simulation mechanisms based on causal DAGs and a wide range of adjustable parameters. Once the simulation setup is described via legible instructions and rules, PARCS automatically probes the space of all complying mechanisms and synthesizes data from both observational and interventional distributions.
