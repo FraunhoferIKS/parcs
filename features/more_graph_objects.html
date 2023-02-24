@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>More Graph Objects &mdash; PARCS 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="M-Graphs" href="m_graphs.html" />
+    <link rel="prev" title="Looping over randomized parameters" href="looping.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PARCS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">First Steps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/theoretical_background.html">Theoretical background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/first_graph.html">Create the First Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/function_list.html">Available functions and distributions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Features</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="interventions.html">Interventions, Counterfactuals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="partial_randomization.html">Partial Randomization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="looping.html">Looping over randomized parameters</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">More Graph Objects</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#deterministic-nodes">Deterministic nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#constant-nodes">Constant nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-nodes">Data nodes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="m_graphs.html">M-Graphs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Details</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../technical/graph_objects.html">Graph objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/conventions.html">Conventions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PARCS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">More Graph Objects</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/features/more_graph_objects.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="more-graph-objects">
+<h1>More Graph Objects<a class="headerlink" href="#more-graph-objects" title="Permalink to this heading"></a></h1>
+<p>As mentioned in :ref:` the first steps &lt;create_the_first_graph&gt;`, the main objects are nodes which are defined by standard probability distributions and edges that are defined by PARCS edge functions. In this section we introduce other types of nodes and edges that you can use in your PARCS simulation</p>
+<section id="deterministic-nodes">
+<h2>Deterministic nodes<a class="headerlink" href="#deterministic-nodes" title="Permalink to this heading"></a></h2>
+<p>A node can be defined to output a deterministic function of its parents. In this case, a deterministic function replaces the output distribution. To define a deterministic node:</p>
+<ol class="arabic simple">
+<li><p>create a <cite>.py</cite> file in the same directory as your main Python script</p></li>
+<li><p>Define your custom function in the file. The input must be considered the dataset pandas data frame. (see example below)</p></li>
+<li><p>define the node in the <cite>description file</cite> by <code class="docutils literal notranslate"><span class="pre">deterministic(&lt;.py</span> <span class="pre">file</span> <span class="pre">name&gt;,</span> <span class="pre">&lt;function</span> <span class="pre">name&gt;)</span></code></p></li>
+</ol>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text"><code class="code docutils literal notranslate"><span class="pre">customs.py</span></code></span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="k">def</span> <span class="nf">custom_function</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="linenos">2</span>    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text"><code class="code docutils literal notranslate"><span class="pre">graph_description.yml</span></code></span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1"># === A causal Triangle: Treatment, Outcome, Confounder ===</span>
+<span class="linenos">2</span><span class="c1"># nodes</span>
+<span class="linenos">3</span><span class="n">C</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">4</span><span class="n">A</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">2</span><span class="n">C</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">5</span><span class="n">Y</span><span class="p">:</span> <span class="n">deterministic</span><span class="p">(</span><span class="n">customs</span><span class="o">.</span><span class="n">py</span><span class="p">,</span> <span class="n">custom_function</span><span class="p">)</span>
+<span class="linenos">6</span><span class="c1"># edges</span>
+<span class="linenos">7</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">A</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">8</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">9</span><span class="n">A</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text"><code class="code docutils literal notranslate"><span class="pre">graph.py</span></code></span><a class="headerlink" href="#id3" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyparcs.graph_builder.parsers</span> <span class="kn">import</span> <span class="n">graph_file_parser</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="linenos"> 4</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">2022</span><span class="p">)</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">graph_file_parser</span><span class="p">(</span><span class="s1">&#39;graph_description.yml&#39;</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="n">samples</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">10</span><span class="c1">#           C         A         Y</span>
+<span class="linenos">11</span><span class="c1"># 0 -1.607407 -6.612316 -8.219723</span>
+<span class="linenos">12</span><span class="c1"># 1 -0.018125  0.398616  0.380491</span>
+<span class="linenos">13</span><span class="c1"># 2 -0.783934 -3.035199 -3.819132</span>
+<span class="linenos">14</span><span class="c1"># 3 -0.273290 -1.014330 -1.287620</span>
+<span class="linenos">15</span><span class="c1"># 4 -0.670573 -1.914762 -2.585335</span>
+<span class="linenos">16</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">Y</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">C</span> <span class="o">+</span> <span class="n">samples</span><span class="o">.</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+<span class="linenos">17</span><span class="c1"># [ True  True  True  True  True]</span>
+</pre></div>
+</div>
+</div>
+<p>While defining the function, we consider the input to be the simulated data of the graph, and call the columns by the same node names as in graph description file. Note that you can write your function using Pandas functionalities, e.g. column operations, or for loops using pandas <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.iterrows.html">iterrows</a>. The output must be a pandas <code class="docutils literal notranslate"><span class="pre">Series</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The data passed to the custom function only includes data of the parent nodes (inferred from the description file). In order to do interventions and calculate the node using other parents, see <a class="reference internal" href="interventions.html#functional-intervention"><span class="std std-ref">interventions docs</span></a></p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Deterministic nodes are designed for simulating variables that are deterministic given the parent variables. Even though it is technically possible to perform stochastic sampling inside the function (e.g. <code class="docutils literal notranslate"><span class="pre">return</span> <span class="pre">np.random.normal(data['A']+data['C'],</span> <span class="pre">1)</span></code>) it is not recommended to, as the stochasticity cannot be controlled by PARCS.</p>
+</div>
+</section>
+<section id="constant-nodes">
+<h2>Constant nodes<a class="headerlink" href="#constant-nodes" title="Permalink to this heading"></a></h2>
+<p>This class of nodes provide a simple way to add a constant node to the graph. The syntax in the description file as simple as creating a node by <code class="docutils literal notranslate"><span class="pre">constant(&lt;value&gt;)</span></code></p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text"><code class="code docutils literal notranslate"><span class="pre">graph_description_const.yml</span></code></span><a class="headerlink" href="#id4" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1"># === A causal Triangle: Treatment, Outcome, Confounder ===</span>
+<span class="linenos">2</span><span class="c1"># nodes</span>
+<span class="linenos">3</span><span class="n">C</span><span class="p">:</span> <span class="n">constant</span><span class="p">(</span><span class="mf">3.5</span><span class="p">)</span>
+<span class="linenos">4</span><span class="n">A</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">2</span><span class="n">C</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">5</span><span class="n">Y</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="n">A</span><span class="o">+</span><span class="n">C</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">6</span><span class="c1"># edges</span>
+<span class="linenos">7</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">A</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">8</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">9</span><span class="n">A</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text"><code class="code docutils literal notranslate"><span class="pre">graph_const.py</span></code></span><a class="headerlink" href="#id5" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyparcs.graph_builder.parsers</span> <span class="kn">import</span> <span class="n">graph_file_parser</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="linenos"> 4</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">2022</span><span class="p">)</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">graph_file_parser</span><span class="p">(</span><span class="s1">&#39;graph_description_const.yml&#39;</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="n">samples</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">10</span><span class="c1">#      C         A         Y</span>
+<span class="linenos">11</span><span class="c1"># 0  3.5  5.392593  8.619303</span>
+<span class="linenos">12</span><span class="c1"># 1  3.5  6.981875  9.811302</span>
+<span class="linenos">13</span><span class="c1"># 2  3.5  6.216066  7.318564</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We can simulate deterministic and constant nodes by <cite>hacking</cite> stochastic <code class="docutils literal notranslate"><span class="pre">gaussian</span></code> node with <code class="docutils literal notranslate"><span class="pre">mean_</span></code> being a desired constant or determinist term, and <code class="docutils literal notranslate"><span class="pre">sigma_</span></code> being 0. Using the deterministic and constant nodes, however, adds more to the clarity of the simulation and the description file.</p>
+</div>
+</section>
+<section id="data-nodes">
+<h2>Data nodes<a class="headerlink" href="#data-nodes" title="Permalink to this heading"></a></h2>
+<p>This class of nodes allows us to read an external CSV file for the samples. The file should be given to PARCS by its directory. To provide an example, we assume there is already a CSV file (created in the first lines of <cite>graph.py</cite> file):</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text"><code class="code docutils literal notranslate"><span class="pre">graph_description_data.yml</span></code></span><a class="headerlink" href="#id6" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1"># === A causal Triangle: Treatment, Outcome, Confounder ===</span>
+<span class="linenos">2</span><span class="c1"># nodes</span>
+<span class="linenos">3</span><span class="n">C</span><span class="p">:</span> <span class="n">data</span><span class="p">(</span><span class="o">./</span><span class="n">dummy_data</span><span class="o">.</span><span class="n">csv</span><span class="p">)</span>
+<span class="linenos">4</span><span class="n">A</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">2</span><span class="n">C</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">5</span><span class="n">Y</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="n">A</span><span class="o">+</span><span class="n">C</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">6</span><span class="c1"># edges</span>
+<span class="linenos">7</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">A</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">8</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">9</span><span class="n">A</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text"><code class="code docutils literal notranslate"><span class="pre">graph.py</span></code></span><a class="headerlink" href="#id7" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyparcs.graph_builder.parsers</span> <span class="kn">import</span> <span class="n">graph_file_parser</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="linenos"> 5</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">2022</span><span class="p">)</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="c1"># create dummy data</span>
+<span class="linenos"> 8</span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">13</span><span class="p">)],</span> <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,))})</span>
+<span class="linenos"> 9</span><span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;dummy_data.csv&#39;</span><span class="p">)</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="c1"># main script</span>
+<span class="linenos">12</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">graph_file_parser</span><span class="p">(</span><span class="s1">&#39;graph_description_data.yml&#39;</span><span class="p">)</span>
+<span class="linenos">13</span><span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="linenos">14</span><span class="n">samples</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos">15</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">16</span><span class="c1">#     C          A          Y</span>
+<span class="linenos">17</span><span class="c1"># 0  11  22.144651  35.270247</span>
+<span class="linenos">18</span><span class="c1"># 1  12  24.062452  34.656983</span>
+<span class="linenos">19</span><span class="c1"># 2  10  18.592657  28.653529</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Data nodes must have no incoming edges in the graph description file</p>
+</div>
+<p>The sampling procedure based on the errors repeats for the data nodes again. Therefore we might have duplicate samples as the a row can be selected more than once (sotchastically). If more than one columns are read from the csv file, then the graph samples <em>jointly</em>. It does so by using a shared error vector for all the data nodes, leading to selection of the same rows simultaneously.</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text"><code class="code docutils literal notranslate"><span class="pre">graph_description_data_2.yml</span></code></span><a class="headerlink" href="#id8" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1"># === A causal Triangle: Treatment, Outcome, Confounder ===</span>
+<span class="linenos">2</span><span class="c1"># nodes</span>
+<span class="linenos">3</span><span class="n">C</span><span class="p">:</span> <span class="n">data</span><span class="p">(</span><span class="o">./</span><span class="n">dummy_data</span><span class="o">.</span><span class="n">csv</span><span class="p">)</span>
+<span class="linenos">4</span><span class="n">A</span><span class="p">:</span> <span class="n">data</span><span class="p">(</span><span class="o">./</span><span class="n">dummy_data</span><span class="o">.</span><span class="n">csv</span><span class="p">)</span>
+<span class="linenos">5</span><span class="n">Y</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="n">A</span><span class="o">+</span><span class="n">C</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">6</span><span class="c1"># edges</span>
+<span class="linenos">7</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">8</span><span class="n">A</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text"><code class="code docutils literal notranslate"><span class="pre">graph.py</span></code></span><a class="headerlink" href="#id9" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyparcs.graph_builder.parsers</span> <span class="kn">import</span> <span class="n">graph_file_parser</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="linenos"> 5</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">2022</span><span class="p">)</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="c1"># create dummy data</span>
+<span class="linenos"> 8</span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">13</span><span class="p">)],</span> <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">103</span><span class="p">)]})</span>
+<span class="linenos"> 9</span><span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;dummy_data.csv&#39;</span><span class="p">)</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="c1"># main script</span>
+<span class="linenos">12</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">graph_file_parser</span><span class="p">(</span><span class="s1">&#39;graph_description_data_2.yml&#39;</span><span class="p">)</span>
+<span class="linenos">13</span><span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="linenos">14</span><span class="n">samples</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos">15</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">16</span><span class="c1">#      A   C           Y</span>
+<span class="linenos">17</span><span class="c1"># 0  102  12  112.859449</span>
+<span class="linenos">18</span><span class="c1"># 1  100  10  111.339772</span>
+<span class="linenos">19</span><span class="c1"># 2  102  12  115.306027</span>
+</pre></div>
+</div>
+</div>
+<p>sampling from interventional distributions using <cite>.do()</cite>, … methods are similar to <cite>.sample()</cite>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="looping.html" class="btn btn-neutral float-left" title="Looping over randomized parameters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="m_graphs.html" class="btn btn-neutral float-right" title="M-Graphs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Fraunhofer Institute for Cognitive Systems (IKS).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

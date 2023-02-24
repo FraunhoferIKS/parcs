@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>M-Graphs &mdash; PARCS 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Graph objects" href="../technical/graph_objects.html" />
+    <link rel="prev" title="More Graph Objects" href="more_graph_objects.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PARCS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">First Steps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/theoretical_background.html">Theoretical background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/first_graph.html">Create the First Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/function_list.html">Available functions and distributions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Features</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="interventions.html">Interventions, Counterfactuals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="partial_randomization.html">Partial Randomization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="looping.html">Looping over randomized parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more_graph_objects.html">More Graph Objects</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">M-Graphs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#using-m-graph-templates">Using M-graph templates</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ground-truth-graph">Ground truth graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#missingness-indicators-subgraph">Missingness indicators subgraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-z-r-edges">Creating <cite>Z-&gt;R</cite> edges</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Details</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../technical/graph_objects.html">Graph objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/conventions.html">Conventions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PARCS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">M-Graphs</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/features/m_graphs.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="m-graphs">
+<h1>M-Graphs<a class="headerlink" href="#m-graphs" title="Permalink to this heading"></a></h1>
+<p>M-graphs are causal DAG models for missing data, where the binary <cite>indicator</cite> node <cite>R_x</cite> defines if node <cite>X</cite> is missing or not. The <cite>missingness mechanism</cite> (i.e. what are the causes of missing values) are then determined by incoming edges to the indicator node. In PARCS, a simple function called <code class="docutils literal notranslate"><span class="pre">m_graph_convert</span></code> returns the corresponding m-graph for a graph object. It takes the indicator variables and mask the data based on the indicator realizations</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1"># === A causal Triangle: Treatment, Outcome, Confounder ===</span>
+<span class="linenos">2</span><span class="c1"># nodes</span>
+<span class="linenos">3</span><span class="n">C</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">4</span><span class="n">A</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">2</span><span class="n">C</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="hll"><span class="linenos">5</span><span class="n">R_A</span><span class="p">:</span> <span class="n">bernoulli</span><span class="p">(</span><span class="n">p_</span><span class="o">=</span><span class="n">C</span><span class="o">+</span><span class="n">A</span><span class="o">-</span><span class="mf">0.3</span><span class="n">AC</span><span class="p">),</span> <span class="n">correction</span><span class="p">[</span><span class="n">target_mean</span><span class="o">=</span><span class="mf">0.3</span><span class="p">]</span>
+</span><span class="linenos">6</span><span class="c1"># edges</span>
+<span class="linenos">7</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">A</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">8</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">R_A</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">9</span><span class="n">A</span><span class="o">-&gt;</span><span class="n">R_A</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs.helpers.missing_data</span> <span class="kn">import</span> <span class="n">m_graph_convert</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyparcs.graph_builder.parsers</span> <span class="kn">import</span> <span class="n">graph_file_parser</span>
+<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos"> 5</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">2022</span><span class="p">)</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">graph_file_parser</span><span class="p">(</span><span class="s1">&#39;graph_description.yml&#39;</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="n">samples</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="linenos">10</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">11</span><span class="c1">#           C         A  R_A</span>
+<span class="linenos">12</span><span class="c1"># 0  0.774417  2.049457  0.0</span>
+<span class="linenos">13</span><span class="c1"># 1 -0.652315 -1.713998  0.0</span>
+<span class="linenos">14</span><span class="c1"># 2  1.310389  3.075017  1.0</span>
+<span class="linenos">15</span><span class="c1"># 3  0.240281 -0.888637  0.0</span>
+<span class="hll"><span class="linenos">16</span><span class="c1"># 4 -0.884086 -2.497936  0.0</span>
+</span><span class="linenos">17</span><span class="nb">print</span><span class="p">(</span><span class="n">m_graph_convert</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">missingness_prefix</span><span class="o">=</span><span class="s1">&#39;R_&#39;</span><span class="p">,</span> <span class="n">shared_subscript</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+<span class="linenos">18</span><span class="c1">#           C         A</span>
+<span class="linenos">19</span><span class="c1"># 0  0.774417       NaN</span>
+<span class="linenos">20</span><span class="c1"># 1 -0.652315       NaN</span>
+<span class="linenos">21</span><span class="c1"># 2  1.310389  3.075017</span>
+<span class="linenos">22</span><span class="c1"># 3  0.240281       NaN</span>
+<span class="linenos">23</span><span class="c1"># 4 -0.884086       NaN</span>
+</pre></div>
+</div>
+<p>In order to use the function, you need to define the indicators of variables with a specific <cite>prefix</cite>, such as <code class="docutils literal notranslate"><span class="pre">R_</span></code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Since the function <code class="docutils literal notranslate"><span class="pre">m_graph_convert</span></code> doesn’t have access to the description file, and only reads the sample data, it is up to the user to comply with the M-graph assumptions and restrictions, e.g. not having an edge from indicator nodes to main variables.</p>
+</div>
+<section id="using-m-graph-templates">
+<h2>Using M-graph templates<a class="headerlink" href="#using-m-graph-templates" title="Permalink to this heading"></a></h2>
+<p>Above, we showed how you can create an m-graph by determining a DAG as before. Another option is to allow PARCS to randomly set up a missingness mechanism for the dataset and induce the missingness. Many literature have proposed unique m-graph structures for missingness mechanisms. These structures determine which edges are allowed among <cite>R`s and from `Z</cite> to <cite>R`s. By having two (sub) graphs of `Z</cite> and <cite>R</cite>, we can use the <a class="reference internal" href="partial_randomization.html#connect-randomizer"><span class="std std-ref">ConnectRandomizer</span></a> to create outgoing edges from <cite>Z</cite> to <cite>R</cite>, while masking the edges according to one of the known m-graph structures. This way, <cite>R-&gt;R</cite> edges must be induced when creating <cite>R</cite>, and <cite>Z-&gt;R</cite> will be induced by the randomizer. An example is provided below:</p>
+<section id="ground-truth-graph">
+<h3>Ground truth graph<a class="headerlink" href="#ground-truth-graph" title="Permalink to this heading"></a></h3>
+<p>We start from a <cite>Z</cite> graph. It can be a graph of data nodes, or simulated data. In this example, we use the following graph description file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span># === A causal Triangle: Treatment, Outcome, Confounder ===
+<span class="linenos"> 2</span># nodes
+<span class="linenos"> 3</span>Z_1: gaussian(?)
+<span class="linenos"> 4</span>Z_2: gaussian(?)
+<span class="linenos"> 5</span>Z_3: gaussian(?)
+<span class="linenos"> 6</span>Z_4: bernoulli(p_=?), correction[target_mean=0.3]
+<span class="linenos"> 7</span># edges
+<span class="linenos"> 8</span>Z_1-&gt;Z_2: identity(), correction[]
+<span class="linenos"> 9</span>Z_1-&gt;Z_4: identity(), correction[]
+<span class="linenos">10</span>Z_2-&gt;Z_3: identity(), correction[]
+<span class="linenos">11</span>Z_3-&gt;Z_4: identity(), correction[]
+</pre></div>
+</div>
+</section>
+<section id="missingness-indicators-subgraph">
+<h3>Missingness indicators subgraph<a class="headerlink" href="#missingness-indicators-subgraph" title="Permalink to this heading"></a></h3>
+<p>Nest, we determine the <cite>R</cite> subgraph. As mentioned, <cite>R-&gt;R</cite> edges must be defined here. We can again use a graph description file. But we can also use a helper which sets up an <cite>R</cite> subgraph for a given graph:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyparcs.helpers.missing_data</span> <span class="kn">import</span> <span class="n">indicator_graph_description_file</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="n">indicator_graph_description_file</span><span class="p">(</span>
+<span class="linenos"> 5</span>    <span class="n">adj_matrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span>
+<span class="linenos"> 6</span>    <span class="n">node_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Z_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)],</span>
+<span class="linenos"> 7</span>    <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;R&#39;</span><span class="p">,</span>
+<span class="linenos"> 8</span>    <span class="n">subscript_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="linenos"> 9</span>    <span class="n">file_dir</span><span class="o">=</span><span class="s1">&#39;./gdf_R.yml&#39;</span>
+<span class="linenos">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The parameters:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">adj_matrix</span></code> determines the edges among R nodes. In this example, there is no edge among Rs</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">node_name</span></code> is the list of names for Z nodes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">prefix</span></code> and <code class="docutils literal notranslate"><span class="pre">subscript_only</span></code> tells the function how to make names for R nodes. If <cite>subscript_only=True</cite> then the node names are <cite>R_</cite> and the subscript of Z nodes. If <cite>False</cite>, then the names will be <cite>R_&lt;Z node name&gt;</cite></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">file_dir</span></code> is the directory of the created graph description file.</p></li>
+</ul>
+<p>The resulting file is shown below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span># nodes
+<span class="linenos">2</span>R_1: bernoulli(*p_=?), correction[]
+<span class="linenos">3</span>R_2: bernoulli(*p_=?), correction[]
+<span class="linenos">4</span>R_3: bernoulli(*p_=?), correction[]
+<span class="linenos">5</span>R_4: bernoulli(*p_=?), correction[]
+<span class="linenos">6</span># edges
+</pre></div>
+</div>
+<p>As for the <code class="docutils literal notranslate"><span class="pre">adj_matrix</span></code> parameter, PARCS again provides helper functions to induce different missingness mechanisms:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">R_adj_matrix(size,</span> <span class="pre">shuffle,</span> <span class="pre">density)</span></code> freely randomize edges among Rs to induce an acyclic structure.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">R_attrition_adj_matrix(size,</span> <span class="pre">step,</span> <span class="pre">density)</span></code> gives an adjacency matrix which induces <cite>attrition</cite> missingness, i.e. edges from early Rs to later Rs. <code class="docutils literal notranslate"><span class="pre">step</span></code> determines how many Rs can an indicator affect. e.g. if <code class="docutils literal notranslate"><span class="pre">step=2</span></code> then <cite>R_1</cite> will have an edge to <cite>R_2</cite> and <cite>R_3</cite> but not anymore.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In order to make post-hoc changes, simply edit the resulting graph description file. for example you can set <code class="docutils literal notranslate"><span class="pre">target_mean</span></code> parameter to the <code class="docutils literal notranslate"><span class="pre">correction</span></code> of edges in order to control the ratio of missingness.</p>
+</div>
+</section>
+<section id="creating-z-r-edges">
+<h3>Creating <cite>Z-&gt;R</cite> edges<a class="headerlink" href="#creating-z-r-edges" title="Permalink to this heading"></a></h3>
+<p><strong>Next</strong> step is to use the <cite>ConnectRandomizer</cite> to create the <cite>Z-&gt;R</cite> edges. Here we apply masks in order to determine the missingness mechanism. These masks can be made manually, or read from the <cite>helper</cite> module as well:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">fully_observed_mar</span></code> creates an <cite>p x q</cite> mask matrix where <cite>p</cite> and <cite>q</cite> are length of Z and R node vectors respectively, and <cite>p - q</cite> determine the number of fully observed Z nodes (they have no R). with the parameter <code class="docutils literal notranslate"><span class="pre">fully_observed_indices</span></code> we specify the index of fully observed nodes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nsc_mask</span></code> allows for no-self censoring mechanism, i.e. all the <cite>Z-&gt;R</cite> edges are allowed except for <cite>Z_i-&gt;R_i</cite> edges (diagonal is zero)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sc_mask</span></code> is an identity matrix, allowing only for self-censoring edges</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">block_conditional_mask</span></code> is an upper triangular mask where each Z can have edge to only later Rs (not previous ones). This mask assumes an order in Z nodes (e.g. a chronological order).</p></li>
+</ul>
+<p>Finally, we sample from the constructed graph as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyparcs.graph_builder.randomizer</span> <span class="kn">import</span> <span class="n">ConnectRandomizer</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="linenos"> 4</span><span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="linenos"> 5</span><span class="kn">from</span> <span class="nn">pyparcs.helpers.missing_data</span> <span class="kn">import</span> <span class="n">sc_mask</span><span class="p">,</span> <span class="n">m_graph_convert</span>
+<span class="linenos"> 6</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos"> 7</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">2022</span><span class="p">)</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="n">mask</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">sc_mask</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span>
+<span class="linenos">10</span>                    <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Z_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)],</span>
+<span class="linenos">11</span>                    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;R_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)])</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="n">rndz</span> <span class="o">=</span> <span class="n">ConnectRandomizer</span><span class="p">(</span>
+<span class="linenos">14</span>    <span class="n">parent_graph_dir</span><span class="o">=</span><span class="s1">&#39;gdf_Z.yml&#39;</span><span class="p">,</span>
+<span class="linenos">15</span>    <span class="n">child_graph_dir</span><span class="o">=</span><span class="s1">&#39;gdf_R.yml&#39;</span><span class="p">,</span>
+<span class="linenos">16</span>    <span class="n">guideline_dir</span><span class="o">=</span><span class="s1">&#39;simple_guideline.yml&#39;</span><span class="p">,</span>
+<span class="linenos">17</span>    <span class="n">delete_temp_graph_description</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="linenos">18</span>    <span class="n">adj_matrix_mask</span><span class="o">=</span><span class="n">mask</span>
+<span class="linenos">19</span><span class="p">)</span>
+<span class="linenos">20</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">rndz</span><span class="o">.</span><span class="n">get_graph_params</span><span class="p">()</span>
+<span class="linenos">21</span><span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="linenos">22</span><span class="n">samples</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+<span class="linenos">23</span><span class="n">masked_samples</span> <span class="o">=</span> <span class="n">m_graph_convert</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">shared_subscript</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span><span class="nb">print</span><span class="p">(</span><span class="n">masked_samples</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="linenos">26</span><span class="c1">#           Z_1       Z_2       Z_3  Z_4</span>
+<span class="linenos">27</span><span class="c1"># 430  0.328718       NaN       NaN  NaN</span>
+<span class="linenos">28</span><span class="c1"># 322       NaN  1.291225  4.473324  1.0</span>
+<span class="linenos">29</span><span class="c1"># 742  1.393201       NaN       NaN  1.0</span>
+<span class="linenos">30</span><span class="c1"># 271       NaN  0.031668       NaN  NaN</span>
+<span class="linenos">31</span><span class="nb">print</span><span class="p">(</span><span class="n">masked_samples</span><span class="p">[</span><span class="s1">&#39;Z_4&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="linenos">32</span><span class="c1"># 0.229</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="more_graph_objects.html" class="btn btn-neutral float-left" title="More Graph Objects" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../technical/graph_objects.html" class="btn btn-neutral float-right" title="Graph objects" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Fraunhofer Institute for Cognitive Systems (IKS).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

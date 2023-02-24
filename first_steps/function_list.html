@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Available functions and distributions &mdash; PARCS 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Interventions, Counterfactuals" href="../features/interventions.html" />
+    <link rel="prev" title="Create the First Graph" href="first_graph.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PARCS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">First Steps</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="theoretical_background.html">Theoretical background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="first_graph.html">Create the First Graph</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Available functions and distributions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#output-distributions">Output distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#edge-functions">Edge functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#identity"><code class="docutils literal notranslate"><span class="pre">identity</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sigmoid"><code class="docutils literal notranslate"><span class="pre">sigmoid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gaussian-rbf"><code class="docutils literal notranslate"><span class="pre">gaussian_rbf</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#arctan"><code class="docutils literal notranslate"><span class="pre">arctan</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#corrections">Corrections</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sigmoid-correction">Sigmoid Correction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#edge-correction">Edge Correction</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../features/interventions.html">Interventions, Counterfactuals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/partial_randomization.html">Partial Randomization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/looping.html">Looping over randomized parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/more_graph_objects.html">More Graph Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/m_graphs.html">M-Graphs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Details</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../technical/graph_objects.html">Graph objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/conventions.html">Conventions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PARCS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Available functions and distributions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/first_steps/function_list.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="available-functions-and-distributions">
+<span id="function-list"></span><h1>Available functions and distributions<a class="headerlink" href="#available-functions-and-distributions" title="Permalink to this heading"></a></h1>
+<section id="output-distributions">
+<span id="available-output-distributions"></span><h2>Output distributions<a class="headerlink" href="#output-distributions" title="Permalink to this heading"></a></h2>
+<p>The distributions are provided by <cite>Scipy’s</cite> <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/stats.html">stats</a> module. Instead of calling the <code class="docutils literal notranslate"><span class="pre">.rvs()</span></code> method, however, we use the <code class="docutils literal notranslate"><span class="pre">.ppf()</span></code> (percent point function) method to obtain realizations given the error terms.</p>
+<p>For the parameters with described <em>range</em>, we can specify correction.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 60%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Distribution</p></th>
+<th class="head"><p>Parameters</p></th>
+<th class="head"><p>Range</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bernoulli</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">p_</span></code>: success probability</p></td>
+<td><p><span class="math notranslate nohighlight">\([0, 1]\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">uniform</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mu_</span></code>: center point: <cite>(a+b)/2</cite></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">diff_</span></code>: range: <cite>b-a</cite></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gaussian</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mu_</span></code>: mean</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sigma_</span></code>: standard deviation</p></td>
+<td><p><span class="math notranslate nohighlight">\([0, \infty)\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lognormal</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mu_</span></code>: mean</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sigma_</span></code>: standard deviation</p></td>
+<td><p><span class="math notranslate nohighlight">\([0, \infty)\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">poisson</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">lambda_</span></code>: rate</p></td>
+<td><p><span class="math notranslate nohighlight">\([0, \infty)\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Exponential</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">lambda_</span></code>: rate</p></td>
+<td><p><span class="math notranslate nohighlight">\([0, \infty)\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="edge-functions">
+<span id="available-edge-functions"></span><h2>Edge functions<a class="headerlink" href="#edge-functions" title="Permalink to this heading"></a></h2>
+<p>Read more about each edge function by clicking the link in the table title.</p>
+<section id="identity">
+<h3><code class="docutils literal notranslate"><span class="pre">identity</span></code><a class="headerlink" href="#identity" title="Permalink to this heading"></a></h3>
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-text"><code class="xref py py-func docutils literal notranslate"><span class="pre">edge_identity()</span></code></span><a class="headerlink" href="#id3" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 60%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="sigmoid">
+<h3><code class="docutils literal notranslate"><span class="pre">sigmoid</span></code><a class="headerlink" href="#sigmoid" title="Permalink to this heading"></a></h3>
+<table class="docutils align-default" id="id4">
+<caption><span class="caption-text"><code class="xref py py-func docutils literal notranslate"><span class="pre">edge_sigmoid()</span></code></span><a class="headerlink" href="#id4" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 60%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\alpha\)</span>: <code class="docutils literal notranslate"><span class="pre">alpha</span></code></p></td>
+<td><div class="line-block">
+<div class="line">Scale of the Sigmoid. Takes positive values</div>
+<div class="line">The reasonable range is approx. <span class="math notranslate nohighlight">\([1, 3]\)</span></div>
+</div>
+</td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\beta\)</span>: <code class="docutils literal notranslate"><span class="pre">beta</span></code></p></td>
+<td><div class="line-block">
+<div class="line">offset of the Sigmoid. Takes real values.</div>
+<div class="line">The reasonable range is approx. <span class="math notranslate nohighlight">\([-2, 2]\)</span></div>
+</div>
+</td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\gamma\)</span>: <code class="docutils literal notranslate"><span class="pre">gamma</span></code></p></td>
+<td><p>mirroring on x-axis. Takes <span class="math notranslate nohighlight">\(\{0, 1\}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\tau\)</span>: <code class="docutils literal notranslate"><span class="pre">tau</span></code></p></td>
+<td><div class="line-block">
+<div class="line">induces a dwelling region in the center of the function.</div>
+<div class="line">Takes odd values <span class="math notranslate nohighlight">\(\{1, 3, \dots\}\)</span></div>
+</div>
+</td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="gaussian-rbf">
+<h3><code class="docutils literal notranslate"><span class="pre">gaussian_rbf</span></code><a class="headerlink" href="#gaussian-rbf" title="Permalink to this heading"></a></h3>
+<table class="docutils align-default" id="id5">
+<caption><span class="caption-text"><code class="xref py py-func docutils literal notranslate"><span class="pre">edge_gaussian_rbf()</span></code></span><a class="headerlink" href="#id5" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 60%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\alpha\)</span>: <code class="docutils literal notranslate"><span class="pre">alpha</span></code></p></td>
+<td><div class="line-block">
+<div class="line">Scale of the RBF. Takes positive values</div>
+<div class="line">The reasonable range is approx. <span class="math notranslate nohighlight">\([1, 3]\)</span></div>
+</div>
+</td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\beta\)</span>: <code class="docutils literal notranslate"><span class="pre">beta</span></code></p></td>
+<td><div class="line-block">
+<div class="line">offset of the RBF. Takes real values.</div>
+<div class="line">The reasonable range is approx. <span class="math notranslate nohighlight">\([-2, 2]\)</span></div>
+</div>
+</td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\gamma\)</span>: <code class="docutils literal notranslate"><span class="pre">gamma</span></code></p></td>
+<td><p>mirroring on y-axis. Takes <span class="math notranslate nohighlight">\(\{0, 1\}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\tau\)</span>: <code class="docutils literal notranslate"><span class="pre">tau</span></code></p></td>
+<td><div class="line-block">
+<div class="line">induces a dwelling region in the center of the function.</div>
+<div class="line">Takes even values <span class="math notranslate nohighlight">\(\{2, 4, \dots\}\)</span></div>
+</div>
+</td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="arctan">
+<h3><code class="docutils literal notranslate"><span class="pre">arctan</span></code><a class="headerlink" href="#arctan" title="Permalink to this heading"></a></h3>
+<table class="docutils align-default" id="id6">
+<caption><span class="caption-text"><code class="xref py py-func docutils literal notranslate"><span class="pre">edge_arctan()</span></code></span><a class="headerlink" href="#id6" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 60%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\alpha\)</span>: <code class="docutils literal notranslate"><span class="pre">alpha</span></code></p></td>
+<td><div class="line-block">
+<div class="line">Scale of the RBF. Takes positive values</div>
+<div class="line">The reasonable range is approx. <span class="math notranslate nohighlight">\([1, 3]\)</span></div>
+</div>
+</td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\beta\)</span>: <code class="docutils literal notranslate"><span class="pre">beta</span></code></p></td>
+<td><div class="line-block">
+<div class="line">offset of the RBF. Takes real values.</div>
+<div class="line">The reasonable range is approx. <span class="math notranslate nohighlight">\([-2, 2]\)</span></div>
+</div>
+</td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\gamma\)</span>: <code class="docutils literal notranslate"><span class="pre">gamma</span></code></p></td>
+<td><p>mirroring on y-axis. Takes <span class="math notranslate nohighlight">\(\{0, 1\}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="corrections">
+<span id="id1"></span><h2>Corrections<a class="headerlink" href="#corrections" title="Permalink to this heading"></a></h2>
+<section id="sigmoid-correction">
+<span id="id2"></span><h3>Sigmoid Correction<a class="headerlink" href="#sigmoid-correction" title="Permalink to this heading"></a></h3>
+<table class="docutils align-default" id="id7">
+<caption><span class="caption-text"><code class="xref py py-func docutils literal notranslate"><span class="pre">SigmoidCorrection()</span></code></span><a class="headerlink" href="#id7" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 70%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>default (yml/py)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">lower,</span> <span class="pre">upper</span></code></p></td>
+<td><p>lower and upper range of the corrected values.</p></td>
+<td><p><cite>float</cite></p></td>
+<td><p><cite>0, 1</cite></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">to_center</span></code></p></td>
+<td><div class="line-block">
+<div class="line">If the raw values must be centered (mean = 0)</div>
+<div class="line">before sigmoid correction.</div>
+</div>
+</td>
+<td><p><cite>bool</cite></p></td>
+<td><p><cite>false/False</cite></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">target_mean</span></code></p></td>
+<td><div class="line-block">
+<div class="line">specify this option if you want to fix the mean</div>
+<div class="line">of corrected values. must be in range of (lower, upper)</div>
+</div>
+</td>
+<td><p><em>float</em></p></td>
+<td><p><cite>null/None</cite></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="edge-correction">
+<h3>Edge Correction<a class="headerlink" href="#edge-correction" title="Permalink to this heading"></a></h3>
+<table class="docutils align-default" id="id8">
+<caption><span class="caption-text"><code class="xref py py-func docutils literal notranslate"><span class="pre">EdgeCorrection()</span></code></span><a class="headerlink" href="#id8" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 70%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>default (yml/py)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="first_graph.html" class="btn btn-neutral float-left" title="Create the First Graph" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../features/interventions.html" class="btn btn-neutral float-right" title="Interventions, Counterfactuals" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Fraunhofer Institute for Cognitive Systems (IKS).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

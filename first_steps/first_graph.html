@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create the First Graph &mdash; PARCS 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Available functions and distributions" href="function_list.html" />
+    <link rel="prev" title="Theoretical background" href="theoretical_background.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PARCS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">First Steps</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="theoretical_background.html">Theoretical background</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Create the First Graph</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#sampling-error-terms">Sampling error terms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#node-correction">Node correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reading-graph-info">Reading graph info</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="function_list.html">Available functions and distributions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../features/interventions.html">Interventions, Counterfactuals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/partial_randomization.html">Partial Randomization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/looping.html">Looping over randomized parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/more_graph_objects.html">More Graph Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/m_graphs.html">M-Graphs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Details</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../technical/graph_objects.html">Graph objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/conventions.html">Conventions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PARCS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Create the First Graph</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/first_steps/first_graph.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="create-the-first-graph">
+<span id="id1"></span><h1>Create the First Graph<a class="headerlink" href="#create-the-first-graph" title="Permalink to this heading"></a></h1>
+<p>We define a causal DAG in PARCS by specifying the output distributions and parameter coefficient vectors of the nodes, along with edges and their edge functions. This can be done using the <code class="xref py py-func docutils literal notranslate"><span class="pre">Graph()</span></code> class, and a <code class="docutils literal notranslate"><span class="pre">.yml</span></code> description file.</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text"><code class="code docutils literal notranslate"><span class="pre">graph_description.yml</span></code></span><a class="headerlink" href="#id4" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1"># === A causal Triangle: Treatment, Outcome, Confounder ===</span>
+<span class="linenos">2</span><span class="c1"># nodes</span>
+<span class="linenos">3</span><span class="n">C</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">4</span><span class="n">A</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">2</span><span class="n">C</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mf">0.1</span><span class="n">C</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">5</span><span class="n">Y</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="n">C</span><span class="o">+</span><span class="n">A</span><span class="o">-</span><span class="mf">0.3</span><span class="n">AC</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos">6</span><span class="c1"># edges</span>
+<span class="linenos">7</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">A</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">8</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">9</span><span class="n">A</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>In the description file, names like <code class="docutils literal notranslate"><span class="pre">...-&gt;...</span></code> define edges, and the remaining lines are considered as nodes. What comes afterward is the a distribution for nodes, and an edge function for edges.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ol class="arabic simple">
+<li><p>Read more about <a class="reference internal" href="../technical/conventions.html#conventions-graph-description-file"><span class="std std-ref">graph file parser conventions</span></a></p></li>
+<li><p>List of <a class="reference internal" href="function_list.html#function-list"><span class="std std-ref">available output distributions and edge functions</span></a></p></li>
+</ol>
+</div>
+<p>The description file then is used to instantiate a graph object.</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text"><code class="code docutils literal notranslate"><span class="pre">graph.py</span></code></span><a class="headerlink" href="#id5" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyparcs.graph_builder.parsers</span> <span class="kn">import</span> <span class="n">graph_file_parser</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos"> 4</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">2022</span><span class="p">)</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">graph_file_parser</span><span class="p">(</span><span class="s1">&#39;graph_description.yml&#39;</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="n">samples</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">10</span><span class="c1">#           C         A         Y</span>
+<span class="linenos">11</span><span class="c1"># 0  1.500622  3.542066  3.928658</span>
+<span class="linenos">12</span><span class="c1"># 1  0.774417  2.115694  3.251244</span>
+<span class="linenos">13</span><span class="c1"># 2 -1.140551 -2.120171 -3.445699</span>
+<span class="linenos">14</span><span class="c1"># 3  0.590632  1.564428  0.109688</span>
+<span class="linenos">15</span><span class="c1"># 4 -0.652315 -2.649744 -6.378569</span>
+</pre></div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">graph_file_parser</span></code> function converts the description lines to standard <em>node</em> and <em>edge</em> objects needed by the <code class="docutils literal notranslate"><span class="pre">Graph</span></code> class. These objects are lists of Python dictionaries. Finally, the <code class="docutils literal notranslate"><span class="pre">.sample()</span></code> method return a <code class="docutils literal notranslate"><span class="pre">Pandas.DataFrame</span></code> object.</p>
+<section id="sampling-error-terms">
+<span id="id2"></span><h2>Sampling error terms<a class="headerlink" href="#sampling-error-terms" title="Permalink to this heading"></a></h2>
+<p>The math library in PARCS that supports sampling from the distributions is <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/stats.html">Scipy</a>. Instead of using the <code class="code docutils literal notranslate"><span class="pre">.rvs()</span></code> methods of the distributions, however, PARCS samples <em>error</em> terms from a <span class="math notranslate nohighlight">\(\text{Unif}(0, 1)\)</span> per each data row, and passes the realization to the <code class="code docutils literal notranslate"><span class="pre">.ppf()</span></code> method to obtain the corresponding sample from the target distribution. (read more about <a class="reference internal" href="../technical/graph_objects.html#node-doc"><span class="std std-ref">internal mechanics of nodes</span></a>). With this procedure, we follow two main goals:</p>
+<ul class="simple">
+<li><p>Reproducibility is explicitly handled by returning and re-using the error terms.</p></li>
+<li><p>These error terms enable us to run simulate for counterfactual analysis. We explain this goal in the section below.</p></li>
+</ul>
+<p>To reuse the errors, we set <code class="docutils literal notranslate"><span class="pre">return_errors=True</span></code>, and pass the returned dataframe to <code class="docutils literal notranslate"><span class="pre">sampled_errors</span></code> in the next run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">samples</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">return_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos"> 2</span><span class="nb">print</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+<span class="linenos"> 3</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos"> 4</span><span class="c1">#           C         A         Y</span>
+<span class="linenos"> 5</span><span class="c1"># 0  0.083551  0.393740  0.074251</span>
+<span class="linenos"> 6</span><span class="c1"># 1  0.806554  0.201740  0.278956</span>
+<span class="linenos"> 7</span><span class="c1"># 2  0.488542  0.248906  0.166903</span>
+<span class="linenos"> 8</span><span class="c1">#           C         A         Y</span>
+<span class="linenos"> 9</span><span class="c1"># 0 -1.381576 -3.995493 -9.922780</span>
+<span class="linenos">10</span><span class="c1"># 1  0.865266 -0.177176 -0.437808</span>
+<span class="linenos">11</span><span class="c1"># 2 -0.028724 -1.733438 -3.710056</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="n">reproduced_samples</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+<span class="linenos">14</span>    <span class="n">use_sampled_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="linenos">15</span>    <span class="n">sampled_errors</span><span class="o">=</span><span class="n">errors</span>
+<span class="linenos">16</span><span class="p">)</span>
+<span class="linenos">17</span><span class="nb">print</span><span class="p">(</span><span class="n">reproduced_samples</span><span class="p">)</span>
+<span class="linenos">18</span><span class="c1">#           C         A         Y</span>
+<span class="linenos">19</span><span class="c1"># 0 -1.381576 -3.995493 -9.922780</span>
+<span class="linenos">20</span><span class="c1"># 1  0.865266 -0.177176 -0.437808</span>
+<span class="linenos">21</span><span class="c1"># 2 -0.028724 -1.733438 -3.710056</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We still can control the random number generation in the main script by <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.seed.html"><code class="docutils literal notranslate"><span class="pre">numpy.random.seed()</span></code></a>. In this case, the sampled errors will also be affected by the fixed seed, while reproducibility of simulation regarding the data rows is still controlled by the error terms.</p>
+</div>
+</section>
+<section id="node-correction">
+<span id="id3"></span><h2>Node correction<a class="headerlink" href="#node-correction" title="Permalink to this heading"></a></h2>
+<p>PARCS provides a method to apply a standardizing <em>correction</em> to the distribution parameters. This option is available for all parameters that have a non-real numbers support, such as success probability of the Bernoulli distribution. Here is an example which runs into a problem, as the passed values to <code class="docutils literal notranslate"><span class="pre">p_</span></code> of the Bernoulli distribution are not in the range of <span class="math notranslate nohighlight">\([0, 1]\)</span>.</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">graph_description.yml</span><a class="headerlink" href="#id6" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1"># nodes</span>
+<span class="linenos">2</span><span class="n">C</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">3</span><span class="n">A</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">2</span><span class="n">C</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">4</span><span class="n">Y</span><span class="p">:</span> <span class="n">bernoulli</span><span class="p">(</span><span class="n">p_</span><span class="o">=</span><span class="mi">10</span><span class="n">A</span><span class="o">+</span><span class="mi">10</span><span class="n">C</span><span class="p">)</span>
+<span class="linenos">5</span><span class="c1"># edges</span>
+<span class="linenos">6</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">A</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">7</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">8</span><span class="n">A</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">graph.py</span><a class="headerlink" href="#id7" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="linenos">2</span><span class="kn">from</span> <span class="nn">pyparcs.graph_builder.parsers</span> <span class="kn">import</span> <span class="n">graph_file_parser</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">graph_file_parser</span><span class="p">(</span><span class="s1">&#39;graph_description.yml&#39;</span><span class="p">)</span>
+<span class="linenos">5</span><span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="linenos">6</span>
+<span class="linenos">7</span><span class="n">samples</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos">8</span><span class="c1"># AssertionError: Bern(p) probabilities are out of [0, 1] range</span>
+</pre></div>
+</div>
+</div>
+<p>To activate the correction, we add an extra <code class="code docutils literal notranslate"><span class="pre">correction[...]</span></code> term to the line of the node.</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">graph_description_correction.yml</span><a class="headerlink" href="#id8" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1"># nodes</span>
+<span class="linenos">2</span><span class="n">C</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">3</span><span class="n">A</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">2</span><span class="n">C</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="hll"><span class="linenos">4</span><span class="n">Y</span><span class="p">:</span> <span class="n">bernoulli</span><span class="p">(</span><span class="n">p_</span><span class="o">=</span><span class="mi">10</span><span class="n">A</span><span class="o">+</span><span class="mi">10</span><span class="n">C</span><span class="p">),</span> <span class="n">correction</span><span class="p">[</span><span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">1</span><span class="p">]</span>
+</span><span class="linenos">5</span><span class="c1"># edges</span>
+<span class="linenos">6</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">A</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">7</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">8</span><span class="n">A</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">graph.py</span><a class="headerlink" href="#id9" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyparcs.graph_builder.parsers</span> <span class="kn">import</span> <span class="n">graph_file_parser</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">graph_file_parser</span><span class="p">(</span><span class="s1">&#39;graph_description_correction.yml&#39;</span><span class="p">)</span>
+<span class="linenos"> 5</span><span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="n">samples</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">10</span><span class="c1">#           C         A    Y</span>
+<span class="linenos">11</span><span class="c1"># 0  0.446559 -1.114598  1.0</span>
+<span class="linenos">12</span><span class="c1"># 1 -1.871864 -4.844675  0.0</span>
+<span class="linenos">13</span><span class="c1"># 2  1.095366  0.805899  0.0</span>
+</pre></div>
+</div>
+</div>
+<p>In this example, the correction transformation for Bernoulli distribution, is a Sigmoid function, mapping the real values to the [lower, upper] range. As a result, the success probability of the example has the form <span class="math notranslate nohighlight">\(\sigma(10A+10C)\)</span>.</p>
+<div class="admonition note" id="node-correction-node">
+<p class="admonition-title">Note</p>
+<p><strong>Node correction is always initialized upon the first batch of data</strong>. For example, if <cite>target_mean</cite> option is set for node correction in the example above, the output values will be transformed such that the output has the mean equal to the <cite>target_mean</cite>. This is done by learning an <cite>offset</cite> term from the first batch which satisfies the <cite>mean</cite> requirements. This values will be then used for next simulations. For this purpose, the graph object always <cite>burns</cite> the first 500 samples, to initialize the corrections. Read more about sigmoid correction at <code class="xref py py-func docutils literal notranslate"><span class="pre">SigmoidCorrection()</span></code>.</p>
+</div>
+</section>
+<section id="reading-graph-info">
+<h2>Reading graph info<a class="headerlink" href="#reading-graph-info" title="Permalink to this heading"></a></h2>
+<p>You can read the graph information via calling <code class="docutils literal notranslate"><span class="pre">.get_info(type=...)</span></code>. The output includes information of nodes and edges, and corrections if available. If <cite>type=’raw’</cite> (default), then a dictionary of nodes and edges info are returned. If <cite>type=’md’</cite> then a markdown file including decorated report (pretty equations) will be written in the given directory via <cite>info_dir</cite> parameter.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Markdown report has not been implemented yet. The doc will be updated after implementation</p>
+</div>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">graph.py</span><a class="headerlink" href="#id10" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyparcs.graph_builder.parsers</span> <span class="kn">import</span> <span class="n">graph_file_parser</span>
+<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos"> 5</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">2022</span><span class="p">)</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">graph_file_parser</span><span class="p">(</span><span class="s1">&#39;graph_description.yml&#39;</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="n">pprint</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">get_info</span><span class="p">())</span>
+<span class="linenos">11</span><span class="c1"># {&#39;edges&#39;: {&#39;A-&gt;Y&#39;: {&#39;correction&#39;: {&#39;offset&#39;: -0.9682150226680958,</span>
+<span class="linenos">12</span><span class="c1">#                                    &#39;scale&#39;: 2.229350605378819},</span>
+<span class="linenos">13</span><span class="c1">#                     &#39;edge_function&#39;: &#39;identity&#39;,</span>
+<span class="linenos">14</span><span class="c1">#                     &#39;function_params&#39;: {}},</span>
+<span class="linenos">15</span><span class="c1">#            &#39;C-&gt;A&#39;: {&#39;edge_function&#39;: &#39;identity&#39;, &#39;function_params&#39;: {}},</span>
+<span class="linenos">16</span><span class="c1">#            &#39;C-&gt;Y&#39;: {&#39;edge_function&#39;: &#39;identity&#39;, &#39;function_params&#39;: {}}},</span>
+<span class="linenos">17</span><span class="c1">#  &#39;nodes&#39;: {&#39;A&#39;: {&#39;dist_params_coefs&#39;: {&#39;mu_&#39;: {&#39;bias&#39;: -1.0,</span>
+<span class="linenos">18</span><span class="c1">#                                                &#39;interactions&#39;: array([], dtype=float64),</span>
+<span class="linenos">19</span><span class="c1">#                                                &#39;linear&#39;: array([2.])},</span>
+<span class="linenos">20</span><span class="c1">#                                        &#39;sigma_&#39;: {&#39;bias&#39;: 1.0,</span>
+<span class="linenos">21</span><span class="c1">#                                                   &#39;interactions&#39;: array([], dtype=float64),</span>
+<span class="linenos">22</span><span class="c1">#                                                   &#39;linear&#39;: array([0.1])}},</span>
+<span class="linenos">23</span><span class="c1">#                  &#39;node_type&#39;: &#39;stochastic&#39;,</span>
+<span class="linenos">24</span><span class="c1">#                  &#39;output_distribution&#39;: &#39;gaussian&#39;},</span>
+<span class="linenos">25</span><span class="c1">#            &#39;C&#39;: {&#39;dist_params_coefs&#39;: {&#39;mu_&#39;: {&#39;bias&#39;: 0.0,</span>
+<span class="linenos">26</span><span class="c1">#                                                &#39;interactions&#39;: array([], dtype=float64),</span>
+<span class="linenos">27</span><span class="c1">#                                                &#39;linear&#39;: array([], dtype=float64)},</span>
+<span class="linenos">28</span><span class="c1">#                                        &#39;sigma_&#39;: {&#39;bias&#39;: 1.0,</span>
+<span class="linenos">29</span><span class="c1">#                                                   &#39;interactions&#39;: array([], dtype=float64),</span>
+<span class="linenos">30</span><span class="c1">#                                                   &#39;linear&#39;: array([], dtype=float64)}},</span>
+<span class="linenos">31</span><span class="c1">#                  &#39;node_type&#39;: &#39;stochastic&#39;,</span>
+<span class="linenos">32</span><span class="c1">#                  &#39;output_distribution&#39;: &#39;gaussian&#39;},</span>
+<span class="linenos">33</span><span class="c1">#            &#39;Y&#39;: {&#39;dist_params_coefs&#39;: {&#39;mu_&#39;: {&#39;bias&#39;: 0,</span>
+<span class="linenos">34</span><span class="c1">#                                                &#39;interactions&#39;: array([-0.3]),</span>
+<span class="linenos">35</span><span class="c1">#                                                &#39;linear&#39;: array([1., 1.])},</span>
+<span class="linenos">36</span><span class="c1">#                                        &#39;sigma_&#39;: {&#39;bias&#39;: 2.0,</span>
+<span class="linenos">37</span><span class="c1">#                                                   &#39;interactions&#39;: array([0.]),</span>
+<span class="linenos">38</span><span class="c1">#                                                   &#39;linear&#39;: array([0., 0.])}},</span>
+<span class="linenos">39</span><span class="c1">#                  &#39;node_type&#39;: &#39;stochastic&#39;,</span>
+<span class="linenos">40</span><span class="c1">#                  &#39;output_distribution&#39;: &#39;gaussian&#39;}}}</span>
+<span class="linenos">41</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="theoretical_background.html" class="btn btn-neutral float-left" title="Theoretical background" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="function_list.html" class="btn btn-neutral float-right" title="Available functions and distributions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Fraunhofer Institute for Cognitive Systems (IKS).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

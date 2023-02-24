@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Graph objects &mdash; PARCS 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API" href="api.html" />
+    <link rel="prev" title="M-Graphs" href="../features/m_graphs.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PARCS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">First Steps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/theoretical_background.html">Theoretical background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/first_graph.html">Create the First Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/function_list.html">Available functions and distributions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../features/interventions.html">Interventions, Counterfactuals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/partial_randomization.html">Partial Randomization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/looping.html">Looping over randomized parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/more_graph_objects.html">More Graph Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/m_graphs.html">M-Graphs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Details</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Graph objects</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#edges">Edges</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#input-normalization">Input normalization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parent-child-node-names">Parent-Child node names</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#nodes">Nodes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sampling-a-source-node">Sampling a source node</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sampling-a-node-with-parents">Sampling a Node with Parents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#correction-of-distribution-parameters">Correction of distribution parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#graphs">Graphs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conventions.html">Conventions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PARCS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Graph objects</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/technical/graph_objects.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="graph-objects">
+<h1>Graph objects<a class="headerlink" href="#graph-objects" title="Permalink to this heading"></a></h1>
+<p>In Getting started document we explained how to make a graph using a graph description file, how to sample from observational and interventional distributions, and how to randomize it partially. This is the most efficient way to utilize PARCS. Nevertheless, it might be beneficial if we get to know the nuts and bolts of the graph object.</p>
+<p>In PARCS two main objects make DAGs: <em>nodes</em>, <em>edges</em></p>
+<section id="edges">
+<span id="edge-doc"></span><h2>Edges<a class="headerlink" href="#edges" title="Permalink to this heading"></a></h2>
+<p>An <code class="docutils literal notranslate"><span class="pre">Edge</span></code> object is primarily defined by a pair of parent-child nodes <span class="math notranslate nohighlight">\((Z_i, Z_j)\)</span> and an <em>edge function</em> <span class="math notranslate nohighlight">\(e_{ij}(.)\)</span> along with its parameters. The edge function maps the input values from the parent node and create a transformed array, to be then passed to the child node as the actual input.</p>
+<div class="math notranslate nohighlight" id="equation-edge-1">
+<span class="eqno">(1)<a class="headerlink" href="#equation-edge-1" title="Permalink to this equation"></a></span>\[\begin{align}
+z^*_i = e_{ij}(z_i)
+\end{align}\]</div>
+<p>An edge object is declared via the following code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Edge</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># replace &#39;identity&#39; with other functions</span>
+<span class="n">edge</span> <span class="o">=</span> <span class="n">Edge</span><span class="p">(</span><span class="n">function_name</span><span class="o">=</span><span class="s1">&#39;identity&#39;</span><span class="p">,</span> <span class="n">function_params</span><span class="o">=</span><span class="p">{})</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="c1"># [ 1.62434536 -0.61175641 -0.52817175 -1.07296862  0.86540763]</span>
+
+<span class="n">mapped_x</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mapped_x</span><span class="p">)</span>
+<span class="c1"># [ 1.62434536 -0.61175641 -0.52817175 -1.07296862  0.86540763]</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">function_name</span></code> argument determines the selected edge function. Other examples are provided below.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>List of <a class="reference internal" href="../first_steps/function_list.html#available-edge-functions"><span class="std std-ref">available edge functions</span></a></p>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">edge</span> <span class="o">=</span> <span class="n">Edge</span><span class="p">(</span>
+    <span class="n">function_name</span><span class="o">=</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">,</span>
+    <span class="n">function_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;gamma&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;beta&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;tau&#39;</span><span class="p">:</span> <span class="mi">1</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<span class="n">mapped_x</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">mapped_x</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="c1"># [0.   0.12 0.5  0.88 1.  ]</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">edge</span> <span class="o">=</span> <span class="n">Edge</span><span class="p">(</span>
+    <span class="n">function_name</span><span class="o">=</span><span class="s1">&#39;gaussian_rbf&#39;</span><span class="p">,</span>
+    <span class="n">function_params</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;gamma&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;beta&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;tau&#39;</span><span class="p">:</span> <span class="mi">2</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<span class="n">mapped_x</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">mapped_x</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="c1"># [0.   0.37 1.   0.37 0.  ]</span>
+</pre></div>
+</div>
+<section id="input-normalization">
+<h3>Input normalization<a class="headerlink" href="#input-normalization" title="Permalink to this heading"></a></h3>
+<p>During randomization of simulation in PARCS, we need to normalize the inputs before applying the edge function. by setting <code class="docutils literal notranslate"><span class="pre">do_correction=True</span></code>, the edge object calculates the empirical mean and standard deviation of the input data, and normalizes it as</p>
+<div class="math notranslate nohighlight" id="equation-edge-correction">
+<span class="eqno">(2)<a class="headerlink" href="#equation-edge-correction" title="Permalink to this equation"></a></span>\[\begin{align}
+    \tilde{z}_i = \frac{z_i - \mu_q}{\sigma_q}
+\end{align}\]</div>
+<p>where the subscript <span class="math notranslate nohighlight">\(q\)</span> means that the statistics are calculated for the truncated input, excluding first and last <em>q</em> quantiles. This is done to prevent improper normalization in the presence of outliers. By default, the quantile is set to <span class="math notranslate nohighlight">\(0.05\)</span></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;gamma&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;beta&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;tau&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+<span class="n">edge_no_correction</span> <span class="o">=</span> <span class="n">Edge</span><span class="p">(</span>
+    <span class="n">function_name</span><span class="o">=</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">,</span>
+    <span class="n">function_params</span><span class="o">=</span><span class="n">params</span>
+<span class="p">)</span>
+<span class="n">edge_correction</span> <span class="o">=</span> <span class="n">Edge</span><span class="p">(</span>
+    <span class="n">function_name</span><span class="o">=</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">,</span>
+    <span class="n">function_params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+    <span class="n">do_correction</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+<span class="n">mapped_x_no_correction</span> <span class="o">=</span> <span class="n">edge_no_correction</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">mapped_x_correction</span> <span class="o">=</span> <span class="n">edge_correction</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">mapped_x_no_correction</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="c1"># [0.5 1.  1.  1. ]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">mapped_x_correction</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="c1"># [0.08 0.5  0.92 1.  ]</span>
+</pre></div>
+</div>
+<p>For the next data batch, edge uses the calculated statistics from the first feed. Therefore this normalization becomes the characteristics of the simulation model and stays fixed for all further sampling.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Since the statistics are calculated on the first batch, PARCS throws an instability warning if the first batch is <code class="docutils literal notranslate"><span class="pre">&lt;500</span></code>.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>requires <em>see also</em> section which points to randomizer section</p>
+</div>
+</section>
+<section id="parent-child-node-names">
+<h3>Parent-Child node names<a class="headerlink" href="#parent-child-node-names" title="Permalink to this heading"></a></h3>
+<p>We can also declare the parent and child name of the edge upon instantiation. These attributes will be consumed by the graph as the index of the edge.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">edge</span> <span class="o">=</span> <span class="n">Edge</span><span class="p">(</span>
+    <span class="n">parent</span><span class="o">=</span><span class="s1">&#39;Z_1&#39;</span><span class="p">,</span>
+    <span class="n">child</span><span class="o">=</span><span class="s1">&#39;Z_2&#39;</span><span class="p">,</span>
+    <span class="n">function_name</span><span class="o">=</span><span class="s1">&#39;identity&#39;</span><span class="p">,</span>
+    <span class="n">function_params</span><span class="o">=</span><span class="p">{}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>However, when an edge object is instantiated independently and outside a graph object, it is not necessary to give any node names.</p>
+</section>
+</section>
+<section id="nodes">
+<span id="node-doc"></span><h2>Nodes<a class="headerlink" href="#nodes" title="Permalink to this heading"></a></h2>
+<p>A <code class="docutils literal notranslate"><span class="pre">Node</span></code> object is primarily defined by an <em>output distribution</em> <span class="math notranslate nohighlight">\(\mathcal{P}_j(\theta_1, \dots, \theta_K)\)</span>, and <em>parameter coefficient vectors</em> <span class="math notranslate nohighlight">\(W_j^{(\theta_k)}\)</span>. The sampling algorithm for a node is defined below:</p>
+<ol class="arabic simple">
+<li><p>Given a set of parents for the node <span class="math notranslate nohighlight">\(Z_j\)</span> as <span class="math notranslate nohighlight">\((Z_1, \dots, Z_M)\)</span> with sampled values for 1 instance, an <em>input dictionary</em> <span class="math notranslate nohighlight">\(S_j\)</span> is defined as concatenation of a bias element (<span class="math notranslate nohighlight">\(1\)</span>), all parent values and <span class="math notranslate nohighlight">\(m\)</span>-wise multiplications, where <span class="math notranslate nohighlight">\(m = \{2, \dots, M\}\)</span>. As an example, for two parents <span class="math notranslate nohighlight">\(\{Z_1, Z_2, Z_3\}\)</span> the input dictionary will be <span class="math notranslate nohighlight">\(s_j = (z_1, z_2, z_3) \cup (z_1 z_2, z_1z_3, z_2z_3) \cup (z_1z_2z_3)\)</span></p></li>
+<li><p>The dot product of <span class="math notranslate nohighlight">\(s_j.W_j^{(\theta_k)}\)</span> gives the calculated <span class="math notranslate nohighlight">\(\theta_k\)</span> parameter for <span class="math notranslate nohighlight">\(\mathcal{P}_j\)</span>. We calculate this dot product for all parameters.</p></li>
+<li><p>To finish the sampling process, we sample from <span class="math notranslate nohighlight">\(\mathcal{P}_j(\Theta)\)</span> once, and yield it as the sampled <span class="math notranslate nohighlight">\(z_j\)</span> for that specific instance.</p></li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>requires equation \
+requires schematic</p>
+</div>
+<p>Based on the data type (continuous, binary, etc.) and the desired underlying distribution for a node, we can choose an output distribution from provided PARCS distributions. Subsequently, we need to define the parameter coefficient vectors according to the number of parents and distributions.</p>
+<section id="sampling-a-source-node">
+<h3>Sampling a source node<a class="headerlink" href="#sampling-a-source-node" title="Permalink to this heading"></a></h3>
+<p>A source node in a graph, is a node with no parents. The code below, creates a source node with Bernoulli distribution and the success probability of <span class="math notranslate nohighlight">\(0.7\)</span>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Node</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">node</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Z_1&#39;</span><span class="p">,</span>
+    <span class="n">parents</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">output_distribution</span><span class="o">=</span><span class="s1">&#39;bernoulli&#39;</span><span class="p">,</span>
+    <span class="n">dist_params_coefs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;p_&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;bias&#39;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span> <span class="s1">&#39;interactions&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">errors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([]),</span> <span class="n">errors</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">[:</span><span class="mi">5</span><span class="p">])</span>
+<span class="c1"># [1 1 0 1 0]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Explanations:</p>
+<ul class="simple">
+<li><p>the <code class="docutils literal notranslate"><span class="pre">dist_params_coefs</span></code> is a dictionary of distributions parameters. In case of the Bernoulli distribution, the only parameter is the success probability i.e. <code class="docutils literal notranslate"><span class="pre">p_</span></code>. Three distinct key-value pairs define the coefficient vectors for each parameter. The keys are <code class="docutils literal notranslate"><span class="pre">bias,</span> <span class="pre">linear,</span> <span class="pre">interactions</span></code>. In this example, the source node needs only the bias, so other vectors are set to empty. In next examples about non-source nodes, we provide more details regarding the coefficients.</p></li>
+<li><p>the <code class="docutils literal notranslate"><span class="pre">data</span></code> input is required for the <code class="docutils literal notranslate"><span class="pre">.sample()</span></code> method. In this case, as the node has no parents, the data frame can be empty.</p></li>
+</ul>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>List of <a class="reference internal" href="../first_steps/function_list.html#available-output-distributions"><span class="std std-ref">available output distributions</span></a></p>
+</div>
+</section>
+<section id="sampling-a-node-with-parents">
+<h3>Sampling a Node with Parents<a class="headerlink" href="#sampling-a-node-with-parents" title="Permalink to this heading"></a></h3>
+<p>We repeat the previous process, but now for a node assuming it has two parents.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Node</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">size_</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">size_</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">columns</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Z_1&#39;</span><span class="p">,</span> <span class="s1">&#39;Z_2&#39;</span><span class="p">))</span>
+<span class="n">node</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Z_3&#39;</span><span class="p">,</span>
+    <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Z_1&#39;</span><span class="p">,</span> <span class="s1">&#39;Z_2&#39;</span><span class="p">],</span>
+    <span class="n">output_distribution</span><span class="o">=</span><span class="s1">&#39;bernoulli&#39;</span><span class="p">,</span>
+    <span class="n">dist_params_coefs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;p_&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;bias&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="s1">&#39;interactions&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">errors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size_</span><span class="p">)</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">[:</span><span class="mi">5</span><span class="p">])</span>
+<span class="c1"># [1 0 0 0 0]</span>
+</pre></div>
+</div>
+<p>In the example above, we assumed the data frame is already filled with parent values, where both parents are uniformly distributed r.v.s. and the edges are set to identity function (in the next steps, we also simulate the parents as PARCS nodes). The <code class="docutils literal notranslate"><span class="pre">dist_params_coefs</span></code> implements <span class="math notranslate nohighlight">\(P(Z_3=1|Z_1, Z_2) = Z_1Z_2\)</span></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To create the interaction input vector elements, the order of permutation over the parent values follows the standard of Python’s <code class="docutils literal notranslate"><span class="pre">itertools.combinations</span></code> function. As an example, the order for the case of three <code class="docutils literal notranslate"><span class="pre">(X,Y,Z)</span></code> nodes is: <code class="docutils literal notranslate"><span class="pre">XY,</span> <span class="pre">XZ,</span> <span class="pre">XYZ</span></code></p>
+</div>
+</section>
+<section id="correction-of-distribution-parameters">
+<h3>Correction of distribution parameters<a class="headerlink" href="#correction-of-distribution-parameters" title="Permalink to this heading"></a></h3>
+<p>It is obvious that not all of the distribution parameters can be chosen freely. As an example, the Bernoulli’s success probability must lie in <span class="math notranslate nohighlight">\([0, 1]\)</span> range, or the Gaussian normal’s standard deviation must be a positive value. This means that arbitrary parent data types potentially lead to invalid parameter values. An example is shown below</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">columns</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;X_1&#39;</span><span class="p">,</span> <span class="s1">&#39;X_2&#39;</span><span class="p">))</span>
+<span class="n">node</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;X_3&#39;</span><span class="p">,</span>
+    <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;X_1&#39;</span><span class="p">,</span> <span class="s1">&#39;X_2&#39;</span><span class="p">],</span>
+    <span class="n">output_distribution</span><span class="o">=</span><span class="s1">&#39;bernoulli&#39;</span><span class="p">,</span>
+    <span class="n">dist_params_coefs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;p_&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;bias&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="s1">&#39;interactions&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+</pre></div>
+</div>
+<p>For this reason, either the data type and the support of the parents must follow the restrictions, or a correction must be done. Correction is possible via <code class="docutils literal notranslate"><span class="pre">do_correction=True</span></code> argument, which in return tells the node object to read the <code class="docutils literal notranslate"><span class="pre">correction_config</span></code> key out of a <code class="docutils literal notranslate"><span class="pre">dist_config</span></code> argument. The <code class="docutils literal notranslate"><span class="pre">correction_config</span></code> then specifies the correction arguments for each distribution parameter. In our example, correction of the success probability is a <em>Sigmoid correction</em>, meaning that the sampled and calculated raw parameter value is transformed by a sigmoid function.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">size_</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">size_</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">columns</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Z_1&#39;</span><span class="p">,</span> <span class="s1">&#39;Z_2&#39;</span><span class="p">))</span>
+<span class="n">node</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Z_3&#39;</span><span class="p">,</span>
+    <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Z_1&#39;</span><span class="p">,</span> <span class="s1">&#39;Z_2&#39;</span><span class="p">],</span>
+    <span class="n">output_distribution</span><span class="o">=</span><span class="s1">&#39;bernoulli&#39;</span><span class="p">,</span>
+    <span class="n">dist_params_coefs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;p_&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;bias&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="s1">&#39;interactions&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="n">do_correction</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">dist_config</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;correction_config&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;p_&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;lower&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;upper&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">errors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size_</span><span class="p">)</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="graphs">
+<h2>Graphs<a class="headerlink" href="#graphs" title="Permalink to this heading"></a></h2>
+<p>To create a graph for the example above, we can serialize and order the 3 nodes and 2 connection edges as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="kn">from</span> <span class="nn">pyparcs.graph_builder.parsers</span> <span class="kn">import</span> <span class="n">graph_file_parser</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">graph_file_parser</span><span class="p">(</span><span class="s1">&#39;graph_description.yml&#39;</span><span class="p">)</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="c1">#           C         A         Y</span>
+<span class="c1"># 0 -0.063525  1.748499  2.231440</span>
+<span class="c1"># 1  0.724484 -0.499045 -4.305049</span>
+<span class="c1"># 2  1.740207  2.135624  1.453687</span>
+<span class="c1"># 3  0.071935 -1.684686  0.533123</span>
+<span class="c1"># 4  0.398912 -0.249330  0.645679</span>
+
+<span class="n">samples</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">return_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="c1">#           C         A         Y</span>
+<span class="c1"># 0  0.083193  0.680838  0.853406</span>
+<span class="c1"># 1  0.306862  0.170525  0.273802</span>
+<span class="c1"># 2  0.506727  0.865491  0.490109</span>
+<span class="c1">#           C         A         Y</span>
+<span class="c1"># 0 -1.383912 -3.362831 -4.040595</span>
+<span class="c1"># 1 -0.504763 -2.913560 -5.062230</span>
+<span class="c1"># 2  0.016864  0.140918  0.107478</span>
+
+<span class="n">reproduced_samples</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="n">use_sampled_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">sampled_errors</span><span class="o">=</span><span class="n">errors</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">reproduced_samples</span><span class="p">)</span>
+<span class="c1">#           C         A         Y</span>
+<span class="c1"># 0 -1.383912 -3.362831 -4.040595</span>
+<span class="c1"># 1 -0.504763 -2.913560 -5.062230</span>
+<span class="c1"># 2  0.016864  0.140918  0.107478</span>
+</pre></div>
+</div>
+<p>This simulation can also be done using the <code class="docutils literal notranslate"><span class="pre">Graph</span></code> object.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../features/m_graphs.html" class="btn btn-neutral float-left" title="M-Graphs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api.html" class="btn btn-neutral float-right" title="API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Fraunhofer Institute for Cognitive Systems (IKS).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

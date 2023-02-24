@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Looping over randomized parameters &mdash; PARCS 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="More Graph Objects" href="more_graph_objects.html" />
+    <link rel="prev" title="Partial Randomization" href="partial_randomization.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PARCS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">First Steps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/theoretical_background.html">Theoretical background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/first_graph.html">Create the First Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/function_list.html">Available functions and distributions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Features</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="interventions.html">Interventions, Counterfactuals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="partial_randomization.html">Partial Randomization</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Looping over randomized parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more_graph_objects.html">More Graph Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="m_graphs.html">M-Graphs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Details</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../technical/graph_objects.html">Graph objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/conventions.html">Conventions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PARCS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Looping over randomized parameters</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/features/looping.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="looping-over-randomized-parameters">
+<h1>Looping over randomized parameters<a class="headerlink" href="#looping-over-randomized-parameters" title="Permalink to this heading"></a></h1>
+<p>In the <a class="reference internal" href="partial_randomization.html#partial-randomization"><span class="std std-ref">Partial randomization</span></a> section, we explained how to generate graphs from a graph parameter space. What might come after, is that we run an algorithm on many generated graphs, and measure the performance of the algorithm vs. a graph parameter, e.g. the number of nodes. The function <code class="docutils literal notranslate"><span class="pre">guideline_iterator</span></code> allows us to change a graph parameter in a loop, and do such analyses.</p>
+<p>To use the iterator, the guideline file doesn’t need to change. The only point is that the randomization directive of the target parameter, becomes the looping directive:</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">graph_description.yml</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">graph</span><span class="p">:</span>
+<span class="linenos"> 2</span>  <span class="n">num_nodes</span><span class="p">:</span> <span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="linenos"> 3</span>  <span class="n">graph_density</span><span class="p">:</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="linenos"> 4</span><span class="n">nodes</span><span class="p">:</span>
+<span class="linenos"> 5</span>  <span class="n">bernoulli</span><span class="p">:</span>
+<span class="linenos"> 6</span>    <span class="n">p_</span><span class="p">:</span> <span class="p">[</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">,</span> <span class="mi">0</span> <span class="p">,</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="p">]</span>
+<span class="linenos"> 7</span>  <span class="n">gaussian</span><span class="p">:</span>
+<span class="linenos"> 8</span>    <span class="n">mu_</span><span class="p">:</span> <span class="p">[</span> <span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">,</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">,</span> <span class="mi">0</span> <span class="p">]</span>
+<span class="linenos"> 9</span>    <span class="n">sigma_</span><span class="p">:</span> <span class="p">[</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="p">,</span> <span class="mi">0</span> <span class="p">,</span> <span class="mi">0</span> <span class="p">]</span>
+<span class="linenos">10</span><span class="n">edges</span><span class="p">:</span>
+<span class="linenos">11</span>  <span class="n">identity</span><span class="p">:</span> <span class="n">null</span>
+<span class="linenos">12</span>  <span class="n">gaussian_rbf</span><span class="p">:</span>
+<span class="linenos">13</span>    <span class="n">alpha</span><span class="p">:</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="linenos">14</span>    <span class="n">beta</span><span class="p">:</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
+<span class="linenos">15</span>    <span class="n">gamma</span><span class="p">:</span> <span class="p">[</span><span class="n">choice</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="linenos">16</span>    <span class="n">tau</span><span class="p">:</span> <span class="mi">2</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s say we want to iterate over number of nodes and run an algorithm. We want to estimate the variance of the results by bootstrapping, so we run the algorithm for each value 2 times:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">graph.py</span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyparcs.graph_builder.randomizer</span> <span class="kn">import</span> <span class="n">FreeRandomizer</span><span class="p">,</span> <span class="n">guideline_iterator</span>
+<span class="linenos"> 3</span>
+<span class="hll"><span class="linenos"> 4</span><span class="k">for</span> <span class="n">dir_</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">guideline_iterator</span><span class="p">(</span><span class="n">guideline_dir</span><span class="o">=</span><span class="s1">&#39;simple_guideline.yml&#39;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos"> 5</span>                                             <span class="n">to_iterate</span><span class="o">=</span><span class="s1">&#39;graph/num_nodes&#39;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos"> 6</span>                                             <span class="n">repeat</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+</span><span class="linenos"> 7</span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;num_nodes:&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+<span class="linenos"> 8</span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1"> EPOCH:&#39;</span><span class="p">,</span> <span class="n">epoch</span><span class="p">)</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span>    <span class="n">rndz</span> <span class="o">=</span> <span class="n">FreeRandomizer</span><span class="p">(</span>
+<span class="linenos">11</span>        <span class="n">guideline_dir</span><span class="o">=</span><span class="n">dir_</span>
+<span class="linenos">12</span>    <span class="p">)</span>
+<span class="linenos">13</span>    <span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">rndz</span><span class="o">.</span><span class="n">get_graph_params</span><span class="p">()</span>
+<span class="linenos">14</span>    <span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="linenos">15</span>    <span class="n">samples</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">16</span>    <span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">17</span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;=====&#39;</span><span class="p">)</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="c1"># num_nodes: 1</span>
+<span class="linenos">20</span><span class="c1"># 	 EPOCH: 0</span>
+<span class="linenos">21</span><span class="c1">#         H_0</span>
+<span class="linenos">22</span><span class="c1"># 0  2.097445</span>
+<span class="linenos">23</span><span class="c1"># =====</span>
+<span class="linenos">24</span><span class="c1"># num_nodes: 1</span>
+<span class="linenos">25</span><span class="c1"># 	 EPOCH: 1</span>
+<span class="linenos">26</span><span class="c1">#         H_0</span>
+<span class="linenos">27</span><span class="c1"># 0  1.964081</span>
+<span class="linenos">28</span><span class="c1"># =====</span>
+<span class="linenos">29</span><span class="c1"># num_nodes: 2</span>
+<span class="linenos">30</span><span class="c1"># 	 EPOCH: 0</span>
+<span class="linenos">31</span><span class="c1">#    H_0       H_1</span>
+<span class="linenos">32</span><span class="c1"># 0  1.0 -1.779816</span>
+<span class="linenos">33</span><span class="c1"># =====</span>
+<span class="linenos">34</span><span class="c1"># num_nodes: 2</span>
+<span class="linenos">35</span><span class="c1"># 	 EPOCH: 1</span>
+<span class="linenos">36</span><span class="c1">#    H_0  H_1</span>
+<span class="linenos">37</span><span class="c1"># 0  1.0  1.0</span>
+<span class="linenos">38</span><span class="c1"># =====</span>
+</pre></div>
+</div>
+</div>
+<p>The function <code class="docutils literal notranslate"><span class="pre">guideline_iterator</span></code> receives the guideline file and the target parameter to be looped over, as well as number of repeats per each value. It then returns an iterable object which gives a tuple of <cite>(guideline_path, epoch, value)</cite> at each round. Next, we can pass the guideline path as before to the randomizer, and use the epoch and value to log the results.</p>
+<p>The behavior of the function for different directives is as follows:</p>
+<ul class="simple">
+<li><p>if <code class="docutils literal notranslate"><span class="pre">[i-range,</span> <span class="pre">a,</span> <span class="pre">b]</span></code> then it enumerates integers of <cite>[a, b]</cite> (<cite>b</cite> included).</p></li>
+<li><p>if <code class="docutils literal notranslate"><span class="pre">[f-range,</span> <span class="pre">a,</span> <span class="pre">b]</span></code> then it gives <code class="docutils literal notranslate"><span class="pre">steps=n</span></code> equidistant values between <cite>a</cite> and <cite>b</cite>. the <cite>steps</cite> parameter is needed in this case.</p></li>
+<li><p>if <code class="docutils literal notranslate"><span class="pre">[choice,</span> <span class="pre">a,</span> <span class="pre">b,</span> <span class="pre">...]</span></code> then it iterates over the options in the same order.</p></li>
+<li><p>if fixed, then it raises an error, saying that the directive is a fixed value.</p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="partial_randomization.html" class="btn btn-neutral float-left" title="Partial Randomization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="more_graph_objects.html" class="btn btn-neutral float-right" title="More Graph Objects" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Fraunhofer Institute for Cognitive Systems (IKS).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conventions &mdash; PARCS 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="API" href="api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PARCS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">First Steps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/theoretical_background.html">Theoretical background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/first_graph.html">Create the First Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/function_list.html">Available functions and distributions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../features/interventions.html">Interventions, Counterfactuals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/partial_randomization.html">Partial Randomization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/looping.html">Looping over randomized parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/more_graph_objects.html">More Graph Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/m_graphs.html">M-Graphs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Details</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="graph_objects.html">Graph objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Conventions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#graph-description-file">Graph description file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#inducing-randomization">Inducing randomization</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PARCS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Conventions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/technical/conventions.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="conventions">
+<h1>Conventions<a class="headerlink" href="#conventions" title="Permalink to this heading"></a></h1>
+<p>In this document, we present the PARCS conventions for description files, guideline files, etc.</p>
+<section id="graph-description-file">
+<span id="conventions-graph-description-file"></span><h2>Graph description file<a class="headerlink" href="#graph-description-file" title="Permalink to this heading"></a></h2>
+<p>The description file is a YAML file. Below is a list of conventions for the description file:</p>
+<ul class="simple">
+<li><p>The rows start by <code class="docutils literal notranslate"><span class="pre">some_name:</span></code>, following are the <em>names</em> and values are functions/distributions.The parser recognizes all the keys including <cite>arrow</cite> sign  <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code> as edges, and the remaining keys as nodes.</p></li>
+<li><p>Node names and edges must be consistent. In other words, if there is an <cite>A-&gt;B</cite> edge, there must be nodes <cite>A</cite> and <cite>B</cite> defined. We recommend to start the node names with letters, and (multiple) <cite>_</cite> and numbers, for more stability.</p></li>
+<li><p>the value of each row (after <code class="docutils literal notranslate"><span class="pre">:</span></code>) is an edge function for edges, and an output distribution for nodes. Parameters of the functions must correspond to the function itself. See the full list of available edge functions and output distributions.</p></li>
+<li><p>For activating <cite>correction</cite>, the <code class="docutils literal notranslate"><span class="pre">correction[...]</span></code> keyword should be brought after the main function. It’s not necessary, however recommended for readability, that the function and correction are separated by a comma.</p></li>
+</ul>
+<section id="inducing-randomization">
+<span id="conventions-inducing-randomization"></span><h3>Inducing randomization<a class="headerlink" href="#inducing-randomization" title="Permalink to this heading"></a></h3>
+<p>To tell PARCS to randomize part of the graph description, follow the conventions below:</p>
+<ul class="simple">
+<li><p>The question mark <code class="docutils literal notranslate"><span class="pre">?</span></code> in front of a distribution/function parameter tells PARCS to randomize that parameter.</p></li>
+<li><p>Note that for distribution parameters, the entire parameter (not a coefficient) can be randomized. E.g. <code class="docutils literal notranslate"><span class="pre">mu_=?</span></code> is possible, while <code class="docutils literal notranslate"><span class="pre">mu_=2A+?C</span></code> is an invalid syntax</p></li>
+<li><p>The question mark <code class="docutils literal notranslate"><span class="pre">?</span></code> as the argument of a function/distribution tells PARCS to randomize all parameters. E.g. <code class="docutils literal notranslate"><span class="pre">gaussian(?)</span></code> means both <code class="docutils literal notranslate"><span class="pre">mu_</span></code> and <code class="docutils literal notranslate"><span class="pre">sigma_</span></code> will be randomized</p></li>
+<li><p>The keyword <code class="docutils literal notranslate"><span class="pre">random</span></code> in front of node/edge names means the function/distribution will be randomly chosen. E.g. <code class="docutils literal notranslate"><span class="pre">X_0:</span> <span class="pre">random</span></code>. Obviously the parameters of the selected function will be randomized as well.</p></li>
+</ul>
+<p>The randomization is done based on a <cite>guideline</cite> file. For more details, see below.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api.html" class="btn btn-neutral float-left" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Fraunhofer Institute for Cognitive Systems (IKS).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

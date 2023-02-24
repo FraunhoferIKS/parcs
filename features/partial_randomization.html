@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Partial Randomization &mdash; PARCS 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Looping over randomized parameters" href="looping.html" />
+    <link rel="prev" title="Interventions, Counterfactuals" href="interventions.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PARCS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">First Steps</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/theoretical_background.html">Theoretical background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/first_graph.html">Create the First Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../first_steps/function_list.html">Available functions and distributions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Features</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="interventions.html">Interventions, Counterfactuals</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Partial Randomization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#parameter-randomization">Parameter Randomization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#free-randomizer">Free Randomizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#connect-randomizer">Connect Randomizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#edge-correction">Edge correction</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="looping.html">Looping over randomized parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more_graph_objects.html">More Graph Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="m_graphs.html">M-Graphs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Details</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../technical/graph_objects.html">Graph objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/conventions.html">Conventions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PARCS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Partial Randomization</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/features/partial_randomization.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="partial-randomization">
+<span id="id1"></span><h1>Partial Randomization<a class="headerlink" href="#partial-randomization" title="Permalink to this heading"></a></h1>
+<p>In simulations, sometimes we need to explore the graphs with certain restrictions; we need to fix some (not all) parameters that models our restrictions, while randomizing the rest of the parameters. As an example, for testing an ML or causal inference model with Gaussian assumption on the nodes, we want to simulate a graph with all Gaussian output distributions, while allowing the mean values to be selected randomly (because perhaps we want to test our model on MVG distributions with arbitrary means and variances).</p>
+<p>An important feature of PARCS, the <em>partial randomization</em>, allows us to simulate for such scenarios. In this section we explain how this can be done.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>to add: For more details regarding the motivation and use-cases please see “here”.</p>
+</div>
+<section id="parameter-randomization">
+<h2>Parameter Randomization<a class="headerlink" href="#parameter-randomization" title="Permalink to this heading"></a></h2>
+<p>As before, simulation starts with a graph description file. However we can use two new values to activate randomization PARCS: <code class="code docutils literal notranslate"><span class="pre">?</span></code> for parameters, and <code class="code docutils literal notranslate"><span class="pre">random</span></code> for functions and distributions. Here is an example of the causal triangle where we randomize the mean of node A, and also the output distribution of Y:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">graph_description.yml</span><a class="headerlink" href="#id3" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span># nodes
+<span class="linenos">2</span>C: gaussian(mu_=1, sigma_=1)
+<span class="hll"><span class="linenos">3</span>A: gaussian(mu_=?, sigma_=1)
+</span><span class="hll"><span class="linenos">4</span>Y: random
+</span><span class="linenos">5</span># edges
+<span class="linenos">6</span>C-&gt;A: identity()
+<span class="linenos">7</span>C-&gt;Y: identity()
+<span class="linenos">8</span>A-&gt;Y: identity()
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">graph.py</span><a class="headerlink" href="#id4" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyparcs.graph_builder.parsers</span> <span class="kn">import</span> <span class="n">graph_file_parser</span>
+<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">pyparcs.graph_builder.randomizer</span> <span class="kn">import</span> <span class="n">ParamRandomizer</span>
+<span class="linenos"> 4</span>
+<span class="hll"><span class="linenos"> 5</span><span class="n">rndz</span> <span class="o">=</span> <span class="n">ParamRandomizer</span><span class="p">(</span>
+</span><span class="hll"><span class="linenos"> 6</span>    <span class="n">graph_dir</span><span class="o">=</span><span class="s1">&#39;graph_description_1.yml&#39;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos"> 7</span>    <span class="n">guideline_dir</span><span class="o">=</span><span class="s1">&#39;simple_guideline.yml&#39;</span>
+</span><span class="hll"><span class="linenos"> 8</span><span class="p">)</span>
+</span><span class="hll"><span class="linenos"> 9</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">rndz</span><span class="o">.</span><span class="n">get_graph_params</span><span class="p">()</span>
+</span><span class="linenos">10</span>
+<span class="linenos">11</span><span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="linenos">12</span><span class="n">samples</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos">13</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">14</span><span class="c1">#           C         A    Y</span>
+<span class="linenos">15</span><span class="c1"># 0  1.660388  0.410814  1.0</span>
+<span class="linenos">16</span><span class="c1"># 1  1.253973 -2.983480  0.0</span>
+<span class="linenos">17</span><span class="c1"># 2  1.088486 -0.167692  1.0</span>
+</pre></div>
+</div>
+</div>
+<p>In <code class="code docutils literal notranslate"><span class="pre">graph.py</span></code> file, instead of <code class="code docutils literal notranslate"><span class="pre">graph_file_parser</span></code>, we import <code class="code docutils literal notranslate"><span class="pre">parcs.graph_builder.randomizer.ParamRandomizer</span></code>. <code class="docutils literal notranslate"><span class="pre">ParamRandomizer</span></code> takes the graph description directory, as well as a <em>guideline file</em>. This file tells the radomizer, what are the options for parameters and functions. Let’s have a look at the guideline file:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">simple_guideline.yml</span><a class="headerlink" href="#id5" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">nodes</span><span class="p">:</span>
+<span class="linenos"> 2</span>  <span class="n">bernoulli</span><span class="p">:</span>
+<span class="linenos"> 3</span>    <span class="n">p_</span><span class="p">:</span> <span class="p">[</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">,</span> <span class="mi">0</span> <span class="p">,</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="p">]</span>
+<span class="linenos"> 4</span>  <span class="n">gaussian</span><span class="p">:</span>
+<span class="linenos"> 5</span>    <span class="n">mu_</span><span class="p">:</span> <span class="p">[</span> <span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="p">,</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="p">,</span> <span class="mi">0</span> <span class="p">]</span>
+<span class="linenos"> 6</span>    <span class="n">sigma_</span><span class="p">:</span> <span class="p">[</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="p">,</span> <span class="mi">0</span> <span class="p">,</span> <span class="mi">0</span> <span class="p">]</span>
+<span class="linenos"> 7</span><span class="n">edges</span><span class="p">:</span>
+<span class="linenos"> 8</span>  <span class="n">identity</span><span class="p">:</span> <span class="n">null</span>
+<span class="linenos"> 9</span>  <span class="n">gaussian_rbf</span><span class="p">:</span>
+<span class="linenos">10</span>    <span class="n">alpha</span><span class="p">:</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="linenos">11</span>    <span class="n">beta</span><span class="p">:</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
+<span class="linenos">12</span>    <span class="n">gamma</span><span class="p">:</span> <span class="p">[</span><span class="n">choice</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="linenos">13</span>    <span class="n">tau</span><span class="p">:</span> <span class="mi">2</span>
+</pre></div>
+</div>
+</div>
+<ol class="arabic simple">
+<li><p>There are two main keys: <code class="code docutils literal notranslate"><span class="pre">nodes</span></code> and <code class="code docutils literal notranslate"><span class="pre">edges</span></code></p></li>
+<li><p>the next-level keys determine the different possibilities for choosing the functions and distributions. For instance, in the example file we tell the randomizer to choose between <code class="code docutils literal notranslate"><span class="pre">bernoulli</span></code> and <code class="code docutils literal notranslate"><span class="pre">gaussian</span></code> for distributions, and between <code class="code docutils literal notranslate"><span class="pre">identity</span></code> and <code class="code docutils literal notranslate"><span class="pre">gaussian_rbf</span></code> for the edge functions.</p></li>
+<li><p>Each function/distribution option contains the corresponding parameters as keys. The value of these keys is a list of the length 3 which corresponds to <em>bias, linear,</em> and <em>interactions</em> coefficients (in the same order). Each component is a directive for the respective coefficient, i.e. first component is used to randomize the bias value, second one for linear coefficient, and third for the interaction coefficient. The directives follow the following convention:</p>
+<ol class="loweralpha simple">
+<li><p>a single value, means <em>fixed</em>, thus for all the randomization turns, randomizer picks the same value</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[f-range,</span> <span class="pre">X,</span> <span class="pre">Y]</span></code> tells the randomizer to pick a float value between X and Y uniformly, i.e. from <cite>Unif(X, Y)</cite>.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[i-range,</span> <span class="pre">X,</span> <span class="pre">Y]</span></code> is similar to (a), except that the value is integer (with equal probabilities).</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[choice,</span> <span class="pre">X_0,</span> <span class="pre">X_1,</span> <span class="pre">...]</span></code> tells the randomizer to pick a value from the given list of options in the directive with equal probabilities (element 2nd onward).</p></li>
+</ol>
+</li>
+</ol>
+<p>In our example, therefore, mean of node A is selected according to line 5 of the guideline, and the distribution of Y is chosen between Bernoulli and Gaussian distributions.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">f-range</span></code> and <code class="docutils literal notranslate"><span class="pre">i-range</span></code> directives, we can specify more than one range. To do so, we simply write the next low/high pairs in the list. <strong>Example:</strong> The guideline <code class="code docutils literal notranslate"><span class="pre">[f-range,</span> <span class="pre">-1,</span> <span class="pre">-0.5,</span> <span class="pre">0.5,</span> <span class="pre">1]</span></code> samples randomly from the range of <span class="math notranslate nohighlight">\((-1, -0.5) \cup (0.5, 1)\)</span>.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../technical/conventions.html#conventions-inducing-randomization"><span class="std std-ref">Randomization conventions</span></a></p>
+</div>
+</section>
+<section id="free-randomizer">
+<h2>Free Randomizer<a class="headerlink" href="#free-randomizer" title="Permalink to this heading"></a></h2>
+<p>Using free randomizer, we can randomly generate a graph based on guidelines for number of nodes and graph sparsity. In fact, this randomizer is wrapped around the parameter randomization, meaning that first, PARCS initializes a graph with some nodes and edges, and assigns <cite>free</cite> and <cite>?</cite> to all functions and parameters, then passes the process to parameter randomizer to fill the blanks.</p>
+<p>The guideline is similar to that of parameter randomizer, except that we need to give the directives for <code class="docutils literal notranslate"><span class="pre">graph</span></code> as well. The keys are <cite>num_nodes</cite> and <cite>graph_sparsity</cite>.</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">simple_guideline.yml</span><a class="headerlink" href="#id6" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="linenos"> 1</span><span class="n">graph</span><span class="p">:</span>
+</span><span class="hll"><span class="linenos"> 2</span>  <span class="n">num_nodes</span><span class="p">:</span> <span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+</span><span class="hll"><span class="linenos"> 3</span>  <span class="n">graph_density</span><span class="p">:</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+</span><span class="linenos"> 4</span><span class="n">nodes</span><span class="p">:</span>
+<span class="linenos"> 5</span>  <span class="n">bernoulli</span><span class="p">:</span>
+<span class="linenos"> 6</span>    <span class="n">p_</span><span class="p">:</span> <span class="p">[</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">,</span> <span class="mi">0</span> <span class="p">,</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="p">]</span>
+<span class="linenos"> 7</span>  <span class="n">gaussian</span><span class="p">:</span>
+<span class="linenos"> 8</span>    <span class="n">mu_</span><span class="p">:</span> <span class="p">[</span> <span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">,</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">,</span> <span class="mi">0</span> <span class="p">]</span>
+<span class="linenos"> 9</span>    <span class="n">sigma_</span><span class="p">:</span> <span class="p">[</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="p">,</span> <span class="mi">0</span> <span class="p">,</span> <span class="mi">0</span> <span class="p">]</span>
+<span class="linenos">10</span><span class="n">edges</span><span class="p">:</span>
+<span class="linenos">11</span>  <span class="n">identity</span><span class="p">:</span> <span class="n">null</span>
+<span class="linenos">12</span>  <span class="n">gaussian_rbf</span><span class="p">:</span>
+<span class="linenos">13</span>    <span class="n">alpha</span><span class="p">:</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="linenos">14</span>    <span class="n">beta</span><span class="p">:</span> <span class="p">[</span><span class="n">f</span><span class="o">-</span><span class="nb">range</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
+<span class="linenos">15</span>    <span class="n">gamma</span><span class="p">:</span> <span class="p">[</span><span class="n">choice</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="linenos">16</span>    <span class="n">tau</span><span class="p">:</span> <span class="mi">2</span>
+</pre></div>
+</div>
+</div>
+<p>using the <cite>FreeRandomizer</cite> class, we generate a graph object.</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">graph.py</span><a class="headerlink" href="#id7" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyparcs.graph_builder.randomizer</span> <span class="kn">import</span> <span class="n">FreeRandomizer</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="n">rndz</span> <span class="o">=</span> <span class="n">FreeRandomizer</span><span class="p">(</span>
+<span class="linenos"> 5</span>    <span class="n">guideline_dir</span><span class="o">=</span><span class="s1">&#39;simple_guideline.yml&#39;</span>
+<span class="linenos"> 6</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">rndz</span><span class="o">.</span><span class="n">get_graph_params</span><span class="p">()</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="linenos">10</span><span class="n">samples</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos">11</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">12</span><span class="c1">#         H_0  H_1       H_2       H_3</span>
+<span class="linenos">13</span><span class="c1"># 0  0.641136  1.0 -2.300603  0.343558</span>
+<span class="linenos">14</span><span class="c1"># 1 -2.007259  1.0  3.145062  1.988338</span>
+<span class="linenos">15</span><span class="c1"># 2  0.874383  1.0 -3.203189  1.714673</span>
+</pre></div>
+</div>
+</div>
+<p>Nodes are named <cite>H_&lt;num&gt;</cite> by default. You can change the name prefix by the key <code class="docutils literal notranslate"><span class="pre">node_name_prefix</span></code> in the guideline (under graph key). The value must be string.</p>
+</section>
+<section id="connect-randomizer">
+<span id="id2"></span><h2>Connect Randomizer<a class="headerlink" href="#connect-randomizer" title="Permalink to this heading"></a></h2>
+<p>This class randomizes the causal flow from a parent to a child graph. To clarify this functionality, suppose we want to simulate the following data model.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{aligned}
+    L &amp;= AL \\
+    Z &amp;= BZ + CL
+\end{aligned}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(Z\)</span> and <span class="math notranslate nohighlight">\(L\)</span> are random vectors, <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span> are a lower triangular coefficient matrices, and <span class="math notranslate nohighlight">\(C\)</span> is another arbitrary coefficient matrix. In this model, <span class="math notranslate nohighlight">\(L\)</span> and <span class="math notranslate nohighlight">\(Z\)</span> are normal simulated graphs, while <span class="math notranslate nohighlight">\(Z\)</span> receives causal edges from <span class="math notranslate nohighlight">\(L\)</span> via <span class="math notranslate nohighlight">\(C\)</span> matrix.</p>
+<p>This model can be simulated as the following:</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text"><cite>graph description for L</cite></span><a class="headerlink" href="#id8" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1"># === A causal Triangle: Treatment, Outcome, Confounder ===</span>
+<span class="linenos">2</span><span class="c1"># nodes</span>
+<span class="linenos">3</span><span class="n">L_1</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">4</span><span class="n">L_2</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">2</span><span class="n">L_1</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">5</span><span class="n">L_3</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="n">L_2</span><span class="o">+</span><span class="n">L_1</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">6</span><span class="c1"># edges</span>
+<span class="linenos">7</span><span class="n">L_1</span><span class="o">-&gt;</span><span class="n">L_2</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">8</span><span class="n">L_1</span><span class="o">-&gt;</span><span class="n">L_3</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">9</span><span class="n">L_2</span><span class="o">-&gt;</span><span class="n">L_3</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>This description is a normal PARCS graph description file for the parent graph.</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text"><cite>graph description for Z</cite></span><a class="headerlink" href="#id9" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1"># === A causal Triangle: Treatment, Outcome, Confounder ===</span>
+<span class="linenos">2</span><span class="c1"># nodes</span>
+<span class="linenos">3</span><span class="n">Z_1</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="hll"><span class="linenos">4</span><span class="n">Z_2</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="o">*</span><span class="n">mu_</span><span class="o">=</span><span class="mi">2</span><span class="n">Z_1</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span><span class="hll"><span class="linenos">5</span><span class="n">Z_3</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="o">*</span><span class="n">mu_</span><span class="o">=</span><span class="n">Z_1</span><span class="o">+</span><span class="n">Z_2</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span><span class="linenos">6</span><span class="c1"># edges</span>
+<span class="linenos">7</span><span class="n">Z_1</span><span class="o">-&gt;</span><span class="n">Z_2</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">8</span><span class="n">Z_1</span><span class="o">-&gt;</span><span class="n">Z_3</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">9</span><span class="n">Z_2</span><span class="o">-&gt;</span><span class="n">Z_3</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>The second graph description file has a minor special style. In line 4 and 5 you can see a symbol <cite>*</cite> behind <cite>mu_</cite> distribution parameters. This syntax tells PARCS to affect these parameters when external causal edges (from L) connect to the graph. Similarly, the fact that the node <cite>Z_1</cite> doesn’t have an asterisk means that PARCS will not let any edge to go to <cite>Z_1</cite>.</p>
+<p>Similar to other randomization classes, <cite>ConnectRandomizer</cite> also requires a (normal) guideline file.</p>
+<p>Finally, the graph can be simulated as follows:</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text"><cite>graph.py</cite></span><a class="headerlink" href="#id10" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyparcs.graph_builder.randomizer</span> <span class="kn">import</span> <span class="n">ConnectRandomizer</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos"> 5</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">2022</span><span class="p">)</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="n">rndz</span> <span class="o">=</span> <span class="n">ConnectRandomizer</span><span class="p">(</span>
+<span class="linenos"> 9</span>    <span class="n">parent_graph_dir</span><span class="o">=</span><span class="s1">&#39;graph_description_L.yml&#39;</span><span class="p">,</span>
+<span class="linenos">10</span>    <span class="n">child_graph_dir</span><span class="o">=</span><span class="s1">&#39;graph_description_Z.yml&#39;</span><span class="p">,</span>
+<span class="linenos">11</span>    <span class="n">guideline_dir</span><span class="o">=</span><span class="s1">&#39;simple_guideline.yml&#39;</span><span class="p">,</span>
+<span class="linenos">12</span>    <span class="n">adj_matrix_mask</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+<span class="linenos">13</span>                                 <span class="n">index</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;L_1&#39;</span><span class="p">,</span> <span class="s1">&#39;L_2&#39;</span><span class="p">,</span> <span class="s1">&#39;L_3&#39;</span><span class="p">),</span>
+<span class="linenos">14</span>                                 <span class="n">columns</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Z_1&#39;</span><span class="p">,</span> <span class="s1">&#39;Z_2&#39;</span><span class="p">,</span> <span class="s1">&#39;Z_3&#39;</span><span class="p">))</span>
+<span class="linenos">15</span><span class="p">)</span>
+<span class="linenos">16</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">rndz</span><span class="o">.</span><span class="n">get_graph_params</span><span class="p">()</span>
+<span class="linenos">17</span><span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="linenos">18</span><span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="linenos">19</span><span class="c1">#         L_1       Z_1       L_2       L_3        Z_2        Z_3</span>
+<span class="linenos">20</span><span class="c1"># 0  0.192125 -0.523060 -1.064670 -1.345416  -4.565572  -5.873356</span>
+<span class="linenos">21</span><span class="c1"># 1 -1.383525  0.079110 -3.010643 -5.204452 -11.578450 -12.299672</span>
+<span class="linenos">22</span><span class="c1"># 2  1.675641 -1.298673  2.850752  4.498497   7.355618   5.460474</span>
+<span class="linenos">23</span><span class="c1"># 3 -0.546389  0.540718 -0.436297 -1.625131  -2.717709  -1.557761</span>
+</pre></div>
+</div>
+</div>
+<p>argument <cite>adj_matrix_mask</cite> is a further restriction by the user to limit the new edges. For example we can suppress any outgoing edge from <cite>L_1</cite> if in this mask, first row is all zero (rows and columns follow the same order of the nodes in the graph description file of the parent and child graphs respectively).</p>
+<p>ConnectionRandomizer creates a temp graph description file as an intermediate step, which deletes it after the process if <code class="docutils literal notranslate"><span class="pre">delete_temp_graph_description=False</span></code>. To check how the class works, we can have a look at this temp file.</p>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">temp file: <cite>combined_gdf.yml</cite></span><a class="headerlink" href="#id11" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>L_1: gaussian(mu_=0, sigma_=1)
+<span class="linenos"> 2</span>L_2: gaussian(mu_=2L_1-1, sigma_=1)
+<span class="linenos"> 3</span>L_3: gaussian(mu_=L_2+L_1, sigma_=1)
+<span class="linenos"> 4</span>Z_1: gaussian(mu_=0,sigma_=1)
+<span class="linenos"> 5</span>Z_2: gaussian(mu_=2Z_1+1.31L_2+1.33L_3,sigma_=1)
+<span class="linenos"> 6</span>Z_3: gaussian(mu_=Z_1+Z_2+1.83L_3,sigma_=1)
+<span class="linenos"> 7</span>L_1-&gt;L_2: identity()
+<span class="linenos"> 8</span>L_1-&gt;L_3: identity()
+<span class="linenos"> 9</span>L_2-&gt;L_3: identity()
+<span class="hll"><span class="linenos">10</span>L_2-&gt;Z_2: identity()
+</span><span class="hll"><span class="linenos">11</span>L_3-&gt;Z_2: identity()
+</span><span class="hll"><span class="linenos">12</span>L_3-&gt;Z_3: gaussian_rbf(?)
+</span><span class="linenos">13</span>Z_1-&gt;Z_2: identity()
+<span class="linenos">14</span>Z_1-&gt;Z_3: identity()
+<span class="linenos">15</span>Z_2-&gt;Z_3: identity()
+</pre></div>
+</div>
+</div>
+<p>The highlighted lines show the traces of the new connection between graphs. Note that this description file is next passed to the <cite>ParamRandomizer</cite>, the parent class of <cite>ConnectionRandomizer</cite>, and that is why there are question marks in the description file.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The density of new edges follows the <cite>graph_density</cite> entry in the guideline file. However, based on asterisks and adjacency matrix mask, number of edges might be less than intended. E.g., <cite>graph_density: 1</cite> tells PARCS to fully connect the parent graph to child graph. However, if the child nodes doesn’t have asterisks in parameters, PARCS will skip all nodes (as we have requested no parameter to be affected by new edges), hence no new edges will be added.</p>
+</div>
+</section>
+<section id="edge-correction">
+<h2>Edge correction<a class="headerlink" href="#edge-correction" title="Permalink to this heading"></a></h2>
+<p>When randomizing the graph parameters, we potentially face two undesired issues:</p>
+<ol class="arabic simple">
+<li><p>For edge functions such as Sigmoid and Gaussian RBF, if the parent output is too far away from the active region of the function, we will end up with low variability in the transformed values. For example, If for a Sigmoid edge function, the output distribution of the parent node is <span class="math notranslate nohighlight">\(\mathcal{N}(10, 2)\)</span>, then the transformed values of a Sigmoid edge function for 1000 samples are in the range of <span class="math notranslate nohighlight">\((0.9912\dots, 0.9999\dots)\)</span>.</p></li>
+<li><p>Take an example of a node with 3 parents, 2 of which are subjected to Sigmoid edge function and have a <span class="math notranslate nohighlight">\([0, 1]\)</span> support while calculating the child node’s distribution parameters, while the remaining is subjected to the identity function and retain its original support. In this case, we have an imbalance when calculating the distribution coefficients, as we pick the distribution coefficients randomly from the same value range for all parents.</p></li>
+</ol>
+<p>In general, both items indicate an issue similar to the issue of <em>sensitivity of calculations to unit of measurement</em>, and of course the remedy to that can be the same, which is normalization. In issue 1, normalization brings the values to the active region of the edge function, and in issue 2, it brings all the parents to the same scale.</p>
+<p>Such normalization can be done via activating the <cite>correction</cite> option for the edges. PARCS automatically activates edge correction when randomizing the parameters. But in general, we can do edge correction in any simulation, by modifying the graph description file.</p>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">graph_description.yml</span><a class="headerlink" href="#id12" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1"># === A causal Triangle: Treatment, Outcome, Confounder ===</span>
+<span class="linenos">2</span><span class="c1"># nodes</span>
+<span class="linenos">3</span><span class="n">C</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">4</span><span class="n">A</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">5</span><span class="n">Y</span><span class="p">:</span> <span class="n">bernoulli</span><span class="p">(</span><span class="n">p_</span><span class="o">=</span><span class="n">C</span><span class="o">+</span><span class="n">A</span><span class="p">),</span> <span class="n">correction</span><span class="p">[]</span>
+<span class="linenos">6</span><span class="c1"># edges</span>
+<span class="linenos">7</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">A</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">8</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">9</span><span class="n">A</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">graph.py</span><a class="headerlink" href="#id13" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">from</span> <span class="nn">pyparcs.cdag.graph_objects</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="linenos">2</span><span class="kn">from</span> <span class="nn">pyparcs.graph_builder.parsers</span> <span class="kn">import</span> <span class="n">graph_file_parser</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">graph_file_parser</span><span class="p">(</span><span class="s1">&#39;graph_description_edge.yml&#39;</span><span class="p">)</span>
+<span class="linenos">5</span><span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="linenos">6</span>
+<span class="linenos">7</span><span class="n">samples</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="linenos">8</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="linenos">9</span><span class="c1"># 1.0</span>
+</pre></div>
+</div>
+</div>
+<p>In this example, the variable Y has the mean of <cite>1.0</cite> because of the mean of A and C. Now we activate correction for <cite>A-&gt;Y</cite> and <cite>C-&gt;Y</cite> edges:</p>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text">graph_description.yml</span><a class="headerlink" href="#id14" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1"># === A causal Triangle: Treatment, Outcome, Confounder ===</span>
+<span class="linenos">2</span><span class="c1"># nodes</span>
+<span class="linenos">3</span><span class="n">C</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">4</span><span class="n">A</span><span class="p">:</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">5</span><span class="n">Y</span><span class="p">:</span> <span class="n">bernoulli</span><span class="p">(</span><span class="n">p_</span><span class="o">=</span><span class="n">C</span><span class="o">+</span><span class="n">A</span><span class="p">),</span> <span class="n">correction</span><span class="p">[]</span>
+<span class="linenos">6</span><span class="c1"># edges</span>
+<span class="linenos">7</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">A</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="hll"><span class="linenos">8</span><span class="n">C</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">(),</span> <span class="n">correction</span><span class="p">[]</span>
+</span><span class="hll"><span class="linenos">9</span><span class="n">A</span><span class="o">-&gt;</span><span class="n">Y</span><span class="p">:</span> <span class="n">identity</span><span class="p">(),</span> <span class="n">correction</span><span class="p">[]</span>
+</span></pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text">graph.py</span><a class="headerlink" href="#id15" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">graph_file_parser</span><span class="p">(</span><span class="s1">&#39;graph_description_edge_2.yml&#39;</span><span class="p">)</span>
+<span class="linenos">2</span><span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="n">samples</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="linenos">5</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="linenos">6</span><span class="c1"># 0.477</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Similar to <a class="reference internal" href="../first_steps/first_graph.html#node-correction-node"><span class="std std-ref">Node correction</span></a> <strong>edge correction parameters (i.e. mean and standard deviation) is always initialized upon the first batch of data</strong>. For this purpose, the graph object always <cite>burns</cite> the first 500 samples, to initialize the corrections. Read more about edge correction at <code class="xref py py-func docutils literal notranslate"><span class="pre">EdgeCorrection()</span></code>.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="interventions.html" class="btn btn-neutral float-left" title="Interventions, Counterfactuals" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="looping.html" class="btn btn-neutral float-right" title="Looping over randomized parameters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Fraunhofer Institute for Cognitive Systems (IKS).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
