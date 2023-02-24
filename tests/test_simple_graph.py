@@ -17,7 +17,7 @@
 #  https://www.gnu.de/documents/gpl-2.0.de.html
 #
 #  Contact: alireza.zamanian@iks.fraunhofer.de
-from pyparcs.cdag.graph_objects import *
+from pyparcs.cdag.graph_objects import Node, DetNode, Graph
 from pyparcs.graph_builder.parsers import *
 from pyparcs.cdag.mapping_functions import *
 import os
@@ -31,8 +31,17 @@ class TestSimpleGraph:
             gdf.write(yml)
 
     @staticmethod
-    def remove_gdf(dir_):
-        os.remove(dir_)
+    def write_custompy(script):
+        with open('custom.py', 'w') as cpy:
+            cpy.write(script)
+
+    @staticmethod
+    def remove_gdf():
+        os.remove('gdf.yml')
+
+    @staticmethod
+    def remove_custompy():
+        os.remove('custom.py')
 
     def test_graph_1(self):
         self.write_gdf(
@@ -76,7 +85,7 @@ class TestSimpleGraph:
             'Z_2': edge_sigmoid(data['Z_2'].values, alpha=1, beta=0, gamma=0, tau=1)})
         data['Z_3'] = z_3.calculate(input_data, ['Z_1', 'Z_2'], errors['Z_3'])
         assert samples.equals(data)
-        self.remove_gdf('gdf.yml')
+        self.remove_gdf()
 
     def test_graph_2(self):
         self.write_gdf(
@@ -108,7 +117,7 @@ class TestSimpleGraph:
         data['Z_1'] = z_1.calculate(data, [], errors['Z_1'])
         data['Z_2'] = z_2.calculate(data, ['Z_1'], errors['Z_2'])
         assert samples.equals(data)
-        self.remove_gdf('gdf.yml')
+        self.remove_gdf()
 
     def test_graph_3(self):
         self.write_gdf(
@@ -154,4 +163,37 @@ class TestSimpleGraph:
             'Z_2': edge_arctan(data['Z_2'].values, alpha=1, beta=0, gamma=0)})
         data['Z_3'] = z_3.calculate(input_data, ['Z_1', 'Z_2'], errors['Z_3'])
         assert samples.equals(data)
-        self.remove_gdf('gdf.yml')
+        self.remove_gdf()
+
+    def test_graph_4(self):
+        self.write_gdf(
+            ("Z_1: gaussian(mu_=0, sigma_=1)\n"
+             "Z_2: deterministic(custom.py, custom_function)\n"
+             "Z_1->Z_2: identity()\n")
+        )
+        self.write_custompy(
+            ("import pandas as pd\n"
+             "def custom_function(data):\n"
+             "\treturn data['Z_1'] + 1\n")
+        )
+        # PARCS Graph
+        nodes, edges = graph_file_parser('gdf.yml')
+        g = Graph(nodes, edges)
+        samples, errors = g.sample(10, return_errors=True)
+
+        # Manual graph
+        z_1 = Node(name='Z_1',
+                   output_distribution='gaussian',
+                   dist_params_coefs={
+                       'mu_': {'bias': 0, 'linear': [], 'interactions': []},
+                       'sigma_': {'bias': 1, 'linear': [], 'interactions': []}},
+                   do_correction=False
+                   )
+        z_2 = DetNode(name='Z_2', function=lambda x: x['Z_1'] + 1)
+
+        data = pd.DataFrame([], columns=('Z_1', 'Z_2'))
+        data['Z_1'] = z_1.calculate(data, [], errors['Z_1'])
+        data['Z_2'] = z_2.calculate(data)
+        assert samples.equals(data)
+        self.remove_gdf()
+        self.remove_custompy()

@@ -19,20 +19,22 @@
 #  Contact: alireza.zamanian@iks.fraunhofer.de
 
 import re
+from typing import List, Tuple
+from typeguard import typechecked
 import numpy as np
 from pyparcs.graph_builder.utils import config_parser
 from pyparcs.cdag.output_distributions import DISTRIBUTION_PARAMS
 from pyparcs.cdag.mapping_functions import EDGE_FUNCTIONS, FUNCTION_PARAMS
 from pyparcs.cdag.utils import get_interactions_length, get_interactions_dict
-from pyparcs.exceptions import *
-from typeguard import typechecked
-from typing import List, Tuple
+from pyparcs.exceptions import (parcs_assert, DescriptionFileError, ExternalResourceError,
+                                GuidelineError)
 
 
 @typechecked
 def term_parser(term: str, vars_: List[str]) -> Tuple[list, float]:
     """
-    parses the terms (between plus signs). gives list of parents and the multiplicative coef of the term
+    parses the terms (between plus signs). gives list of parents and
+    the multiplicative coef of the term
 
     Parameters
     ----------
@@ -51,25 +53,29 @@ def term_parser(term: str, vars_: List[str]) -> Tuple[list, float]:
     Raises
     ------
     DescriptionFileError
-        If the terms are invalid. Cases: non-existing parents, terms other than bias, linear, interactions, etc.
+        If the terms are invalid. Cases: non-existing parents, terms other than bias, linear,
+        interactions, etc.
     """
-    err_msg = '''The term {} in the description file is invalid.
-    Another possibility is that a node name exists in another node\'s parameter, while it is not marked as
-    a parent by the described edges; in this case, check for the nodes/edges consistency.
-    '''.format(term)  # for potential errors
+    err_msg = f'''The term {term} in the description file is invalid.
+    Another possibility is that a node name exists in another node\'s parameter,
+    while it is not marked as a parent by the described edges; in this case, check for the
+    nodes/edges consistency.
+    ''' # for potential errors
     pars = []
     for var in vars_:
         # check if X^2 exists:
-        res = re.search(r'{}\^2'.format(var), term)
+        res = re.search(rf'{var}\^2', term)
         if res is not None:  # a term like 'X^2' exists
-            parcs_assert(len(pars) == 0, DescriptionFileError, err_msg)  # quad parent must be the only parent
+            # quad parent must be the only parent
+            parcs_assert(len(pars) == 0, DescriptionFileError, err_msg)
             inds = res.span(0)
-            parcs_assert(len(term) == inds[1], DescriptionFileError, err_msg)  # '^2' must be the last char
+            # '^2' must be the last char
+            parcs_assert(len(term) == inds[1], DescriptionFileError, err_msg)
             pars = [var, var]
             term = term[0:inds[0]] + term[inds[1]:]
             break  # do not check other variables because we cannot have 'YX^2'
         # it's not quadratic. check other possibilities
-        res = re.search(r'{}'.format(var), term)
+        res = re.search(fr'{var}(?!\d+)', term)
         if res is not None:
             inds = res.span(0)
             pars.append(var)
@@ -81,14 +87,17 @@ def term_parser(term: str, vars_: List[str]) -> Tuple[list, float]:
     else:
         try:
             coef = float(term)
-        except ValueError:
-            raise DescriptionFileError(err_msg)  # there are other chars apart from quad term and coef.
+        except ValueError as exc:
+            # there are other chars apart from quad term and coef.
+            raise DescriptionFileError(err_msg) from exc
     return pars, coef
 
 
 def equation_parser(eq: str, vars_: List[str]) -> List[Tuple[List[str], float]]:
     """
-    parses the equation strings as lists of terms. each term includes tuples of parent lists and coefficient.
+    parses the equation strings as lists of terms. each term includes tuples of parent lists
+    and coefficient.
+
     Parameters
     ----------
     eq : str
@@ -113,7 +122,7 @@ def equation_parser(eq: str, vars_: List[str]) -> List[Tuple[List[str], float]]:
     # 3. check for duplicates
     parents = [frozenset(e[0]) for e in eq]
     parcs_assert(len(set(parents)) == len(parents),
-                 DescriptionFileError, "Duplicated terms exist in equation {}".format(eq))
+                 DescriptionFileError, f"Duplicated terms exist in equation {eq}")
 
     return eq
 
@@ -121,11 +130,13 @@ def equation_parser(eq: str, vars_: List[str]) -> List[Tuple[List[str], float]]:
 @typechecked
 def node_parser(line: str, parents: List[str]) -> dict:
     """
-    Parses a line in graph description file, and gives the appropriate dictionary to initiate a node. Keys are
-    - for stochastic node: 'output_distribution', 'dist_params_coefs', 'do_correction', 'correction_config'
-    - for constant node: 'value'
-    - for data node: 'csv_dir'
-    - for deterministic node: 'function'
+    Parses a line in description file, and gives the appropriate dictionary to initiate a node.
+    Keys are:
+    - stochastic node: 'output_distribution', 'dist_params_coefs', 'do_correction',
+    'correction_config'
+    - constant node: 'value'
+    - data node: 'csv_dir'
+    - deterministic node: 'function'
 
     Parameters
     ----------
@@ -144,13 +155,17 @@ def node_parser(line: str, parents: List[str]) -> dict:
     interactions_dict = get_interactions_dict(parents)  # get order of interactions
     line = line.replace(' ', '')  # remove spaces
 
-    data_pattern = re.compile(r'data\((.*)\)')  # data node regex pattern
-    const_pattern = re.compile(r'constant\((-?[0-9]+(\.[0-9]+)?)\)')  # constant node regex pattern
-    det_pattern = re.compile(
-        r'deterministic\((.*),(.*)\)'.format('|'.join(DISTRIBUTION_PARAMS.keys())))  # deterministic node regex pattern
-    stoch_pattern = re.compile(
-        r'({})\((.*)\)'.format('|'.join(DISTRIBUTION_PARAMS.keys())))  # stochastic node regex pattern
-    correction_pattern = re.compile(r'correction\[(.*)]')  # correction regex pattern, only for stochastic
+    # data node regex pattern
+    data_pattern = re.compile(r'data\((.*)\)')
+    # constant node regex pattern
+    const_pattern = re.compile(r'constant\((-?[0-9]+(\.[0-9]+)?)\)')
+    # deterministic node regex pattern
+    det_pattern = re.compile(r'deterministic\((.*),(.*)\)')
+    # stochastic node regex pattern
+    join_param_keys = '|'.join(DISTRIBUTION_PARAMS.keys())
+    stoch_pattern = re.compile(fr'({join_param_keys})\((.*)\)')
+    # correction regex pattern, only for stochastic
+    correction_pattern = re.compile(r'correction\[(.*)]')
 
     # 1. random node (stochastic)
     if line == 'random':
@@ -180,10 +195,9 @@ def node_parser(line: str, parents: List[str]) -> dict:
         raw_value = res.group(1)
         if len(res.groups()) == 2:
             return {'value': float(raw_value)}
-        elif len(res.groups()) == 1:  # doesn't have floating part
+        if len(res.groups()) == 1:  # doesn't have floating part
             return {'value': int(raw_value)}
-        else:
-            raise AttributeError
+        raise AttributeError
     except AttributeError:
         # it's not constant
         pass
@@ -197,12 +211,14 @@ def node_parser(line: str, parents: List[str]) -> dict:
         function_name = res.group(2)
         try:
             function_file = __import__(directory)
-        except ModuleNotFoundError:
-            raise ExternalResourceError('Python script {} containing the function does not exist.'.format(directory))
+        except ModuleNotFoundError as exc:
+            raise ExternalResourceError(f'Python script {directory} containing the function does '
+                                        f'not exist.') from exc
         try:
             function = getattr(function_file, function_name)
-        except AttributeError:
-            raise ExternalResourceError('Python function {} not existing in script {}'.format(function_name, directory))
+        except AttributeError as exc:
+            raise ExternalResourceError(f'Python function {function_name} not existing in script '
+                                        f'{directory}') from exc
         return {
             'function': function
         }
@@ -215,14 +231,13 @@ def node_parser(line: str, parents: List[str]) -> dict:
         res = stoch_pattern.search(line)
         dist = res.group(1)
         params = res.group(2)
-    except AttributeError:
+    except AttributeError as exc:
         raise DescriptionFileError(
-            '''description line '{}' cannot be parsed. check the following:
+            f'''description line '{line}' cannot be parsed. check the following:
                 - distribution names
                 - input arguments for a node type
                 - unwanted invalid characters
-            '''.format(line)
-        )
+            ''') from exc
     # split into param - value
     try:
         keys_ = [p.split('=')[0] for p in params.split(',')]
@@ -236,16 +251,14 @@ def node_parser(line: str, parents: List[str]) -> dict:
     parcs_assert(
         set(keys_) == set(DISTRIBUTION_PARAMS[dist]),
         DescriptionFileError,
-        "params {} not valid for distribution '{}'".format(set(keys_), dist)
+        f"params {set(keys_)} not valid for distribution '{dist}'"
     )
     parcs_assert(
         len(set(keys_)) == len(keys_),
         DescriptionFileError,
-        "duplicate params for distribution '{}'".format(dist)
+        f"duplicate params for distribution '{dist}'"
     )
-    params = {
-        k: v for k, v in zip(keys_, values_)
-    }
+    params = dict(zip(keys_, values_))
 
     # process params
     for p in params:
@@ -289,8 +302,8 @@ def node_parser(line: str, parents: List[str]) -> dict:
         do_correction = True
     except AttributeError:  # default values
         pass
-    except ValueError:  # the values are not float
-        raise DescriptionFileError("correction params are invalid: {}".format(res))
+    except ValueError as exc:  # the values are not float
+        raise DescriptionFileError(f"correction params are invalid: {res}") from exc
 
     return {
         'output_distribution': dist,
@@ -310,15 +323,15 @@ def edge_parser(line):
         }
 
     # find the func(p1=v1, ...) pattern
-    output_params_pattern = re.compile(
-        r'({})\((.*)\)'.format('|'.join(EDGE_FUNCTIONS.keys()))
-    )
+    edge_func_keys = '|'.join(EDGE_FUNCTIONS.keys())
+    output_params_pattern = re.compile(rf'({edge_func_keys})\((.*)\)')
     try:
         res = output_params_pattern.search(line)
         func = res.group(1)
         params = res.group(2)
-    except AttributeError:
-        raise DescriptionFileError("edge function '{}' unknown".format(line.split('(')[0]))
+    except AttributeError as exc:
+        func = line.split('(')[0]
+        raise DescriptionFileError(f"edge function '{func}' unknown") from exc
 
     # split into param - value
     try:
@@ -329,16 +342,17 @@ def edge_parser(line):
                 func_params[p.split('=')[0]] = float(p.split('=')[1])
             except ValueError:
                 # only ? is allowed as non float
-                parcs_assert(p.split('=')[1] == '?', DescriptionFileError, "wrong param input: {}".format(line))
+                parcs_assert(p.split('=')[1] == '?', DescriptionFileError,
+                             f"wrong param input: {line}")
                 func_params[p.split('=')[0]] = '?'
         parcs_assert(
             set(func_params.keys()) == set(FUNCTION_PARAMS[func]),
             DescriptionFileError,
-            '''
+            f'''
             edge function params are invalid or incomplete. if you want to leave a parameter random,
             specify it explicitly by param=?.
-            faulty description file line is: {}
-            '''.format(line)
+            faulty description file line is: {line}
+            '''
         )
     except IndexError:
         # function has no params
@@ -365,7 +379,7 @@ def edge_parser(line):
 
 def graph_file_parser(file_dir):
     """**Parser for graph description YAML files**
-    This function reads the graph description ``.yml`` files and returns the list of nodes and edges.
+    This function reads the graph description `.yml` files and returns the list of nodes and edges.
     These lists are used to instantiate a :func:`~pyparcs.cdag.graph_objects.Graph` object.
 
     See Also
@@ -385,8 +399,8 @@ def graph_file_parser(file_dir):
         return [], []
     try:
         file = config_parser(file_dir)
-    except Exception as e:
-        raise DescriptionFileError("Error in parsing YAML file. The native error from yaml package: {}".format(e))
+    except Exception as exc:
+        raise DescriptionFileError("Error in parsing YAML file.") from exc
     # edges
     edges = [{
         'name': e,
@@ -405,7 +419,7 @@ def graph_file_parser(file_dir):
     )
     # 1. node in edges are also in node list
     edge_names = [e['name'] for e in edges]
-    node_in_edge = set([i for element in edge_names for i in element.split('->')])
+    node_in_edge = {i for element in edge_names for i in element.split('->')}
     parcs_assert(
         node_in_edge.issubset(set(node_list)),
         DescriptionFileError,
@@ -431,5 +445,5 @@ def graph_file_parser(file_dir):
 def guideline_parser(file_dir):
     try:
         return config_parser(file_dir)
-    except Exception as e:
-        raise GuidelineError("Error in parsing YAML file. The native error from yaml package: {}".format(e))
+    except Exception as exc:
+        raise GuidelineError("Error in parsing YAML file.") from exc

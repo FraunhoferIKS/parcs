@@ -19,16 +19,17 @@
 #  Contact: alireza.zamanian@iks.fraunhofer.de
 
 import warnings
+from itertools import combinations_with_replacement as comb_w_repl
 import numpy as np
 import pandas as pd
 from scipy.special import expit
-from itertools import combinations_with_replacement as comb_w_repl
 from pyparcs.exceptions import parcs_assert
 
 
 def topological_sort(adj_matrix: pd.DataFrame = None):
     """
-    performs topological sorting of a given adjacency matrix. It is an implementation of Kahn's algorithm.
+    performs topological sorting of a given adjacency matrix.
+    It is an implementation of Kahn's algorithm.
 
     Parameters
     ----------
@@ -88,8 +89,8 @@ def get_interactions(data):
 
     Returns the columns of product of interaction terms. The interaction terms are of length 2.
     The order of interaction terms follow the order
-    of ``itertools.combination_with_replacement`` module. Example: for ``[X,Y,Z]`` the method returns:
-    ``[XX, XY, XZ, YY, YZ, ZZ]``.
+    of ``itertools.combination_with_replacement`` module. Example:
+    for ``[X,Y,Z]`` the method returns: ``[XX, XY, XZ, YY, YZ, ZZ]``.
 
     Parameters
     ----------
@@ -209,17 +210,18 @@ class SigmoidCorrection:
             x^{'} = ( U - L ) \sigma(x - x_0) + L, \quad \sigma(a) = \frac{1}{1+e^{-a}}
         \end{align}
 
-    where :math:`U` and :math:`L` are user-defined upper and lower bounds for transformed variable, and :math:`X_0`
-    is the `offset` which is defined according to user needs, defined by ``target_mean`` and ``to_center`` parameters.
-    see the parameter descriptions below for more details.
+    where :math:`U` and :math:`L` are user-defined upper and lower bounds for transformed variable,
+    and :math:`X_0` is the `offset` which is defined according to user needs, defined by
+    ``target_mean`` and ``to_center`` parameters. see the parameter descriptions below for more
+    details.
 
     Parameters
     ----------
     lower, upper : float
         lower and upper bounds for transformed variable
     target_mean : float, default=None
-        If a float value (not ``None``), then the mean of transformed value is fixed. This value must be
-        in the `[L, U]` range.
+        If a float value (not ``None``), then the mean of transformed value is fixed. This value
+        must be in the `[L, U]` range.
 
     Raises
     ------
@@ -228,8 +230,8 @@ class SigmoidCorrection:
 
     Examples
     --------
-    This class is used internally by PARCS if `correction` parameter is chosen for a node. However, to understand
-    the functionality better, we make an example using the class:
+    This class is used internally by PARCS if `correction` parameter is chosen for a node. However,
+    to understand the functionality better, we make an example using the class:
 
     >>> from pyparcs.cdag.utils import SigmoidCorrection
     >>> import numpy
@@ -244,8 +246,9 @@ class SigmoidCorrection:
     0.019 1.0 0.8
 
     .. note::
-        If ``target_mean`` is given, sigmoid correction searches for an offset term to add to the input values,
-        such that the required mean is obtained. The process is a manual search near the support of data points.
+        If ``target_mean`` is given, sigmoid correction searches for an offset term to add
+        to the input values, such that the required mean is obtained. The process is a manual
+        search near the support of data points.
     """
 
     def __init__(self, lower=0, upper=1, target_mean=None):
@@ -305,8 +308,8 @@ class SigmoidCorrection:
 
 class EdgeCorrection:
     r"""
-    This object normalizes the input variables using the mean and standard deviation **of the first data batch** that
-    it receives.
+    This object normalizes the input variables using the mean and standard deviation
+    of the first data batch** that it receives.
 
     .. math::
         \begin{align}
@@ -316,8 +319,8 @@ class EdgeCorrection:
 
     Examples
     --------
-    This class is used internally by PARCS if `correction` parameter is chosen for an edge. However, to understand
-    the functionality better, we make an example using the class:
+    This class is used internally by PARCS if `correction` parameter is chosen for an edge. However,
+    to understand the functionality better, we make an example using the class:
 
     >>> from pyparcs.cdag.utils import EdgeCorrection
     >>> import numpy

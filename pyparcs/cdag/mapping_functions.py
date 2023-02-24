@@ -20,8 +20,8 @@
 
 import numpy as np
 from scipy.special import expit
-from pyparcs.exceptions import EdgeFunctionError, parcs_assert
 from typeguard import typechecked
+from pyparcs.exceptions import EdgeFunctionError, parcs_assert
 
 ALPHA_MIN, ALPHA_MAX = 0.1, 10
 BETA_MIN, BETA_MAX = -5, 5
@@ -36,7 +36,8 @@ def edge_empty(**kwargs):
 
 @typechecked
 def edge_sigmoid(array: np.ndarray = None,
-                 alpha: float = 2.0, beta: float = 0.0, gamma: float = 0, tau: float = 1) -> np.ndarray:
+                 alpha: float = 2.0, beta: float = 0.0,
+                 gamma: float = 0, tau: float = 1) -> np.ndarray:
     r"""
     This edge function transforms input variable according to the following equation:
 
@@ -73,7 +74,8 @@ def edge_sigmoid(array: np.ndarray = None,
                  f'beta should be a float in [{BETA_MIN}, {BETA_MAX}], got {beta} instead')
     parcs_assert(gamma in GAMMA_RANGE, EdgeFunctionError,
                  f'gamma should be an integer in {GAMMA_RANGE}, got {gamma} instead')
-    parcs_assert(tau % 2 == 1, EdgeFunctionError, f'tau should be an odd integer, got {tau} instead')
+    parcs_assert(tau % 2 == 1, EdgeFunctionError,
+                 f'tau should be an odd integer, got {tau} instead')
 
     expon = (-1) ** gamma * alpha * ((array - beta) ** tau)
 
@@ -82,7 +84,8 @@ def edge_sigmoid(array: np.ndarray = None,
 
 @typechecked
 def edge_gaussian_rbf(array: np.ndarray = None,
-                      alpha: float = 1.0, beta: float = 0, gamma: float = 0, tau: float = 2) -> np.ndarray:
+                      alpha: float = 1.0, beta: float = 0,
+                      gamma: float = 0, tau: float = 2) -> np.ndarray:
     r"""
     .. math::
         \begin{align}
@@ -118,7 +121,8 @@ def edge_gaussian_rbf(array: np.ndarray = None,
                  f'beta should be a float in [{BETA_MIN}, {BETA_MAX}], got {beta} instead')
     parcs_assert(gamma in GAMMA_RANGE, EdgeFunctionError,
                  f'gamma should be an integer in {GAMMA_RANGE}, got {gamma} instead')
-    parcs_assert(tau % 2 == 0, EdgeFunctionError, f'tau should be an even integer, got {tau} instead')
+    parcs_assert(tau % 2 == 0, EdgeFunctionError,
+                 f'tau should be an even integer, got {tau} instead')
 
     expon = -alpha * ((array - beta) ** tau)
 

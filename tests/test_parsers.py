@@ -38,18 +38,23 @@ class TestTermParser:
         ('-0', ['A', 'B', 'Z_1'], [], 0),
         ('-0.6', ['A', 'B', 'Z_1'], [], -0.6),
         ('-2', ['A', 'B', 'Z_1'], [], -2),
+        ('-2', ['Z_1', 'Z_11', 'Z_19'], [], -2), # names which are identical up to a letter: Z_1, Z_11
         # linear terms
         ('B', ['A', 'B', 'Z_1'], ['B'], 1),
         ('-0.3Z_1', ['A', 'B', 'Z_1'], ['Z_1'], -0.3),
         ('1.7A', ['A', 'B', 'Z_1'], ['A'], 1.7),
+        ('4Z_11', ['Z_1', 'Z_11', 'Z_19'], ['Z_11'], 4), # names which are identical up to a letter: Z_1, Z_11
+        ('3Z_1', ['Z_1', 'Z_11', 'Z_19'], ['Z_1'], 3),  # names which are identical up to a letter: Z_1, Z_11
         # interaction terms
         ('ABZ_1', ['A', 'B', 'Z_1'], ['A', 'B', 'Z_1'], 1),
         ('2Z_1A', ['A', 'B', 'Z_1'], ['A', 'Z_1'], 2),
         ('-0.3BA', ['A', 'B', 'Z_1'], ['A', 'B'], -0.3),
+        ('4Z_11Z_1', ['Z_1', 'Z_11', 'Z_19'], ['Z_11', 'Z_1'], 4),  # ... identical up to a letter: Z_1, Z_11
         # quadratic terms
         ('A^2', ['A', 'B', 'Z_1'], ['A', 'A'], 1),
         ('1.6Z_1^2', ['A', 'B', 'Z_1'], ['Z_1', 'Z_1'], 1.6),
-        ('-3B^2', ['A', 'B', 'Z_1'], ['B', 'B'], -3)
+        ('-3B^2', ['A', 'B', 'Z_1'], ['B', 'B'], -3),
+        ('Z_1^2', ['Z_1', 'Z_11', 'Z_19'], ['Z_1', 'Z_1'], 1)  # names which are identical up to a letter: Z_1, Z_11
     ])
     def test_parse_terms_correctly(term, vars, exp_pars, exp_coef):
         """
@@ -97,7 +102,8 @@ class TestEquationParser:
     @pytest.mark.parametrize('eq,vars,output', [
         ('2+A-2.8B', ['A', 'B'], [([], 2), (['A'], 1.0), (['B'], -2.8)]),  # example equation, no space
         ('1', ['A', 'B'], [([], 1)]),  # only bias
-        ('A^2-2AB', ['A', 'B'], [(['A', 'A'], 1), (['A', 'B'], -2.0)])  # quadratic terms with space
+        ('A^2-2AB', ['A', 'B'], [(['A', 'A'], 1), (['A', 'B'], -2.0)]),  # quadratic terms with space
+        ('Z_1Z_11 + 2Z_11 - Z_1', ['Z_1', 'Z_11'], [(['Z_1', 'Z_11'], 1), (['Z_11'], 2.0), (['Z_1'], -1.0)])
     ])
     def test_parse_equations(eq, vars, output):
         """
