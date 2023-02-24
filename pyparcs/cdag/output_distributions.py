@@ -18,11 +18,10 @@
 #
 #  Contact: alireza.zamanian@iks.fraunhofer.de
 
-from pyparcs.cdag.utils import dot_prod
-from pyparcs.cdag.utils import SigmoidCorrection
-from scipy import stats as dists
 import numpy as np
-from pyparcs.exceptions import *
+from scipy import stats as dists
+from pyparcs.cdag.utils import dot_prod, SigmoidCorrection
+from pyparcs.exceptions import parcs_assert, DistributionError
 
 DISTRIBUTION_PARAMS = {
     'gaussian': ['mu_', 'sigma_'],
@@ -89,7 +88,7 @@ class PARCSDistribution:
             param: self.params[param].calculate(data)
             for param in self.params
         }  # for each param, calculate the values based on parents values
-        self._validate_params(param_realization)  # validate the range of the params (e.g. bernoulli p > 1 is invalid)
+        self._validate_params(param_realization)  # (e.g. bernoulli p > 1 is invalid)
         # calculate the realizations based on the error
         return self.icdf(errors, **self._parcs_to_icdf_map_param(param_realization))
 
@@ -107,7 +106,8 @@ class BernoulliDistribution(PARCSDistribution):
                  do_correction=True,
                  correction_config=None):
         super().__init__(icdf=dists.bernoulli.ppf, params=['p_'], coefs=coefs,
-                         correctors={'p_': SigmoidCorrection(**correction_config) if do_correction else None})
+                         correctors={'p_': SigmoidCorrection(**correction_config) if do_correction
+                         else None})
 
     def _validate_params(self, params):
         p_ = params['p_']
@@ -116,7 +116,8 @@ class BernoulliDistribution(PARCSDistribution):
                          DistributionError,
                          "Bern(p) probabilities are out of [0, 1] range")
         else:
-            parcs_assert(0 <= p_ <= 1, DistributionError, "Bern(p) probabilities are out of [0, 1] range")
+            parcs_assert(0 <= p_ <= 1, DistributionError,
+                         "Bern(p) probabilities are out of [0, 1] range")
 
     @staticmethod
     def _parcs_to_icdf_map_param(params):
@@ -138,7 +139,8 @@ class GaussianNormalDistribution(PARCSDistribution):
         super().__init__(icdf=dists.norm.ppf, params=['mu_', 'sigma_'], coefs=coefs,
                          correctors={
                              'mu_': None,
-                             'sigma_': SigmoidCorrection(**correction_config) if do_correction else None,
+                             'sigma_': SigmoidCorrection(**correction_config) if do_correction
+                             else None,
                          })
 
     def _validate_params(self, params):
@@ -148,7 +150,8 @@ class GaussianNormalDistribution(PARCSDistribution):
                          DistributionError,
                          "Gaussian normal sigma_ has negative values")
         else:
-            parcs_assert(sigma_ >= 0, DistributionError, "Gaussian normal sigma_ has negative values")
+            parcs_assert(sigma_ >= 0, DistributionError,
+                         "Gaussian normal sigma_ has negative values")
 
     @staticmethod
     def _parcs_to_icdf_map_param(params):
@@ -158,8 +161,8 @@ class GaussianNormalDistribution(PARCSDistribution):
 class UniformDistribution(PARCSDistribution):
     """ **Uniform distribution**
 
-    Since the distribution of the sampled errors is Uniform, this class takes the samples as they are,
-    and does loc-scale to satisfy the given parameters.
+    Since the distribution of the sampled errors is Uniform, this class takes the samples
+    as they are, and does loc-scale to satisfy the given parameters.
     """
     def __init__(self,
                  coefs=None,
@@ -196,7 +199,8 @@ class ExponentialDistribution(PARCSDistribution):
             icdf=dists.expon.ppf,
             params=['lambda_'],
             coefs=coefs,
-            correctors={'lambda_': SigmoidCorrection(**correction_config) if do_correction else None}
+            correctors={'lambda_': SigmoidCorrection(**correction_config) if do_correction
+            else None}
         )
 
     def _validate_params(self, params):
@@ -206,7 +210,8 @@ class ExponentialDistribution(PARCSDistribution):
                          DistributionError,
                          "Exponential lambda has non-positive values")
         else:
-            parcs_assert(lambda_ > 0, DistributionError, "Exponential lambda has non-positive values")
+            parcs_assert(lambda_ > 0, DistributionError,
+                         "Exponential lambda has non-positive values")
 
     @staticmethod
     def _parcs_to_icdf_map_param(params):
@@ -229,7 +234,8 @@ class PoissonDistribution(PARCSDistribution):
             icdf=dists.poisson.ppf,
             params=['lambda_'],
             coefs=coefs,
-            correctors={'lambda_': SigmoidCorrection(**correction_config) if do_correction else None}
+            correctors={'lambda_': SigmoidCorrection(**correction_config) if do_correction
+            else None}
         )
 
     def _validate_params(self, params):
@@ -261,7 +267,8 @@ class LogNormalDistribution(PARCSDistribution):
         super().__init__(icdf=dists.lognorm.ppf, params=['mu_', 'sigma_'], coefs=coefs,
                          correctors={
                              'mu_': None,
-                             'sigma_': SigmoidCorrection(**correction_config) if do_correction else None,
+                             'sigma_': SigmoidCorrection(**correction_config) if do_correction
+                             else None,
                          })
 
     def _validate_params(self, params):
