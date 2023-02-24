@@ -166,7 +166,7 @@ class UniformDistribution(PARCSDistribution):
                  do_correction=False,
                  correction_config=None):
         parcs_assert(
-            not do_correction and correction_config is None,
+            not do_correction,
             DistributionError,
             "Uniform distribution does not accept any node correction."
         )
