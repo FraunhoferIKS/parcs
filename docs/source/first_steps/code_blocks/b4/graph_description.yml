@@ -1,0 +1,13 @@
+# === A causal Triangle: Treatment, Outcome, Confounder ===
+# nodes
+A: gaussian(mu_=0, sigma_=1)
+B: bernoulli(p_=0.)
+C: gaussian(mu_=B+A-0.3AB, sigma_=2)
+D: constant(1)
+E: deterministic(custom_func.py, add_function)
+# edges
+A->C: identity()
+B->C: sigmoid()
+A->D: gaussian_rbf()
+A->E: arctan()
+B->E: identity()

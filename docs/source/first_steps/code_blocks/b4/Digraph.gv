@@ -1,0 +1,13 @@
+digraph {
+	graph [rankdir=LR]
+	A [color="#1f77b4" shape=circle]
+	B [color="#2ca02c" shape=circle]
+	C [color="#1f77b4" shape=circle]
+	D [color=black shape=circle]
+	E [color=black shape=circle]
+	A -> C [color=black]
+	B -> C [color="#ff7f0e"]
+	A -> D [color="#2ca02c"]
+	A -> E [color="#d62728"]
+	B -> E [color=black]
+}
