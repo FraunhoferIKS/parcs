@@ -23,10 +23,12 @@ from typing import Optional, Union, List, Callable
 from typeguard import typechecked
 import numpy as np
 import pandas as pd
+import seaborn as sns
+from graphviz import Digraph
 from pyparcs.cdag.utils import topological_sort, EdgeCorrection
-from pyparcs.cdag.output_distributions import OUTPUT_DISTRIBUTIONS
 from pyparcs.cdag.mapping_functions import EDGE_FUNCTIONS
 from pyparcs.graph_builder.utils import info_md_parser
+from pyparcs.cdag.output_distributions import OUTPUT_DISTRIBUTIONS
 from pyparcs.exceptions import (
     parcs_assert, validate_deterministic_function, validate_error_term,
     ExternalResourceError, GraphError, DistributionError
@@ -35,6 +37,22 @@ from pyparcs.exceptions import (
 OUTPUT_DISTRIBUTIONS_KEYS = OUTPUT_DISTRIBUTIONS.keys()
 EDGE_FUNCTIONS_KEYS = EDGE_FUNCTIONS.keys()
 REPORT_TYPES = ['md', 'raw']
+GRAPHVIZ_SHAPE_DICT = {
+    'stochastic': 'circle',
+    'data': 'rectangle',
+    'deterministic': 'rectangle',
+    'constant': 'rectangle'
+}
+GRAPHVIZ_NODE_COLOR_DICT = dict(zip(
+    OUTPUT_DISTRIBUTIONS_KEYS,
+    [f'#{int(c[0] * 255):02x}{int(c[1] * 255):02x}{int(c[2] * 255):02x}' for c in
+     sns.color_palette()[:len(OUTPUT_DISTRIBUTIONS_KEYS)]]
+))
+GRAPHVIZ_EDGE_COLOR_DICT = dict(zip(
+    EDGE_FUNCTIONS_KEYS,
+    [f'#{int(c[0] * 255):02x}{int(c[1] * 255):02x}{int(c[2] * 255):02x}' for c in
+     sns.color_palette()[:len(EDGE_FUNCTIONS_KEYS)]]
+))
 
 
 @typechecked
@@ -527,6 +545,50 @@ class Graph:
                     'sampled errors for data nodes are inconsistent.'
                 )
         return sampled_errors
+
+    def visualize(self, filename, color_coded=True, shape_coded=True, notebook=False):
+        """**Visualize the graph**
+
+        This method uses the `Graphviz <https://pypi.org/project/graphviz/>`_ package to visualize
+        the PARCS graph. If `color_coded=True` and/or `shape_coded=True`,
+        see cdag.graph_objects.GRAPHVIZ_SHAPE_DICT and cdag.graph_objects.GRAPHVIZ_NODE_COLOR_DICT
+        and  cdag.graph_objects.GRAPHVIZ_EDGE_COLOR_DICT for a guide on the codes.
+
+        Parameters
+        ----------
+        filename : str
+            Name of the pdf and gv file if `notebook=False`.
+        color_coded : bool, default=True
+            If `True`, edges and nodes will be color coded based on their functions and
+            distributions.
+        shape_coded : bool, default=True
+            If `True`, nodes will be shape coded based on their type
+        notebook : bool, default=False,
+            If `True` it returns a graphviz `dot` object that if called, the Jupyter notebook
+            displays the image. If `False`, the image is displayed in a new window, and a pdf
+            file is generated in the directory of the main python script.
+
+        Returns
+        -------
+        graphviz dot object or None
+        """
+        dag = Digraph(filename)
+        dag.graph_attr['rankdir'] = 'LR'
+
+        for n in self.nodes:
+            shape_ = GRAPHVIZ_SHAPE_DICT[self.node_types[n]] if shape_coded else 'circle'
+            color_ = 'black' if (self.node_types[n] != 'stochastic' or not color_coded) \
+                else GRAPHVIZ_NODE_COLOR_DICT[self.nodes[n].info['output_distribution']]
+            dag.node(n, shape=shape_, color=color_)
+
+        for e in self.edges:
+            func = self.edges[e].info['edge_function']
+            color_ = 'black' if (func == 'identity' or not color_coded) else \
+                GRAPHVIZ_EDGE_COLOR_DICT[func]
+            dag.edge(*e.split('->'), color=color_)
+        if notebook:
+            return dag
+        dag.view()
 
     def sample(self, size: Optional[int] = None,
                return_errors: bool = False,
