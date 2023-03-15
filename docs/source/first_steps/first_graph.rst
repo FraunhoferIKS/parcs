@@ -84,8 +84,8 @@ Graphviz Visualization
 
 PARCS visualizes the `Graph` using the `Graphviz <https://pypi.org/project/graphviz/>`_ package.
 The nodes and edges can be color-coded based on the functions and distributions. The nodes can be
-shape-coded as well, based on the node type. (arguments are :code:`color-coded=True` and
-:code:`shape-coded=True`).
+shape-coded as well, based on the node type. (arguments are :code:`color_coded=True` and
+:code:`shape_coded=True`).
 
 .. literalinclude:: code_blocks/b4/graph.py
     :linenos:
