@@ -20,6 +20,7 @@
 
 from pathlib import Path
 from typing import Optional, Union, List, Callable
+import warnings
 from typeguard import typechecked
 import numpy as np
 import pandas as pd
@@ -113,7 +114,13 @@ class Node:
 
     def get_info(self):
         if self.do_correction:
-            self.info['correction'] = self.output_distribution.sigma_correction.get_params()
+            try:
+                self.info['correction'] = {
+                    param: self.output_distribution.params[param].corrector.get_params()
+                    for param in self.output_distribution.params
+                }
+            except AssertionError:
+                warnings.warn("Node has not been initiated. Correction configs unknown.")
         return self.info
 
     def calculate(self, data: pd.DataFrame, parents: List[str], errors: pd.Series) -> np.ndarray:
@@ -404,8 +411,11 @@ class Graph:
         self._set_adj_matrix()
         self.cache = {}
 
-        # one-time sample to setup corrections
-        self.sample(size=500)
+        # one-time sample to set up corrections
+        if any(self.nodes[n].do_correction if self.node_types[n] == 'stochastic' else False
+                for n in self.nodes):
+            warnings.warn("burning-in 500 samples to tune the correction parameters.")
+            self.sample(size=500)
 
     def get_info(self, report_type: str = 'raw', info_dir: Optional[Union[str, Path]] = None):
         """ **getting nodes and edges information**
