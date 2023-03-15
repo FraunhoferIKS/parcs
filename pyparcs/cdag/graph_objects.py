@@ -546,7 +546,7 @@ class Graph:
                 )
         return sampled_errors
 
-    def visualize(self, color_coded=True, shape_coded=True, notebook=False):
+    def visualize(self, filename, color_coded=True, shape_coded=True, notebook=False):
         """**Visualize the graph**
 
         This method uses the `Graphviz <https://pypi.org/project/graphviz/>`_ package to visualize
@@ -556,6 +556,8 @@ class Graph:
 
         Parameters
         ----------
+        filename : str
+            Name of the pdf and gv file if `notebook=False`.
         color_coded : bool, default=True
             If `True`, edges and nodes will be color coded based on their functions and
             distributions.
@@ -570,7 +572,7 @@ class Graph:
         -------
         graphviz dot object or None
         """
-        dag = Digraph()
+        dag = Digraph(filename)
         dag.graph_attr['rankdir'] = 'LR'
 
         for n in self.nodes:
