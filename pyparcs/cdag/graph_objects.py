@@ -409,6 +409,7 @@ class Graph:
         self.parent_sets = {}
         self.adj_matrix = None
         self._set_adj_matrix()
+        self.topological_sorting = topological_sort(self.adj_matrix)
         self.cache = {}
 
         # one-time sample to set up corrections
@@ -675,7 +676,7 @@ class Graph:
             return data, sampled_errors
         return data
 
-    def do(self, size: int, interventions: dict, cache_name: Optional[str] = None,
+    def do(self, interventions: dict, size: Optional[int] = None, cache_name: Optional[str] = None,
            use_sampled_errors: bool = False, sampled_errors: Optional[pd.DataFrame] = None,
            return_errors: bool = False, cache_sampling: bool = False):
         """**sample from interventional distribution**
@@ -699,6 +700,11 @@ class Graph:
         samples, errors : pd.DataFrame, pd.DataFrame
             If ``return_errors=True``. See :func:`~pyparcs.cdag.graph_objects.Graph.sample`
         """
+        parcs_assert(
+            size is not None or sampled_errors is not None,
+            ValueError,
+            'Both "size" and "sampled_errors" cannot be None.'
+        )
         for i in interventions:
             assert i not in self.dummy_names, f'cannot intervene on dummy node {i}'
         data = pd.DataFrame([])
@@ -706,12 +712,14 @@ class Graph:
             use_sampled_errors=use_sampled_errors, size=size, sampled_errors=sampled_errors
         )
 
-        for node_name in topological_sort(self.adj_matrix):
+        for node_name in self.topological_sorting:
             if node_name not in interventions:
                 array = self._calc_non_interventions(
                     node_name=node_name, data=data, sampled_errors=sampled_errors
                 )
             else:
+                if size is None:
+                    size = len(sampled_errors)
                 array = np.ones(shape=(size,)) * interventions[node_name]
             data[node_name] = array
 
@@ -758,8 +766,19 @@ class Graph:
         sampled_errors = self._get_errors(
             use_sampled_errors=use_sampled_errors, size=size, sampled_errors=sampled_errors
         )
+        # change the adjacency matrix based on the functional do
+        adjm = self.adj_matrix.copy(deep=True)
+        # delete previous parents
+        adjm.loc[:, intervene_on] = 0
+        # add new parents
+        adjm.loc[inputs, intervene_on] = 1
+        # new sort + if any error -> then new inputs are descendants
+        try:
+            new_topological_sort = topological_sort(adjm)
+        except GraphError:
+            raise GraphError("new inputs are the descendants of the intervened node")
 
-        for node_name in topological_sort(self.adj_matrix):
+        for node_name in new_topological_sort:
             if node_name != intervene_on:
                 array = self._calc_non_interventions(
                     node_name=node_name, data=data, sampled_errors=sampled_errors
@@ -775,7 +794,7 @@ class Graph:
             return data, sampled_errors
         return data
 
-    def do_self(self, size: int, func: Callable, intervene_on: str,
+    def do_self(self, func: Callable, intervene_on: str, size: Optional[int] = None,
                 use_sampled_errors: bool = False, sampled_errors: Optional[pd.DataFrame] = None,
                 return_errors: bool = False,
                 cache_sampling: bool = False, cache_name: Optional[str] = None):
@@ -800,14 +819,22 @@ class Graph:
         samples, errors : pd.DataFrame, pd.DataFrame
             If ``return_errors=True``. See :func:`~pyparcs.cdag.graph_objects.Graph.sample`
         """
-        assert intervene_on not in self.dummy_names,\
+        parcs_assert(
+            intervene_on not in self.dummy_names,
+            GraphError,
             f'cannot intervene on dummy node {intervene_on}'
+        )
+        parcs_assert(
+            size is not None or sampled_errors is not None,
+            ValueError,
+            'Both "size" and "sampled_errors" cannot be None.'
+        )
         data = pd.DataFrame([])
         sampled_errors = self._get_errors(
             use_sampled_errors=use_sampled_errors, size=size, sampled_errors=sampled_errors
         )
 
-        for node_name in topological_sort(self.adj_matrix):
+        for node_name in self.topological_sorting:
             data[node_name] = self._calc_non_interventions(
                 node_name=node_name, data=data, sampled_errors=sampled_errors
             )

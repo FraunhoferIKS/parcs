@@ -17,9 +17,12 @@
 #  https://www.gnu.de/documents/gpl-2.0.de.html
 #
 #  Contact: alireza.zamanian@iks.fraunhofer.de
+import pytest
+
 from pyparcs.cdag.graph_objects import Node, DetNode, Graph
 from pyparcs.graph_builder.parsers import *
 from pyparcs.cdag.mapping_functions import *
+from pyparcs.exceptions import GraphError
 import os
 import pandas as pd
 
@@ -197,3 +200,19 @@ class TestSimpleGraph:
         assert samples.equals(data)
         self.remove_gdf()
         self.remove_custompy()
+
+    def test_cyclic_graph_raise_error(self):
+        """
+        Tests whether it raises a GraphError if the graph is acyclic
+        """
+        self.write_gdf(
+            ("A: gaussian(mu_=B, sigma_=1)\n"
+             "B: gaussian(mu_=A, sigma_=1)\n"
+             "A->B: identity()\n"
+             "B->A: identity()")
+        )
+        # PARCS Graph
+        nodes, edges = graph_file_parser('gdf.yml')
+        with pytest.raises(GraphError):
+            Graph(nodes, edges)
+        self.remove_gdf()
