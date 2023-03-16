@@ -675,7 +675,7 @@ class Graph:
             return data, sampled_errors
         return data
 
-    def do(self, size: int, interventions: dict, cache_name: Optional[str] = None,
+    def do(self, interventions: dict, size: Optional[int] = None, cache_name: Optional[str] = None,
            use_sampled_errors: bool = False, sampled_errors: Optional[pd.DataFrame] = None,
            return_errors: bool = False, cache_sampling: bool = False):
         """**sample from interventional distribution**
@@ -699,6 +699,11 @@ class Graph:
         samples, errors : pd.DataFrame, pd.DataFrame
             If ``return_errors=True``. See :func:`~pyparcs.cdag.graph_objects.Graph.sample`
         """
+        parcs_assert(
+            size is not None or sampled_errors is not None,
+            ValueError,
+            'Both "size" and "sampled_errors" cannot be None.'
+        )
         for i in interventions:
             assert i not in self.dummy_names, f'cannot intervene on dummy node {i}'
         data = pd.DataFrame([])
@@ -712,6 +717,8 @@ class Graph:
                     node_name=node_name, data=data, sampled_errors=sampled_errors
                 )
             else:
+                if size is None:
+                    size = len(sampled_errors)
                 array = np.ones(shape=(size,)) * interventions[node_name]
             data[node_name] = array
 
