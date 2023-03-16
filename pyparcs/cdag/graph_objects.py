@@ -409,6 +409,7 @@ class Graph:
         self.parent_sets = {}
         self.adj_matrix = None
         self._set_adj_matrix()
+        self.topological_sorting = topological_sort(self.adj_matrix)
         self.cache = {}
 
         # one-time sample to set up corrections
@@ -711,7 +712,7 @@ class Graph:
             use_sampled_errors=use_sampled_errors, size=size, sampled_errors=sampled_errors
         )
 
-        for node_name in topological_sort(self.adj_matrix):
+        for node_name in self.topological_sorting:
             if node_name not in interventions:
                 array = self._calc_non_interventions(
                     node_name=node_name, data=data, sampled_errors=sampled_errors
@@ -765,8 +766,19 @@ class Graph:
         sampled_errors = self._get_errors(
             use_sampled_errors=use_sampled_errors, size=size, sampled_errors=sampled_errors
         )
+        # change the adjacency matrix based on the functional do
+        adjm = self.adj_matrix.copy(deep=True)
+        # delete previous parents
+        adjm.loc[:, intervene_on] = 0
+        # add new parents
+        adjm.loc[inputs, intervene_on] = 1
+        # new sort + if any error -> then new inputs are descendants
+        try:
+            new_topological_sort = topological_sort(adjm)
+        except GraphError:
+            raise GraphError("new inputs are the descendants of the intervened node")
 
-        for node_name in topological_sort(self.adj_matrix):
+        for node_name in new_topological_sort:
             if node_name != intervene_on:
                 array = self._calc_non_interventions(
                     node_name=node_name, data=data, sampled_errors=sampled_errors
@@ -814,7 +826,7 @@ class Graph:
             use_sampled_errors=use_sampled_errors, size=size, sampled_errors=sampled_errors
         )
 
-        for node_name in topological_sort(self.adj_matrix):
+        for node_name in self.topological_sorting:
             data[node_name] = self._calc_non_interventions(
                 node_name=node_name, data=data, sampled_errors=sampled_errors
             )
