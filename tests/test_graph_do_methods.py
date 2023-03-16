@@ -171,3 +171,23 @@ class TestGraphDoMethods:
         with pytest.raises(GraphError):
             dag.do_functional(size=10, intervene_on='A', inputs=['C'], func=lambda c: c + 1)
         self.remove_gdf()
+
+    def test_self_do(self):
+        """
+        Tests the general functionality of .do_self() method
+        """
+        self.write_gdf(
+            ("A: gaussian(mu_=0, sigma_=1)\n"
+             "B: gaussian(mu_=0.3A, sigma_=1)\n"
+             "A->B: identity()")
+        )
+        # PARCS Graph
+        nodes, edges = graph_file_parser('gdf.yml')
+        dag = Graph(nodes, edges)
+        samples, errors = dag.sample(10, return_errors=True)
+
+        new_samples = dag.do_self(intervene_on='B', func=lambda b: b+1,
+                                  use_sampled_errors=True, sampled_errors=errors)
+        assert new_samples['B'].equals(samples['B'] + 1)
+        assert new_samples['A'].equals(samples['A'])
+        self.remove_gdf()

@@ -794,7 +794,7 @@ class Graph:
             return data, sampled_errors
         return data
 
-    def do_self(self, size: int, func: Callable, intervene_on: str,
+    def do_self(self, func: Callable, intervene_on: str, size: Optional[int] = None,
                 use_sampled_errors: bool = False, sampled_errors: Optional[pd.DataFrame] = None,
                 return_errors: bool = False,
                 cache_sampling: bool = False, cache_name: Optional[str] = None):
@@ -819,8 +819,16 @@ class Graph:
         samples, errors : pd.DataFrame, pd.DataFrame
             If ``return_errors=True``. See :func:`~pyparcs.cdag.graph_objects.Graph.sample`
         """
-        assert intervene_on not in self.dummy_names,\
+        parcs_assert(
+            intervene_on not in self.dummy_names,
+            GraphError,
             f'cannot intervene on dummy node {intervene_on}'
+        )
+        parcs_assert(
+            size is not None or sampled_errors is not None,
+            ValueError,
+            'Both "size" and "sampled_errors" cannot be None.'
+        )
         data = pd.DataFrame([])
         sampled_errors = self._get_errors(
             use_sampled_errors=use_sampled_errors, size=size, sampled_errors=sampled_errors
