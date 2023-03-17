@@ -460,9 +460,9 @@ class Graph:
             index=n_names, columns=n_names
         )
         for n in self.nodes:
-            self.parent_sets[n] = [
+            self.parent_sets[n] = sorted([
                 edge.split('->')[0] for edge in self.edges if edge.split('->')[1] == n
-            ]
+            ])
             self.adj_matrix.loc[self.parent_sets[n], n] = 1
 
             if self.node_types[n] == 'data' and len(self.parent_sets[n]) != 0:
@@ -476,9 +476,11 @@ class Graph:
             for parent in self.parent_sets[node_name]
         })
         # calculate node
-        parents = sorted(list(self.adj_matrix[self.adj_matrix[node_name] == 1].index))
-
-        return self.nodes[node_name].calculate(inputs, parents, sampled_errors[node_name])
+        return self.nodes[node_name].calculate(
+            inputs,
+            self.parent_sets[node_name],
+            sampled_errors[node_name]
+        )
 
     def _single_det_round(self, node_name: str, data: pd.DataFrame):
         # transform parents by edges
