@@ -19,7 +19,7 @@
 #  Contact: alireza.zamanian@iks.fraunhofer.de
 
 from pathlib import Path
-from typing import Optional, Union, List, Callable
+from typing import Optional, Union, List, Callable, Literal
 import warnings
 from typeguard import typechecked
 import numpy as np
@@ -115,10 +115,11 @@ class Node:
     def get_info(self):
         if self.do_correction:
             try:
-                self.info['correction'] = {
-                    param: self.output_distribution.params[param].corrector.get_params()
-                    for param in self.output_distribution.params
-                }
+                self.info['correction'] = {}
+                for param in self.output_distribution.params:
+                    if self.output_distribution.params[param].corrector is not None:
+                        self.info['correction'][param] = self.output_distribution.params[param]\
+                            .corrector.get_params()
             except AssertionError:
                 warnings.warn("Node has not been initiated. Correction configs unknown.")
         return self.info
@@ -306,6 +307,7 @@ class Edge:
     >>> x_mapped
     array([0.  , 0.12, 0.5 , 0.88, 1.  ])
     """
+
     def __init__(self,
                  function_name: str,
                  function_params: dict = {},
@@ -414,11 +416,12 @@ class Graph:
 
         # one-time sample to set up corrections
         if any(self.nodes[n].do_correction if self.node_types[n] == 'stochastic' else False
-                for n in self.nodes):
+               for n in self.nodes) or any(self.edges[e].do_correction for e in self.edges):
             warnings.warn("burning-in 500 samples to tune the correction parameters.")
             self.sample(size=500)
 
-    def get_info(self, report_type: str = 'raw', info_dir: Optional[Union[str, Path]] = None):
+    def get_info(self, report_type: Literal['raw', 'advanced'] = 'raw',
+                 info_dir: Optional[Union[str, Path]] = None):
         """ **getting nodes and edges information**
 
         This method gives the graph nodes and edges information
@@ -438,8 +441,6 @@ class Graph:
         info : dict
             If `type='raw'`
         """
-        parcs_assert(type in REPORT_TYPES, DistributionError,
-                     f'type should be in {REPORT_TYPES}, got {type} instead')
         info = {
             'nodes': {n: self.nodes[n].get_info() for n in self.nodes},
             'edges': {e: self.edges[e].get_info() for e in self.edges}
@@ -760,7 +761,7 @@ class Graph:
         samples, errors : pd.DataFrame, pd.DataFrame
             If ``return_errors=True``. See :func:`~pyparcs.cdag.graph_objects.Graph.sample`
         """
-        assert intervene_on not in self.dummy_names,\
+        assert intervene_on not in self.dummy_names, \
             f'cannot intervene on dummy node {intervene_on}'
         data = pd.DataFrame([])
         sampled_errors = self._get_errors(
