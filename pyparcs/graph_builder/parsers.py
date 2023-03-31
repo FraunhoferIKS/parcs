@@ -442,6 +442,9 @@ def graph_file_parser(file_dir):
     return nodes, edges
 
 
+def temporal_graph_file_parser(file_dir):
+    pass
+
 def guideline_parser(file_dir):
     try:
         return config_parser(file_dir)
