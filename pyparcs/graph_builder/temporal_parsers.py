@@ -17,28 +17,22 @@
 #  https://www.gnu.de/documents/gpl-2.0.de.html
 #
 #  Contact: andreas.binder@iks.fraunhofer.de
-import yaml
+import time
 import re
 import os
-import time  
-
+import yaml
 from pyparcs.graph_builder.parsers import graph_file_parser
-
-from pyparcs.exceptions import (parcs_assert, DescriptionFileError, ExternalResourceError,
-                                GuidelineError)
+from pyparcs.graph_builder.utils import config_parser
+from pyparcs.exceptions import DescriptionFileError
 
 
 NEGATION_PREFIX = 'neg'
 
-def config_parser(dir_):
-    with open(dir_, 'r') as stream:
-        conf = yaml.safe_load(stream)
-    return conf
 
 def temporal_edge_parser(old_key, old_value, resolved_file):
     """
     takes in the old key and the old value and writes the new version into
-    the resolved_file 
+    the resolved_file
 
     Parameters
     ----------
@@ -47,7 +41,7 @@ def temporal_edge_parser(old_key, old_value, resolved_file):
     old_value : str
         the dictionary value e.g. 'identity()'
     resolved_file: dict
-        the new dictionary 
+        the new dictionary
 
     Returns
     -------
@@ -58,13 +52,13 @@ def temporal_edge_parser(old_key, old_value, resolved_file):
 
     split_expansion_sequence = r'\{(t.*?)\}'
 
-    # TODO currently only parses key dependencies, might need assertion
-    for t in range(1,n_timesteps+1):
-        new_key = str() 
+    # TODO: currently only parses key dependencies, might need assertion
+    for t in range(1, n_timesteps+1):
+        new_key = str()
         new_value = old_value
-        for split in re.split(split_expansion_sequence, old_key):            
+        for split in re.split(split_expansion_sequence, old_key):
             if split[0:2] == 't-':
-                delay = int(split[2:]) # remove 't-'
+                delay = int(split[2:])  # remove 't-'
                 if t >= delay:
                     new_key += str(t - delay)
                 else:
@@ -73,16 +67,14 @@ def temporal_edge_parser(old_key, old_value, resolved_file):
                 new_key += str(t)
             else:
                 new_key += split
-
         resolved_file[new_key] = new_value
-
     return resolved_file
 
 
 def temporal_node_parser(old_key, old_value, resolved_file):
     """
     takes in the old key and the old value and writes the new version into
-    the resolved_file 
+    the resolved_file
 
     Parameters
     ----------
@@ -91,33 +83,33 @@ def temporal_node_parser(old_key, old_value, resolved_file):
     old_value : str
         the dictionary value e.g. 'bernoulli(p_=BP_{t}Age), correction[]'
     resolved_file: dict
-        the new dictionary 
+        the new dictionary
 
     Returns
     -------
     resolved_file: dict
         the new dictionary after the update
     """
-    split_BLV_Temporal = r'\{(.*?)\}'
-    split_Initial_Expansions = r'\{(\d*)\}|\{(-\d*)\}'
+    split_blv_temporal = r'\{(.*?)\}'
+    split_initial_expansions = r'\{(\d*)\}|\{(-\d*)\}'
     split_expansion_sequence = r'\{(t.*?)\}'
 
     n_timesteps = resolved_file['n_timesteps']
 
     # is BLV
-    if not re.search(split_BLV_Temporal, old_key):
+    if not re.search(split_blv_temporal, old_key):
         resolved_file[old_key] = old_value
     # is Temporal
-    else: 
+    else:
         # is initial
         # TODO assumes no dependencies to be parsed in value
-        if re.search(split_Initial_Expansions, old_key):
+        if re.search(split_initial_expansions, old_key):
             new_key = re.sub('\{|\}', '', old_key)
             # remove potential negative values
             new_key = re.sub('-', NEGATION_PREFIX, new_key)
             # assign
             resolved_file[new_key] = old_value
-        # is expansion (either recursive or non-recursive)     
+        # is expansion (either recursive or non-recursive)
         else:
             for t in range(1,n_timesteps+1):
                 new_key = re.sub('\{t\}', str(t), old_key)
@@ -125,29 +117,28 @@ def temporal_node_parser(old_key, old_value, resolved_file):
                 # splits old_value into previous timesteps (t-X), current timesteps (t) and
                 # the remaining value phrase
                 for split in re.split(split_expansion_sequence, old_value):
-                    
-                    if split[0:2] == 't-':                    
+                    if split[0:2] == 't-':
                         # remove 't-'
-                        delay = int(split[2:]) 
+                        delay = int(split[2:])
                         # check if delay < initial timesteps
                         if t >= delay:
                             new_value += str(t - delay)
                         # replace '-' with neg for correct value parsing
                         else:
-                            new_value += NEGATION_PREFIX + str(delay - t)                        
+                            new_value += NEGATION_PREFIX + str(delay - t)
                     elif split == 't':
                         new_value += str(t)
                     else:
                         new_value += split
 
                 resolved_file[new_key] = new_value
-             
     return resolved_file
 
 
 def temporal_graph_file_parser(file_dir):
     """**Parser for temporal graph description YAML files**
-    This function reads the temporal graph description `.yml` file and returns the list of nodes and edges.
+    This function reads the temporal graph description `.yml` file and returns
+    the list of nodes and edges.
     These lists are used to instantiate a :func:`~pyparcs.cdag.graph_objects.Graph` object.
 
     See Also
@@ -177,7 +168,7 @@ def temporal_graph_file_parser(file_dir):
     
     resolved_file = dict()
 
-    # overwrite 
+    # overwrite
     resolved_file['n_timesteps'] = file['n_timesteps']
 
     for key in file:
@@ -188,19 +179,18 @@ def temporal_graph_file_parser(file_dir):
         else:
             resolved_file = temporal_node_parser(key, file[key], resolved_file)
 
-    # remove n_timesteps  
-    del resolved_file['n_timesteps']    
+    # remove n_timesteps
+    del resolved_file['n_timesteps']
 
-    # TODO not smoothest approach 
-    SAVE_PATH = f'tmp_{time.time()}.yaml'
-    with open(SAVE_PATH, 'w') as file:
-        documents = yaml.dump(resolved_file, file)
+    # TODO not smoothest approach
+    save_path = f'tmp_{time.time()}.yaml'
+    with open(save_path, 'w') as file:
+        yaml.dump(resolved_file, file)
 
     # call parcs graph_file_parser with SAVE_PATH
-    nodes, edges =  graph_file_parser(SAVE_PATH)
- 
-    # remove tmp file 
-    os.remove(SAVE_PATH)
+    nodes, edges = graph_file_parser(save_path)
+    # remove tmp file
+    os.remove(save_path)
 
     return nodes, edges
             
