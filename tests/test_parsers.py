@@ -20,8 +20,9 @@
 import numpy as np
 import os
 import pytest
-from pyparcs.graph_builder.parsers import (term_parser, equation_parser, node_parser, edge_parser,
-                                           graph_file_parser, temporal_graph_file_parser)
+from pyparcs.graph_builder.parsers import (term_parser, equation_parser, node_parser,
+                                           edge_parser, graph_file_parser)
+from pyparcs.graph_builder.temporal_parsers import temporal_graph_file_parser
 from pyparcs.exceptions import *
 
 
