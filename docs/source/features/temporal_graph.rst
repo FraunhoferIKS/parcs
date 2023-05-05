@@ -1,18 +1,21 @@
 Temporal Graph
 ==============================
 
-This feature allows you to expand your graph along the time axis by only making some small modifications to the current pipeline. 
-For now we want to walk you through those adjustments with the following scenario:
-we model the interaction between the blood pressure variable :code:`BP` and the drug variable :code:`Drug`. 
-Initially, we let the blood pressure be dependent on gaussian noise :code:`Noise`, while the drug depends on the age variable :code:`Age` of the 
-patient as well as the blood pressure. This setup can be modeled by the non-temporal version of PARCS. 
+In PARCS, you can define a temporal graph where the nodes and relations are expanded along the
+time axis. This is possible by only making a few small modifications to the current pipeline.
+Let's imagine the following scenario to explain this feature:
+The goal is to model the interaction between the blood pressure variable :code:`BP` and the drug
+variable :code:`Drug`.
+Initially, we let the blood pressure be dependent on gaussian noise :code:`Noise`, while the drug
+depends on the age variable :code:`Age` of the patient as well as the blood pressure. This setup
+can be modeled by the non-temporal version of PARCS.
 
 .. literalinclude:: code_blocks/b10/base_description.yml 
     :linenos:
     
 .. _configuration_file:
 
-Change in Configuration File
+Temporal syntax in Configuration File
 -----------------------
 
 Now we discuss the temporal expansion: every temporal component is marked by a subscript where :code:`_{t}` indicates the current timestep.
