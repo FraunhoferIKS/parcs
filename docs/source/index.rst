@@ -45,6 +45,7 @@ Documentation
    features/looping
    features/more_graph_objects
    features/m_graphs
+   features/temporal_graph
 
 .. toctree::
    :maxdepth: 1
