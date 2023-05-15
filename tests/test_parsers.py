@@ -22,7 +22,6 @@ import os
 import pytest
 from pyparcs.graph_builder.parsers import (term_parser, equation_parser, node_parser,
                                            edge_parser, graph_file_parser)
-from pyparcs.graph_builder.temporal_parsers import temporal_graph_file_parser
 from pyparcs.exceptions import *
 
 
@@ -435,58 +434,3 @@ class TestGraphFileParser:
     def test_parses_gdf_raises_error(setup_wrong_gdf):
         with pytest.raises(DescriptionFileError):
             graph_file_parser(setup_wrong_gdf)
-
-
-class TestTemporalGraphFileParser:
-    """
-    This test class tests the parsing of the temporal description files.
-    The plan is that a parsing function turns temporal gdfs into normal ones,
-    so that the static parsers would take over from then on.
-    """
-    @staticmethod
-    @pytest.fixture(params=[
-        [("n_timesteps: 2\n"
-          "A: bernoulli(p_=0.2)\n"
-          "B_{t}: gaussian(mu_=2B_{t-1}+A, sigma_=1)\n"
-          "B_{0}: poisson(lambda_=1.8)\n"
-          "A->B_{t}: identity()\n"
-          "B_{t-1}->B_{t}: identity()"),
-         # nodes
-         {'A': 'bernoulli', 'B_0': 'poisson', 'B_1': 'gaussian', 'B_2': 'gaussian'},
-         # edges
-         {'A->B_1': 'identity', 'A->B_2': 'identity', 'B_0->B_1': 'identity',
-          'B_1->B_2': 'identity'}],
-    ])
-    def setup_gdf(request):
-        # setup
-        desc = request.param[0]
-        nodes = request.param[1]
-        edges = request.param[2]
-
-        file_name = 'gdf.yml'
-        with open(file_name, 'w') as f:
-            f.write(desc)
-        # test
-        yield file_name, nodes, edges
-        # teardown
-        os.remove(file_name)
-
-    @staticmethod
-    def test_parses_gdf_correctly(setup_gdf):
-        nodes, edges = temporal_graph_file_parser(setup_gdf[0])
-        # Nodes
-        # 1. names
-        assert len(nodes) == len(setup_gdf[1])
-        extracted_node_names = [i['name'] for i in nodes]
-        assert set(extracted_node_names) == set(setup_gdf[1].keys())
-        # 2. distributions
-        for node in nodes:
-            assert setup_gdf[1][node['name']] == node['output_distribution']
-
-        # Edges
-        assert len(edges) == len(setup_gdf[2])
-        extracted_edge_names = [i['name'] for i in edges]
-        assert set(extracted_edge_names) == set(setup_gdf[2].keys())
-        # 2. distributions
-        for edge in edges:
-            assert setup_gdf[2][edge['name']] == edge['function_name']

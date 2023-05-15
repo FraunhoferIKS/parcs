@@ -21,6 +21,7 @@ import time
 import re
 import os
 import yaml
+import pandas as pd
 from pyparcs.graph_builder.parsers import graph_file_parser
 from pyparcs.graph_builder.utils import config_parser
 from pyparcs.exceptions import DescriptionFileError
@@ -193,4 +194,45 @@ def temporal_graph_file_parser(file_dir):
     os.remove(save_path)
 
     return nodes, edges
-            
+
+
+def temporal(temporal_nodes, oldest):
+    """
+    The 'temporal' decorator for deterministc nodes with temporal inputs
+
+    Using this decorator, the user writes columns like 'X_{t-2}' in the custom function.
+    Then when data is passed as `X_5`, the decorator turns `X_5` into `X_{t-2}` properly.
+    For that, the user needs to give the list of temporal nodes, and the oldest time index manually
+
+    Parameters
+    ----------
+    temporal_nodes : list(str)
+        list of temporal nodes that appear in the deterministic node
+    oldest : str
+        in the form of t-1, t-2, ..., marking the earliest t offset that appears in the custom function
+    """
+    def decorator(func):
+        def wrapper(data):
+            # find t-indexed temporal nodes
+            temp_cols = [i for i in data.columns if i.rsplit('_', 1)[0] in temporal_nodes]
+            # get minimum t-index
+            min_t = min(int(i.rsplit('_', 1)[1]) for i in temp_cols)
+            # find out t
+            if oldest != 't':
+                min_t_offset = int(oldest.split('-')[1])
+            else:
+                min_t_offset = 0
+            current_t = min_t_offset + min_t
+            # apply t to all columns
+            rename_dict = {}
+            for c in temp_cols:
+                offset = current_t - int(c.rsplit('_', 1)[1])
+                if offset == 0:
+                    rename_dict[c] = f"{c.rsplit('_', 1)[0]}_{{t}}"
+                else:
+                    rename_dict[c] = f"{c.rsplit('_', 1)[0]}_{{t-{offset}}}"
+            data.rename(columns=rename_dict, inplace=True)
+            # Call the decorated function with updated data
+            return func(data)
+        return wrapper
+    return decorator
