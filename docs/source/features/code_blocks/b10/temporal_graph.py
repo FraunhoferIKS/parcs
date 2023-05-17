@@ -1,5 +1,5 @@
 from pyparcs.cdag.graph_objects import Graph
-from pyparcs.graph_builder.parsers import temporal_graph_file_parser
+from pyparcs.graph_builder.temporal_parsers import temporal_graph_file_parser
 import numpy as np
 np.random.seed(2022)
 
