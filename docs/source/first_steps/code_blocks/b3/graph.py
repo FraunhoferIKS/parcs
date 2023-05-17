@@ -8,21 +8,17 @@ nodes, edges = graph_file_parser('graph_description.yml')
 g = Graph(nodes=nodes, edges=edges)
 
 pprint(g.get_info())
-# burning-in 500 samples to tune the correction parameters.
-# {'edges': {'A->Y': {'correction': {'offset': -0.9569491966108958,
-#                                    'scale': 2.7091592683926735},
+# {'edges': {'A->Y': {'correction': {'offset': -0.9682150226680958,
+#                                    'scale': 2.229350605378819},
 #                     'edge_function': 'identity',
 #                     'function_params': {}},
 #            'C->A': {'edge_function': 'identity', 'function_params': {}},
 #            'C->Y': {'edge_function': 'identity', 'function_params': {}}},
-#  'nodes': {'A': {'correction': {'sigma_': {'lower': 1.0,
-#                                            'offset': 1.4074241998202703,
-#                                            'upper': 3.0}},
-#                  'dist_params_coefs': {'mu_': {'bias': -1.0,
-#                                                'interactions': array([0.]),
+#  'nodes': {'A': {'dist_params_coefs': {'mu_': {'bias': -1.0,
+#                                                'interactions': array([], dtype=float64),
 #                                                'linear': array([2.])},
 #                                        'sigma_': {'bias': 1.0,
-#                                                   'interactions': array([0.]),
+#                                                   'interactions': array([], dtype=float64),
 #                                                   'linear': array([0.1])}},
 #                  'node_type': 'stochastic',
 #                  'output_distribution': 'gaussian'},
@@ -35,10 +31,11 @@ pprint(g.get_info())
 #                  'node_type': 'stochastic',
 #                  'output_distribution': 'gaussian'},
 #            'Y': {'dist_params_coefs': {'mu_': {'bias': 0,
-#                                                'interactions': array([ 0. , -0.3,  0. ]),
+#                                                'interactions': array([-0.3]),
 #                                                'linear': array([1., 1.])},
 #                                        'sigma_': {'bias': 2.0,
-#                                                   'interactions': array([0., 0., 0.]),
+#                                                   'interactions': array([0.]),
 #                                                   'linear': array([0., 0.])}},
 #                  'node_type': 'stochastic',
 #                  'output_distribution': 'gaussian'}}}
+

@@ -101,10 +101,8 @@ class TestEquationParser:
     @staticmethod
     @pytest.mark.parametrize('eq,vars,output', [
         ('2+A-2.8B', ['A', 'B'], [([], 2), (['A'], 1.0), (['B'], -2.8)]),  # example equation, no space
-        ('-9+A', ['A', 'B'], [([], -9.0), (['A'], 1.0)]),  # example equation, no space
         ('1', ['A', 'B'], [([], 1)]),  # only bias
         ('A^2-2AB', ['A', 'B'], [(['A', 'A'], 1), (['A', 'B'], -2.0)]),  # quadratic terms with space
-        ('A^2+2A', ['A', 'B'], [(['A', 'A'], 1), (['A'], 2.0)]),  # quad & lin terms for a var
         ('Z_1Z_11 + 2Z_11 - Z_1', ['Z_1', 'Z_11'], [(['Z_1', 'Z_11'], 1), (['Z_11'], 2.0), (['Z_1'], -1.0)])
     ])
     def test_parse_equations(eq, vars, output):
@@ -124,9 +122,9 @@ class TestEquationParser:
     @staticmethod
     @pytest.mark.parametrize('eq,vars,err', [
         # duplicate terms
-        ('2A + 3A', ['A', 'B'], DescriptionFileError),  # trivial duplicates
-        ('2AB + 3BA', ['A', 'B'], DescriptionFileError),  # invariance to permutations
-        ('B + 2A^2 - A^2', ['A', 'B'], DescriptionFileError),  # quad terms
+        ('2A + 3A', ['A', 'B'], DescriptionFileError),
+        ('2AB + 3BA', ['A', 'B'], DescriptionFileError),
+        ('B + 2A^2 - A^2', ['A', 'B'], DescriptionFileError),
         # non-existing parents
         ('B + 2A^2', ['B'], DescriptionFileError),
         # non-standard symbols

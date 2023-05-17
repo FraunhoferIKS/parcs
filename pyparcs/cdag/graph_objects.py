@@ -19,17 +19,14 @@
 #  Contact: alireza.zamanian@iks.fraunhofer.de
 
 from pathlib import Path
-from typing import Optional, Union, List, Callable, Literal
-import warnings
+from typing import Optional, Union, List, Callable
 from typeguard import typechecked
 import numpy as np
 import pandas as pd
-import seaborn as sns
-from graphviz import Digraph
 from pyparcs.cdag.utils import topological_sort, EdgeCorrection
+from pyparcs.cdag.output_distributions import OUTPUT_DISTRIBUTIONS
 from pyparcs.cdag.mapping_functions import EDGE_FUNCTIONS
 from pyparcs.graph_builder.utils import info_md_parser
-from pyparcs.cdag.output_distributions import OUTPUT_DISTRIBUTIONS
 from pyparcs.exceptions import (
     parcs_assert, validate_deterministic_function, validate_error_term,
     ExternalResourceError, GraphError, DistributionError
@@ -38,22 +35,6 @@ from pyparcs.exceptions import (
 OUTPUT_DISTRIBUTIONS_KEYS = OUTPUT_DISTRIBUTIONS.keys()
 EDGE_FUNCTIONS_KEYS = EDGE_FUNCTIONS.keys()
 REPORT_TYPES = ['md', 'raw']
-GRAPHVIZ_SHAPE_DICT = {
-    'stochastic': 'circle',
-    'data': 'rectangle',
-    'deterministic': 'rectangle',
-    'constant': 'rectangle'
-}
-GRAPHVIZ_NODE_COLOR_DICT = dict(zip(
-    OUTPUT_DISTRIBUTIONS_KEYS,
-    [f'#{int(c[0] * 255):02x}{int(c[1] * 255):02x}{int(c[2] * 255):02x}' for c in
-     sns.color_palette()[:len(OUTPUT_DISTRIBUTIONS_KEYS)]]
-))
-GRAPHVIZ_EDGE_COLOR_DICT = dict(zip(
-    EDGE_FUNCTIONS_KEYS,
-    [f'#{int(c[0] * 255):02x}{int(c[1] * 255):02x}{int(c[2] * 255):02x}' for c in
-     sns.color_palette()[:len(EDGE_FUNCTIONS_KEYS)]]
-))
 
 
 @typechecked
@@ -114,14 +95,7 @@ class Node:
 
     def get_info(self):
         if self.do_correction:
-            try:
-                self.info['correction'] = {}
-                for param in self.output_distribution.params:
-                    if self.output_distribution.params[param].corrector is not None:
-                        self.info['correction'][param] = self.output_distribution.params[param]\
-                            .corrector.get_params()
-            except AssertionError:
-                warnings.warn("Node has not been initiated. Correction configs unknown.")
+            self.info['correction'] = self.output_distribution.sigma_correction.get_params()
         return self.info
 
     def calculate(self, data: pd.DataFrame, parents: List[str], errors: pd.Series) -> np.ndarray:
@@ -307,7 +281,6 @@ class Edge:
     >>> x_mapped
     array([0.  , 0.12, 0.5 , 0.88, 1.  ])
     """
-
     def __init__(self,
                  function_name: str,
                  function_params: dict = {},
@@ -411,17 +384,12 @@ class Graph:
         self.parent_sets = {}
         self.adj_matrix = None
         self._set_adj_matrix()
-        self.topological_sorting = topological_sort(self.adj_matrix)
         self.cache = {}
 
-        # one-time sample to set up corrections
-        if any(self.nodes[n].do_correction if self.node_types[n] == 'stochastic' else False
-               for n in self.nodes) or any(self.edges[e].do_correction for e in self.edges):
-            warnings.warn("burning-in 500 samples to tune the correction parameters.")
-            self.sample(size=500)
+        # one-time sample to setup corrections
+        self.sample(size=500)
 
-    def get_info(self, report_type: Literal['raw', 'advanced'] = 'raw',
-                 info_dir: Optional[Union[str, Path]] = None):
+    def get_info(self, report_type: str = 'raw', info_dir: Optional[Union[str, Path]] = None):
         """ **getting nodes and edges information**
 
         This method gives the graph nodes and edges information
@@ -441,6 +409,8 @@ class Graph:
         info : dict
             If `type='raw'`
         """
+        parcs_assert(type in REPORT_TYPES, DistributionError,
+                     f'type should be in {REPORT_TYPES}, got {type} instead')
         info = {
             'nodes': {n: self.nodes[n].get_info() for n in self.nodes},
             'edges': {e: self.edges[e].get_info() for e in self.edges}
@@ -460,9 +430,9 @@ class Graph:
             index=n_names, columns=n_names
         )
         for n in self.nodes:
-            self.parent_sets[n] = sorted([
+            self.parent_sets[n] = [
                 edge.split('->')[0] for edge in self.edges if edge.split('->')[1] == n
-            ])
+            ]
             self.adj_matrix.loc[self.parent_sets[n], n] = 1
 
             if self.node_types[n] == 'data' and len(self.parent_sets[n]) != 0:
@@ -476,11 +446,9 @@ class Graph:
             for parent in self.parent_sets[node_name]
         })
         # calculate node
-        return self.nodes[node_name].calculate(
-            inputs,
-            self.parent_sets[node_name],
-            sampled_errors[node_name]
-        )
+        parents = sorted(list(self.adj_matrix[self.adj_matrix[node_name] == 1].index))
+
+        return self.nodes[node_name].calculate(inputs, parents, sampled_errors[node_name])
 
     def _single_det_round(self, node_name: str, data: pd.DataFrame):
         # transform parents by edges
@@ -560,50 +528,6 @@ class Graph:
                 )
         return sampled_errors
 
-    def visualize(self, filename, color_coded=True, shape_coded=True, notebook=False):
-        """**Visualize the graph**
-
-        This method uses the `Graphviz <https://pypi.org/project/graphviz/>`_ package to visualize
-        the PARCS graph. If `color_coded=True` and/or `shape_coded=True`,
-        see cdag.graph_objects.GRAPHVIZ_SHAPE_DICT and cdag.graph_objects.GRAPHVIZ_NODE_COLOR_DICT
-        and  cdag.graph_objects.GRAPHVIZ_EDGE_COLOR_DICT for a guide on the codes.
-
-        Parameters
-        ----------
-        filename : str
-            Name of the pdf and gv file if `notebook=False`.
-        color_coded : bool, default=True
-            If `True`, edges and nodes will be color coded based on their functions and
-            distributions.
-        shape_coded : bool, default=True
-            If `True`, nodes will be shape coded based on their type
-        notebook : bool, default=False,
-            If `True` it returns a graphviz `dot` object that if called, the Jupyter notebook
-            displays the image. If `False`, the image is displayed in a new window, and a pdf
-            file is generated in the directory of the main python script.
-
-        Returns
-        -------
-        graphviz dot object or None
-        """
-        dag = Digraph(filename)
-        dag.graph_attr['rankdir'] = 'LR'
-
-        for n in self.nodes:
-            shape_ = GRAPHVIZ_SHAPE_DICT[self.node_types[n]] if shape_coded else 'circle'
-            color_ = 'black' if (self.node_types[n] != 'stochastic' or not color_coded) \
-                else GRAPHVIZ_NODE_COLOR_DICT[self.nodes[n].info['output_distribution']]
-            dag.node(n, shape=shape_, color=color_)
-
-        for e in self.edges:
-            func = self.edges[e].info['edge_function']
-            color_ = 'black' if (func == 'identity' or not color_coded) else \
-                GRAPHVIZ_EDGE_COLOR_DICT[func]
-            dag.edge(*e.split('->'), color=color_)
-        if notebook:
-            return dag
-        dag.view()
-
     def sample(self, size: Optional[int] = None,
                return_errors: bool = False,
                cache_sampling: bool = False,
@@ -679,7 +603,7 @@ class Graph:
             return data, sampled_errors
         return data
 
-    def do(self, interventions: dict, size: Optional[int] = None, cache_name: Optional[str] = None,
+    def do(self, size: int, interventions: dict, cache_name: Optional[str] = None,
            use_sampled_errors: bool = False, sampled_errors: Optional[pd.DataFrame] = None,
            return_errors: bool = False, cache_sampling: bool = False):
         """**sample from interventional distribution**
@@ -703,11 +627,6 @@ class Graph:
         samples, errors : pd.DataFrame, pd.DataFrame
             If ``return_errors=True``. See :func:`~pyparcs.cdag.graph_objects.Graph.sample`
         """
-        parcs_assert(
-            size is not None or sampled_errors is not None,
-            ValueError,
-            'Both "size" and "sampled_errors" cannot be None.'
-        )
         for i in interventions:
             assert i not in self.dummy_names, f'cannot intervene on dummy node {i}'
         data = pd.DataFrame([])
@@ -715,14 +634,12 @@ class Graph:
             use_sampled_errors=use_sampled_errors, size=size, sampled_errors=sampled_errors
         )
 
-        for node_name in self.topological_sorting:
+        for node_name in topological_sort(self.adj_matrix):
             if node_name not in interventions:
                 array = self._calc_non_interventions(
                     node_name=node_name, data=data, sampled_errors=sampled_errors
                 )
             else:
-                if size is None:
-                    size = len(sampled_errors)
                 array = np.ones(shape=(size,)) * interventions[node_name]
             data[node_name] = array
 
@@ -763,25 +680,14 @@ class Graph:
         samples, errors : pd.DataFrame, pd.DataFrame
             If ``return_errors=True``. See :func:`~pyparcs.cdag.graph_objects.Graph.sample`
         """
-        assert intervene_on not in self.dummy_names, \
+        assert intervene_on not in self.dummy_names,\
             f'cannot intervene on dummy node {intervene_on}'
         data = pd.DataFrame([])
         sampled_errors = self._get_errors(
             use_sampled_errors=use_sampled_errors, size=size, sampled_errors=sampled_errors
         )
-        # change the adjacency matrix based on the functional do
-        adjm = self.adj_matrix.copy(deep=True)
-        # delete previous parents
-        adjm.loc[:, intervene_on] = 0
-        # add new parents
-        adjm.loc[inputs, intervene_on] = 1
-        # new sort + if any error -> then new inputs are descendants
-        try:
-            new_topological_sort = topological_sort(adjm)
-        except GraphError:
-            raise GraphError("new inputs are the descendants of the intervened node")
 
-        for node_name in new_topological_sort:
+        for node_name in topological_sort(self.adj_matrix):
             if node_name != intervene_on:
                 array = self._calc_non_interventions(
                     node_name=node_name, data=data, sampled_errors=sampled_errors
@@ -797,7 +703,7 @@ class Graph:
             return data, sampled_errors
         return data
 
-    def do_self(self, func: Callable, intervene_on: str, size: Optional[int] = None,
+    def do_self(self, size: int, func: Callable, intervene_on: str,
                 use_sampled_errors: bool = False, sampled_errors: Optional[pd.DataFrame] = None,
                 return_errors: bool = False,
                 cache_sampling: bool = False, cache_name: Optional[str] = None):
@@ -822,22 +728,14 @@ class Graph:
         samples, errors : pd.DataFrame, pd.DataFrame
             If ``return_errors=True``. See :func:`~pyparcs.cdag.graph_objects.Graph.sample`
         """
-        parcs_assert(
-            intervene_on not in self.dummy_names,
-            GraphError,
+        assert intervene_on not in self.dummy_names,\
             f'cannot intervene on dummy node {intervene_on}'
-        )
-        parcs_assert(
-            size is not None or sampled_errors is not None,
-            ValueError,
-            'Both "size" and "sampled_errors" cannot be None.'
-        )
         data = pd.DataFrame([])
         sampled_errors = self._get_errors(
             use_sampled_errors=use_sampled_errors, size=size, sampled_errors=sampled_errors
         )
 
-        for node_name in self.topological_sorting:
+        for node_name in topological_sort(self.adj_matrix):
             data[node_name] = self._calc_non_interventions(
                 node_name=node_name, data=data, sampled_errors=sampled_errors
             )
