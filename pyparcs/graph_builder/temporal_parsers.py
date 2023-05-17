@@ -215,6 +215,8 @@ def temporal(temporal_nodes, oldest):
         def wrapper(data):
             # find t-indexed temporal nodes
             temp_cols = [i for i in data.columns if i.rsplit('_', 1)[0] in temporal_nodes]
+            # resolve the 'neg' sign
+            temp_cols = [i.replace('neg', '-') for i in temp_cols]
             # get minimum t-index
             min_t = min(int(i.rsplit('_', 1)[1]) for i in temp_cols)
             # find out t
@@ -227,6 +229,8 @@ def temporal(temporal_nodes, oldest):
             rename_dict = {}
             for c in temp_cols:
                 offset = current_t - int(c.rsplit('_', 1)[1])
+                # 'neg' sign back to normal, because we want to replace the names
+                c = c.replace('-', 'neg')
                 if offset == 0:
                     rename_dict[c] = f"{c.rsplit('_', 1)[0]}_{{t}}"
                 else:
