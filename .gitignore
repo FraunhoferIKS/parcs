@@ -78,10 +78,6 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# Graphviz
-*.gv
-*.gv.pdf
-
 # IPython
 profile_default/
 ipython_config.py

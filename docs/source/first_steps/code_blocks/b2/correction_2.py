@@ -3,7 +3,6 @@ from pyparcs.graph_builder.parsers import graph_file_parser
 
 nodes, edges = graph_file_parser('graph_description_correction.yml')
 g = Graph(nodes=nodes, edges=edges)
-# burning-in 500 samples to tune the correction parameters.
 
 samples = g.sample(size=3)
 

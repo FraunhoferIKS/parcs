@@ -120,7 +120,7 @@ def equation_parser(eq: str, vars_: List[str]) -> List[Tuple[List[str], float]]:
     # 2. split by vars
     eq = [term_parser(term, vars_) for term in eq]
     # 3. check for duplicates
-    parents = [tuple(sorted(e[0])) for e in eq]
+    parents = [frozenset(e[0]) for e in eq]
     parcs_assert(len(set(parents)) == len(parents),
                  DescriptionFileError, f"Duplicated terms exist in equation {eq}")
 

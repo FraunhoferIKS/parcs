@@ -23,7 +23,7 @@ from itertools import combinations_with_replacement as comb_w_repl
 import numpy as np
 import pandas as pd
 from scipy.special import expit
-from pyparcs.exceptions import parcs_assert, GraphError
+from pyparcs.exceptions import parcs_assert
 
 
 def topological_sort(adj_matrix: pd.DataFrame = None):
@@ -64,7 +64,7 @@ def topological_sort(adj_matrix: pd.DataFrame = None):
         sum_c = adjm.sum(axis=0)
         # find nodes with no parents
         parent_inds = list(np.where(sum_c == 0)[0])
-        parcs_assert(len(parent_inds) != 0, GraphError, "Adjacency matrix is not acyclic")
+        parcs_assert(len(parent_inds) != 0, ValueError, "Adjacency matrix is not acyclic")
 
         covered_nodes += len(parent_inds)
         # add to the list
@@ -74,6 +74,14 @@ def topological_sort(adj_matrix: pd.DataFrame = None):
         # eliminate from columns by assigning values
         adjm[:, parent_inds] = 10
     return [adj_matrix.columns.tolist()[idx] for idx in ordered_list]
+
+
+def is_adj_matrix_acyclic(adj_matrix):
+    try:
+        topological_sort(adj_matrix)
+        return True
+    except AssertionError:
+        return False
 
 
 def get_interactions(data):

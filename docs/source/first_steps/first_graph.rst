@@ -76,36 +76,8 @@ In this example, the correction transformation for Bernoulli distribution, is a 
 .. note::
     **Node correction is always initialized upon the first batch of data**. For example, if `target_mean` option is set for node correction in the example above, the output values will be transformed such that the output has the mean equal to the `target_mean`. This is done by learning an `offset` term from the first batch which satisfies the `mean` requirements. This values will be then used for next simulations. For this purpose, the graph object always `burns` the first 500 samples, to initialize the corrections. Read more about sigmoid correction at :func:`~pyparcs.cdag.utils.SigmoidCorrection`.
 
-Reports and Visualizations
---------------------------
-
-Graphviz Visualization
-~~~~~~~~~~~~~~~~~~~~~~
-
-PARCS visualizes the `Graph` using the `Graphviz <https://pypi.org/project/graphviz/>`_ package.
-The nodes and edges can be color-coded based on the functions and distributions. The nodes can be
-shape-coded as well, based on the node type. (arguments are :code:`color_coded=True` and
-:code:`shape_coded=True`).
-
-.. literalinclude:: code_blocks/b4/graph.py
-    :linenos:
-    :caption: graph.py
-
-.. literalinclude:: code_blocks/b4/graph_description.yml
-    :linenos:
-    :caption: graph_description.yml
-
-.. image:: ../img/graph_viz.png
-    :width: 200
-    :align: center
-
-If you are using PARCS in the Jupyter notebook, you can set the argument :code:`notebook=True`.
-This will prevent Graphviz to generate the external PDF and GV files, and the :code:`.visualize()`
-method returns a DOT object (See `Graphviz doc <https://graphviz.readthedocs
-.io/en/stable/manual.html#jupyter-notebooks>`_).
-
-Reporting
-~~~~~~~~~
+Reading graph info
+------------------
 
 You can read the graph information via calling ``.get_info(type=...)``. The output includes information of nodes and edges, and corrections if available. If `type='raw'` (default), then a dictionary of nodes and edges info are returned. If `type='md'` then a markdown file including decorated report (pretty equations) will be written in the given directory via `info_dir` parameter.
 

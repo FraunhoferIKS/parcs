@@ -17,7 +17,4 @@
 #  https://www.gnu.de/documents/gpl-2.0.de.html
 #
 #  Contact: alireza.zamanian@iks.fraunhofer.de
-import warnings
 
-# monkey-patching the warning
-warnings.formatwarning = lambda msg, *args, **kwargs: f'{msg}\n'
