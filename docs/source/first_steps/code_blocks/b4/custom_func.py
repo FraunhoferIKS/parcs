@@ -1,4 +1,4 @@
-#  Copyright (c) 2022. Fraunhofer-Gesellschaft zur Foerderung der angewandten Forschung e.V.
+#  Copyright (c) 2023. Fraunhofer-Gesellschaft zur Foerderung der angewandten Forschung e.V.
 #  acting on behalf of its Fraunhofer-Institut für Kognitive Systeme IKS. All rights reserved.
 #
 #  This program is free software; you can redistribute it and/or
@@ -17,7 +17,5 @@
 #  https://www.gnu.de/documents/gpl-2.0.de.html
 #
 #  Contact: alireza.zamanian@iks.fraunhofer.de
-import warnings
-
-# monkey-patching the warning
-warnings.formatwarning = lambda msg, *args, **kwargs: f'{msg}\n'
+def add_function(data):
+    return data['A'] + data['B']

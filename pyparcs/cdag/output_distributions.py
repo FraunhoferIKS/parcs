@@ -56,7 +56,7 @@ class PARCSDistribution:
             p_name: DistParam(
                 name=p_name,
                 coef=coefs[p_name],
-                corrector=None if correctors[p_name] is None else correctors[p_name]
+                corrector=correctors[p_name]
             ) for p_name in params
         }
         self.icdf = icdf
