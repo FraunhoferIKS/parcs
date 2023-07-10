@@ -380,6 +380,7 @@ def edge_parser(line):
 def graph_file_parser(file_dir):
     """**Parser for graph description YAML files**
     This function reads the graph description `.yml` files and returns the list of nodes and edges.
+    It uses the :func:`~pyparcs.graph_builder.parsers.description_parser` function
     These lists are used to instantiate a :func:`~pyparcs.cdag.graph_objects.Graph` object.
 
     See Also
@@ -401,13 +402,33 @@ def graph_file_parser(file_dir):
         file = config_parser(file_dir)
     except Exception as exc:
         raise DescriptionFileError("Error in parsing YAML file.") from exc
+    return graph_description_parser(file)
+
+
+def graph_description_parser(desc_dict):
+    """**Parser for graph description dictionaries**
+    This function reads a description object and returns the list of nodes and edges.
+    These lists are used to instantiate a :func:`~pyparcs.cdag.graph_objects.Graph` object.
+
+    See Also
+    --------
+
+    Parameters
+    ----------
+    desc_dict: dict
+        a dictionary of nodes and edges description
+
+    Returns
+    -------
+
+    """
     # edges
     edges = [{
         'name': e,
-        **edge_parser(file[e])
-    } for e in file if '->' in e]
+        **edge_parser(desc_dict[e])
+    } for e in desc_dict if '->' in e]
     # node list
-    node_list = [n for n in file if '->' not in n]
+    node_list = [n for n in desc_dict if '->' not in n]
 
     # PARCS asserts:
     # 0. names are standard
@@ -436,8 +457,8 @@ def graph_file_parser(file_dir):
     # nodes
     nodes = [{
         'name': n,
-        **node_parser(file[n], parent_dict[n])
-    } for n in file if '->' not in n]
+        **node_parser(desc_dict[n], parent_dict[n])
+    } for n in desc_dict if '->' not in n]
 
     return nodes, edges
 
