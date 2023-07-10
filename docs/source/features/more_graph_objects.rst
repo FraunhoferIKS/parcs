@@ -12,12 +12,12 @@ Deterministic nodes
 
 A node can be defined to output a deterministic function of its parents. In this case, a deterministic function replaces the output distribution. To define a deterministic node:
 
-1. create a `.py` file in the same directory as your main Python script
+1. create a `.py` file in a directory which you will point to using relative/main paths. **NOTE** that under the hood, PARCS does `path.append()` to find the Python file, so be careful not to use an existing file name which is reachable in your current Python path.
 2. Define your custom function in the file. The input must be considered the dataset pandas data frame. (see example below)
-3. define the node in the `description file` by ``deterministic(<.py file name>, <function name>)``
+3. define the node in the `description file` by ``deterministic(<path/to/module>.py, <function name>)``
 
-.. literalinclude:: code_blocks/b1/customs.py
-    :caption: :code:`customs.py`
+.. literalinclude:: code_blocks/b1/python_functions/customs.py
+    :caption: :code:`./python_functions/customs.py`
     :linenos:
 
 .. literalinclude:: code_blocks/b1/graph_description.yml
