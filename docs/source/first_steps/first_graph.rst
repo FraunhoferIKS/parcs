@@ -24,6 +24,16 @@ The description file then is used to instantiate a graph object.
 
 The ``graph_file_parser`` function converts the description lines to standard *node* and *edge* objects needed by the ``Graph`` class. These objects are lists of Python dictionaries. Finally, the ``.sample()`` method return a ``Pandas.DataFrame`` object.
 
+
+As a concluding remark, keeping the graph description instructions in a `.yml` files helps you organize your code better. But to create a minimalistic graph, you can pass the *equivalent* dictionary to the ``graph_description_parser()`` function:
+
+.. code-block:: python
+    :linenos:
+
+    from pyparcs.graph_builder.parsers import graph_description_parser
+
+    nodes, edges = graph_description_parser({'A': 'Gaussian(mu_=0, sigma_=1)', ...})
+
 .. _sampling_error_terms:
 
 Sampling error terms
