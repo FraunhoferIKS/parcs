@@ -21,7 +21,6 @@
 import os
 import re
 import warnings
-from pathlib import Path
 from copy import deepcopy
 from itertools import product, combinations
 from typing import Union, Optional, Iterable
@@ -33,7 +32,7 @@ from pyparcs.graph_builder import parsers
 from pyparcs.cdag.utils import get_interactions_length, topological_sort
 from pyparcs.graph_builder.utils import config_parser, config_dumper
 from pyparcs.cdag.output_distributions import OUTPUT_DISTRIBUTIONS, DISTRIBUTION_PARAMS
-from pyparcs.exceptions import parcs_assert, DescriptionFileError
+from pyparcs.exceptions import parcs_assert, DescriptionFileError, RandomizerError
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -41,12 +40,31 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 @typechecked
 class ParamRandomizer:
     def __init__(self,
-                 graph_dir: Optional[Union[str, Path]] = None,
-                 guideline_dir: Optional[Union[str, Path]] = None):
+                 graph_dir: Optional[Union[str, None]] = None,
+                 guideline_dir: Optional[Union[str, None]] = None,
+                 graph_dict: Optional[Union[dict, None]] = None,
+                 guideline_dict: Optional[Union[dict, None]] = None):
+        # assert only file or dir is given
+        parcs_assert(
+            graph_dir is None or graph_dict is None,
+            RandomizerError,
+            "only a description file OR dict must be given. Both have values"
+        )
+        parcs_assert(
+            guideline_dir is None or guideline_dict is None,
+            RandomizerError,
+            "only a guideline file OR dict must be given. Both have values"
+        )
         # read randomization guideline
-        self.guideline = parsers.guideline_parser(guideline_dir)
+        if guideline_dict is None:
+            self.guideline = parsers.guideline_parser(guideline_dir)
+        else:
+            self.guideline = guideline_dict
         # read fixed nodes and edges
-        self.nodes, self.edges = parsers.graph_file_parser(graph_dir)
+        if graph_dict is None:
+            self.nodes, self.edges = parsers.graph_file_parser(graph_dir)
+        else:
+            self.nodes, self.edges = parsers.graph_description_parser(graph_dict)
 
     @staticmethod
     def directive_picker(directive: Union[list, int, float]):
@@ -160,9 +178,12 @@ class ParamRandomizer:
 @typechecked
 class ExtendRandomizer(ParamRandomizer):
     def __init__(self,
-                 graph_dir: Optional[Union[str, Path]] = None,
-                 guideline_dir: Optional[Union[str, Path]] = None):
-        super().__init__(graph_dir=graph_dir, guideline_dir=guideline_dir)
+                 graph_dir: Optional[Union[str, None]] = None,
+                 guideline_dir: Optional[Union[str, None]] = None,
+                 graph_dict: Optional[Union[dict, None]] = None,
+                 guideline_dict: Optional[Union[dict, None]] = None):
+        super().__init__(graph_dir=graph_dir, guideline_dir=guideline_dir,
+                         graph_dict=graph_dict, guideline_dict=guideline_dict)
 
         # pick number of nodes:
         self.num_nodes = self._set_num_nodes()
@@ -258,27 +279,61 @@ class ExtendRandomizer(ParamRandomizer):
 
 @typechecked
 class FreeRandomizer(ExtendRandomizer):
-    def __init__(self, guideline_dir: Optional[Union[str, Path]] = None):
-        super().__init__(graph_dir=None, guideline_dir=guideline_dir)
+    def __init__(self, guideline_dir: Optional[Union[str, None]] = None,
+                 guideline_dict: Optional[Union[dict, None]] = None):
+        super().__init__(guideline_dir=guideline_dir, guideline_dict=guideline_dict)
 
 
 @typechecked
 class ConnectRandomizer(ParamRandomizer):
     def __init__(self,
-                 parent_graph_dir: Optional[Union[str, Path]] = None,
-                 child_graph_dir: Optional[Union[str, Path]] = None,
-                 guideline_dir: Optional[Union[str, Path]] = None,
+                 parent_graph_dir: Optional[Union[str, None]] = None,
+                 parent_graph_dict: Optional[Union[str, None]] = None,
+                 child_graph_dir: Optional[Union[str, None]] = None,
+                 child_graph_dict: Optional[Union[str, None]] = None,
+                 guideline_dir: Optional[Union[str, None]] = None,
+                 guideline_dict: Optional[Union[str, None]] = None,
                  adj_matrix_mask: pd.DataFrame = None,
                  delete_temp_graph_description: bool = True):
-        pgd = config_parser(parent_graph_dir)
-        cgd = config_parser(child_graph_dir)
+
+
+        # assert only file or dir is given
+        parcs_assert(
+            parent_graph_dir is None or parent_graph_dict is None,
+            RandomizerError,
+            "only a description file OR dict must be given. Parent graph has both arguments"
+        )
+        parcs_assert(
+            child_graph_dir is None or child_graph_dict is None,
+            RandomizerError,
+            "only a description file OR dict must be given. child graph has both arguments"
+        )
+        parcs_assert(
+            guideline_dir is None or guideline_dict is None,
+            RandomizerError,
+            "only a guideline file OR dict must be given. Both have values"
+        )
+
+        if parent_graph_dict is None:
+            pgd = config_parser(parent_graph_dir)
+        else:
+            pgd = parent_graph_dict
+        if child_graph_dict is None:
+            cgd = config_parser(child_graph_dir)
+        else:
+            cgd = child_graph_dict
+
         n_p = [n for n in pgd if '->' not in n]
         l_p = len(n_p)
         n_c = [n for n in cgd if '->' not in n]
         e_c = [n for n in cgd if '->' in n]
         l_c = len(n_c)
 
-        guideline = config_parser(guideline_dir)
+        # read randomization guideline
+        if guideline_dict is None:
+            guideline = parsers.guideline_parser(guideline_dir)
+        else:
+            guideline = guideline_dict
 
         # sample connection adj_matrix
         density = self.directive_picker(guideline['graph']['graph_density'])
@@ -355,7 +410,7 @@ class ConnectRandomizer(ParamRandomizer):
 
 
 @typechecked
-def guideline_iterator(guideline_dir: Optional[Union[str, Path]] = None,
+def guideline_iterator(guideline_dir: Optional[Union[str, None]] = None,
                        to_iterate: str = None, steps: int = None,
                        repeat: int = 1):
     @typechecked
