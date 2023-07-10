@@ -2,7 +2,7 @@
 # nodes
 C: gaussian(mu_=0, sigma_=1)
 A: gaussian(mu_=2C-1, sigma_=1)
-Y: deterministic(customs.py, custom_function)
+Y: deterministic(./python_functions/customs.py, add_A_C)
 # edges
 C->A: identity()
 C->Y: identity()
