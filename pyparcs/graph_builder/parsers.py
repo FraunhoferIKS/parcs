@@ -19,6 +19,7 @@
 #  Contact: alireza.zamanian@iks.fraunhofer.de
 
 import re
+import sys
 from typing import List, Tuple
 from typeguard import typechecked
 import numpy as np
@@ -206,7 +207,18 @@ def node_parser(line: str, parents: List[str]) -> dict:
     try:
         res = det_pattern.search(line)
         directory = res.group(1)
-        assert directory[-3:] == '.py'
+        parcs_assert(
+            directory[-3:] == '.py',
+            ExternalResourceError,
+            'module directory must end with the module name, i.e. with .py '
+        )
+        if '/' in directory:
+            # strip the module name which is the last element after the last '/'
+            path_to_module = '/'.join(directory.split('/')[:-1])
+            sys.path.append(path_to_module)
+            # update directory for the next step, remaining only the module name
+            directory = directory.split('/')[-1]
+        # strip .py extension
         directory = directory[:-3]
         function_name = res.group(2)
         try:
