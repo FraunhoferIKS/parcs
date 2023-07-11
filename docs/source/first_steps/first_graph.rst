@@ -56,6 +56,21 @@ To reuse the errors, we set ``return_errors=True``, and pass the returned datafr
 
 .. _node_correction:
 
+Inferring Implicit Edges
+------------------------
+
+The graph description rules might seem a bit redundant, as we need to explicitly define an edge `A->B` even when we have `A` somewhere in the parameters of `B`. The reason for this design choice is that the edges can also take parameters. So, even though we know `A` is a parent of `B`, we still need to tell PARCS how to model the `A->B` edge.
+
+This rule also prevents part of the mistakes in defining the nodes; since PARCS throws an error if you have `A` in the parameters of `B` but have not `A->B` edge defined. However, there is still a way to get rid of redundancy, and that is by allowing the parser to infer the implicit edges:
+
+Have a look at the following code:
+
+.. literalinclude:: code_blocks/b5/graph.py
+    :linenos:
+    :emphasize-lines: 12, 15, 18
+
+In lines 15 and 18 you can see that the parsed edge list includes ``C->Y: identity()`` and ``C->A: identity()`` which are lacking from the provided description. This is the result of `infer_edges=True` in the description parser (the same parameter can be passed to ``graph_file_parser``). By setting this parameter, the missing edges are created and set to the identity. We recommend, however, to use this feature only if you are fully aware of the effect. As mentioned, the PARCS error for missing edges can be quite useful in preventing mistakes.
+
 Node correction
 ---------------
 PARCS provides a method to apply a standardizing *correction* to the distribution parameters. This option is available for all parameters that have a non-real numbers support, such as success probability of the Bernoulli distribution. Here is an example which runs into a problem, as the passed values to ``p_`` of the Bernoulli distribution are not in the range of :math:`[0, 1]`.
