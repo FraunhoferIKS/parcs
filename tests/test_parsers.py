@@ -484,3 +484,42 @@ class TestGraphDescriptionParser:
         # 2. distributions
         for edge in out_edges:
             assert edges[edge['name']] == edge['function_name']
+
+    @staticmethod
+    @pytest.mark.parametrize('description,nodes,edges', [
+        ({"A": "bernoulli(p_=0.2)",
+          "B": "gaussian(mu_=2A, sigma_=1)"},
+         # nodes
+         {'A': 'bernoulli', 'B': 'gaussian'},
+         # edges
+         {'A->B': 'identity'}),
+
+        ({"A": "bernoulli(p_=0.2)",
+          "B": "bernoulli(p_=A+C)",
+          "C": "bernoulli(p_=0.9)",
+          "A->B": "identity()"},
+         # nodes
+         {'A': 'bernoulli', 'B': 'bernoulli', 'C': 'bernoulli'},
+         # edges
+         {'A->B': 'identity', 'C->B': 'identity'})
+    ])
+    def test_infer_edges_functionality(description, nodes, edges):
+        out_nodes, out_edges = graph_description_parser(description,
+                                                        infer_edges=True)
+        # Nodes
+        # 1. names
+        assert len(nodes) == len(out_nodes)
+        extracted_node_names = [i['name'] for i in out_nodes]
+        assert set(extracted_node_names) == set(nodes.keys())
+        # 2. distributions
+        for node in out_nodes:
+            assert nodes[node['name']] == node['output_distribution']
+
+        # edges
+        # 1. names
+        assert len(edges) == len(out_edges)
+        extracted_edges_names = [i['name'] for i in out_edges]
+        assert set(extracted_edges_names) == set(edges.keys())
+        # 2. distributions
+        for edge in out_edges:
+            assert edges[edge['name']] == edge['function_name']
