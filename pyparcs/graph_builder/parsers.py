@@ -434,13 +434,21 @@ def graph_description_parser(desc_dict):
     -------
 
     """
+    # TODO: check if any edge is left
+    # extract all the node names by the edge names
+    # check which of them exist in the parameters of the distributions
+    # check if it is consistent with the edges
+    # for those who are missing, create (identity)
+
+    node_sublist, edge_sublist = graph_dict_splitter(desc_dict)
+
     # edges
     edges = [{
         'name': e,
         **edge_parser(desc_dict[e])
-    } for e in desc_dict if '->' in e]
+    } for e in edge_sublist]
     # node list
-    node_list = [n for n in desc_dict if '->' not in n]
+    node_list = list(node_sublist)
 
     # PARCS asserts:
     # 0. names are standard
@@ -451,8 +459,7 @@ def graph_description_parser(desc_dict):
         "One or more node names does not follow the PARCS naming conventions. Please see the docs."
     )
     # 1. node in edges are also in node list
-    edge_names = [e['name'] for e in edges]
-    node_in_edge = {i for element in edge_names for i in element.split('->')}
+    node_in_edge = {i for element in edge_sublist.keys() for i in element.split('->')}
     parcs_assert(
         node_in_edge.issubset(set(node_list)),
         DescriptionFileError,
@@ -461,8 +468,8 @@ def graph_description_parser(desc_dict):
 
     parent_dict = {
         node: sorted([
-            e['name'].split('->')[0] for e in edges
-            if e['name'].split('->')[1] == node
+            e.split('->')[0] for e in edge_sublist.keys()
+            if e.split('->')[1] == node
         ])
         for node in node_list
     }
@@ -470,9 +477,16 @@ def graph_description_parser(desc_dict):
     nodes = [{
         'name': n,
         **node_parser(desc_dict[n], parent_dict[n])
-    } for n in desc_dict if '->' not in n]
+    } for n in node_sublist]
 
     return nodes, edges
+
+
+def graph_dict_splitter(graph_dict):
+    edges_sublist = {k: v for k, v in graph_dict.items() if '->' in k}
+    nodes_sublist = {k: v for k, v in graph_dict.items() if k not in edges_sublist}
+
+    return nodes_sublist, edges_sublist
 
 
 def guideline_parser(file_dir):
@@ -480,3 +494,11 @@ def guideline_parser(file_dir):
         return config_parser(file_dir)
     except Exception as exc:
         raise GuidelineError("Error in parsing YAML file.") from exc
+
+
+if __name__ == '__main__':
+    dict_ = infer_edge(graph_dict={'A': 'gaussian(mu_=0, sigma_=1)',
+                                   'B': 'gaussian(mu_1, sigma_=2)',
+                                   'C': 'bernoulli(p_=A+B)',
+                                   'A->C': 'identity()'})
+    print(dict_)
