@@ -256,7 +256,14 @@ def node_parser(line: str, parents: List[str]) -> dict:
         values_ = [p.split('=')[1] for p in params.split(',')]
     except IndexError:
         # all ?
-        assert params == '?'
+        parcs_assert(
+            params == '?',
+            DescriptionFileError,
+            (f'Error in parameter "({params})" for the distribution "{dist}". '
+             'The convention to parameterize a distribution is: '
+             'dist(p1=..., p2=..., ...) even for distributions with 1 parameter, '
+             'unless the parameters are all randomized via question mark: "dist(?)"')
+        )
         keys_ = DISTRIBUTION_PARAMS[dist]
         values_ = ['?'] * len(keys_)
 
