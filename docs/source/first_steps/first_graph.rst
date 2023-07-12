@@ -24,6 +24,16 @@ The description file then is used to instantiate a graph object.
 
 The ``graph_file_parser`` function converts the description lines to standard *node* and *edge* objects needed by the ``Graph`` class. These objects are lists of Python dictionaries. Finally, the ``.sample()`` method return a ``Pandas.DataFrame`` object.
 
+
+As a concluding remark, keeping the graph description instructions in a `.yml` files helps you organize your code better. But to create a minimalistic graph, you can pass the *equivalent* dictionary to the ``graph_description_parser()`` function:
+
+.. code-block:: python
+    :linenos:
+
+    from pyparcs.graph_builder.parsers import graph_description_parser
+
+    nodes, edges = graph_description_parser({'A': 'Gaussian(mu_=0, sigma_=1)', ...})
+
 .. _sampling_error_terms:
 
 Sampling error terms
@@ -45,6 +55,21 @@ To reuse the errors, we set ``return_errors=True``, and pass the returned datafr
 .. _numpy_seed: https://numpy.org/doc/stable/reference/random/generated/numpy.random.seed.html
 
 .. _node_correction:
+
+Inferring Implicit Edges
+------------------------
+
+The graph description rules might seem a bit redundant, as we need to explicitly define an edge `A->B` even when we have `A` somewhere in the parameters of `B`. The reason for this design choice is that the edges can also take parameters. So, even though we know `A` is a parent of `B`, we still need to tell PARCS how to model the `A->B` edge.
+
+This rule also prevents part of the mistakes in defining the nodes; since PARCS throws an error if you have `A` in the parameters of `B` but have not `A->B` edge defined. However, there is still a way to get rid of redundancy, and that is by allowing the parser to infer the implicit edges:
+
+Have a look at the following code:
+
+.. literalinclude:: code_blocks/b5/graph.py
+    :linenos:
+    :emphasize-lines: 12, 15, 18
+
+In lines 15 and 18 you can see that the parsed edge list includes ``C->Y: identity()`` and ``C->A: identity()`` which are lacking from the provided description. This is the result of `infer_edges=True` in the description parser (the same parameter can be passed to ``graph_file_parser``). By setting this parameter, the missing edges are created and set to the identity. We recommend, however, to use this feature only if you are fully aware of the effect. As mentioned, the PARCS error for missing edges can be quite useful in preventing mistakes.
 
 Node correction
 ---------------

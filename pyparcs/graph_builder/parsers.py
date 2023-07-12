@@ -19,6 +19,7 @@
 #  Contact: alireza.zamanian@iks.fraunhofer.de
 
 import re
+import sys
 from typing import List, Tuple
 from typeguard import typechecked
 import numpy as np
@@ -206,7 +207,18 @@ def node_parser(line: str, parents: List[str]) -> dict:
     try:
         res = det_pattern.search(line)
         directory = res.group(1)
-        assert directory[-3:] == '.py'
+        parcs_assert(
+            directory[-3:] == '.py',
+            ExternalResourceError,
+            'module directory must end with the module name, i.e. with .py '
+        )
+        if '/' in directory:
+            # strip the module name which is the last element after the last '/'
+            path_to_module = '/'.join(directory.split('/')[:-1])
+            sys.path.append(path_to_module)
+            # update directory for the next step, remaining only the module name
+            directory = directory.split('/')[-1]
+        # strip .py extension
         directory = directory[:-3]
         function_name = res.group(2)
         try:
@@ -244,7 +256,14 @@ def node_parser(line: str, parents: List[str]) -> dict:
         values_ = [p.split('=')[1] for p in params.split(',')]
     except IndexError:
         # all ?
-        assert params == '?'
+        parcs_assert(
+            params == '?',
+            DescriptionFileError,
+            (f'Error in parameter "({params})" for the distribution "{dist}". '
+             'The convention to parameterize a distribution is: '
+             'dist(p1=..., p2=..., ...) even for distributions with 1 parameter, '
+             'unless the parameters are all randomized via question mark: "dist(?)"')
+        )
         keys_ = DISTRIBUTION_PARAMS[dist]
         values_ = ['?'] * len(keys_)
 
@@ -377,9 +396,10 @@ def edge_parser(line):
     }
 
 
-def graph_file_parser(file_dir):
+def graph_file_parser(file_dir, infer_edges=False):
     """**Parser for graph description YAML files**
     This function reads the graph description `.yml` files and returns the list of nodes and edges.
+    It uses the :func:`~pyparcs.graph_builder.parsers.description_parser` function
     These lists are used to instantiate a :func:`~pyparcs.cdag.graph_objects.Graph` object.
 
     See Also
@@ -389,6 +409,8 @@ def graph_file_parser(file_dir):
     ----------
     file_dir : str
         directory of the description file.
+    infer_edges: bool, default=False
+        If true, then the missing edges are inferred and added to the list
 
     Returns
     -------
@@ -401,13 +423,39 @@ def graph_file_parser(file_dir):
         file = config_parser(file_dir)
     except Exception as exc:
         raise DescriptionFileError("Error in parsing YAML file.") from exc
+    return graph_description_parser(file, infer_edges=infer_edges)
+
+
+def graph_description_parser(desc_dict, infer_edges=False):
+    """**Parser for graph description dictionaries**
+    This function reads a description object and returns the list of nodes and edges.
+    These lists are used to instantiate a :func:`~pyparcs.cdag.graph_objects.Graph` object.
+
+    See Also
+    --------
+
+    Parameters
+    ----------
+    desc_dict: dict
+        a dictionary of nodes and edges description
+    infer_edges: bool, default=False
+        If true, then the missing edges are inferred and added to the list
+
+    Returns
+    -------
+
+    """
+    nodes_sublist, edges_sublist = graph_dict_splitter(desc_dict)
+    if infer_edges:
+        edges_sublist = infer_missing_edges(nodes_sublist, edges_sublist)
+
     # edges
     edges = [{
         'name': e,
-        **edge_parser(file[e])
-    } for e in file if '->' in e]
+        **edge_parser(edges_sublist[e])
+    } for e in edges_sublist]
     # node list
-    node_list = [n for n in file if '->' not in n]
+    node_list = list(nodes_sublist)
 
     # PARCS asserts:
     # 0. names are standard
@@ -418,8 +466,7 @@ def graph_file_parser(file_dir):
         "One or more node names does not follow the PARCS naming conventions. Please see the docs."
     )
     # 1. node in edges are also in node list
-    edge_names = [e['name'] for e in edges]
-    node_in_edge = {i for element in edge_names for i in element.split('->')}
+    node_in_edge = {i for element in edges_sublist.keys() for i in element.split('->')}
     parcs_assert(
         node_in_edge.issubset(set(node_list)),
         DescriptionFileError,
@@ -428,18 +475,41 @@ def graph_file_parser(file_dir):
 
     parent_dict = {
         node: sorted([
-            e['name'].split('->')[0] for e in edges
-            if e['name'].split('->')[1] == node
+            e.split('->')[0] for e in edges_sublist.keys()
+            if e.split('->')[1] == node
         ])
         for node in node_list
     }
     # nodes
     nodes = [{
         'name': n,
-        **node_parser(file[n], parent_dict[n])
-    } for n in file if '->' not in n]
+        **node_parser(desc_dict[n], parent_dict[n])
+    } for n in nodes_sublist]
 
     return nodes, edges
+
+
+def infer_missing_edges(nodes_sublist, edges_sublist):
+    # extracts list of nodes that appear in the params of the nodes
+    existing_nodes = {
+        node: [parent for parent in nodes_sublist.keys()
+               if parent in nodes_sublist[node] and parent != node]
+        for node in nodes_sublist
+    }
+    # add missing edges
+    for node in nodes_sublist:
+        for parent in existing_nodes[node]:
+            if f'{parent}->{node}' not in edges_sublist.keys():
+                edges_sublist[f'{parent}->{node}'] = 'identity()'
+
+    return edges_sublist
+
+
+def graph_dict_splitter(graph_dict):
+    edges_sublist = {k: v for k, v in graph_dict.items() if '->' in k}
+    nodes_sublist = {k: v for k, v in graph_dict.items() if k not in edges_sublist}
+
+    return nodes_sublist, edges_sublist
 
 
 def guideline_parser(file_dir):

@@ -122,3 +122,19 @@ class TestParamRandomizer:
             pass
         else:
             raise AssertionError
+
+    @staticmethod
+    def test_dict_inputs():
+        description = {'A': 'random'}
+        guideline = {'nodes': {'bernoulli': {'p_': [['f-range', 0.8, 0.9], 0, 0]}}}
+        # preliminaries
+        rndz = ParamRandomizer(graph_dict=description, guideline_dict=guideline)
+        nodes, edges = rndz.get_graph_params()
+        # assert correct number of nodes have been established
+        assert len(nodes) == 1
+        assert len(edges) == 0
+        # assert edge is parsed
+        node = nodes[0]
+
+        assert node['output_distribution'] == 'bernoulli'
+        assert 0.8 <= node['dist_params_coefs']['p_']['bias'] <= 0.9

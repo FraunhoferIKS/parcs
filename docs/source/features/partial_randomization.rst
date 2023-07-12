@@ -50,6 +50,16 @@ In our example, therefore, mean of node A is selected according to line 5 of the
 .. seealso::
     :ref:`Randomization conventions <conventions_inducing_randomization>`
 
+As a concluding remark, similar to instantiating a usual PARCS graph, you can pass dict objects which is equivalent to the yml file structure, to the randomizer. The dicts must be passed to the `graph_dict` and `guideline_dict` arguments:
+
+.. code-block:: python
+    :linenos:
+
+    randz = ParamRandomizer(
+        graph_dict={'A': 'random'},
+        guideline_dict={'nodes':{'bernouli': ..., 'gaussian': ...}, 'edges': ...}
+    )
+
 Free Randomizer
 ===============
 
@@ -122,6 +132,9 @@ The highlighted lines show the traces of the new connection between graphs. Note
 
 .. note::
     The density of new edges follows the `graph_density` entry in the guideline file. However, based on asterisks and adjacency matrix mask, number of edges might be less than intended. E.g., `graph_density: 1` tells PARCS to fully connect the parent graph to child graph. However, if the child nodes doesn't have asterisks in parameters, PARCS will skip all nodes (as we have requested no parameter to be affected by new edges), hence no new edges will be added.
+
+.. note::
+    Passing the dictionary instead of the yml files also work for the connect randomizer. The arguments are ``parent_graph_dict``, ``child_graph_dict`` and ``guideline_dict``.
 
 Edge correction
 ===============
