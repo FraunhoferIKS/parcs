@@ -4,6 +4,7 @@ version = "0.2.0"
 description = "A simulation package for causal methods"
 authors = [
     {name = "Alireza Zamanian", email = "alireza.zamanian@iks.fraunhofer.de"},
+    {name = "Ruijie Chen", email = "ruijie.chen@iks.fraunhofer.de"},
     {name = "Leopold Mareis", email = "leopold.mareis@iks.fraunhofer.de"}
 ]
 maintainers = [
@@ -11,7 +12,7 @@ maintainers = [
 ]
 license = {file = "LICENSE.txt"}
 readme = "README.md"
-requires-python = ">=3.5"
+requires-python = ">=3.8"
 keywords = ["simulation", "causal inference", "directed acyclic graphs"]
 classifiers = [
     "Development Status :: 4 - Beta",
