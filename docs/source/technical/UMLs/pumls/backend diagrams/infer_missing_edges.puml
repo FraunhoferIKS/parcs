@@ -1,0 +1,16 @@
+@startuml
+start
+:from description_parser;
+!startsub BASE
+    while (nodes)
+        :search other \n node names;
+        if (found?) then (yes)
+            :add to\n parents list;
+        else (no)
+        endif
+    endwhile
+    :add identity() edge \n for found parents;
+!endsub
+:to description_parser;
+stop
+@enduml

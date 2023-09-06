@@ -1,0 +1,58 @@
+@startuml
+|#b2d8d8|description_parser()|
+start
+:**inputs:** description (dict) &\n\t     infer edge (bool);
+-[dashed]-> pass description;
+
+
+|#66b2b2|outline_splitter()|
+!includesub outline_splitter.puml!BASE
+-[dashed]-> node & edge sublist;
+
+
+|description_parser()|
+if (infer edges?) then (yes)
+    -[dashed]-> yes: node & edge sublist;
+    |#71c7ec|infer_missing_edges()|
+    !includesub infer_missing_edges.puml!BASE
+    -[dashed]-> updated edge sublist;
+else (no)
+endif
+|description_parser()|
+
+
+:check naming standards \n for nodes;
+if (error found?) then (yes)
+    :raise DescriptionError;
+    end
+else (no)
+endif
+
+:check nodes/edges name consistency;
+if (error found?) then (yes)
+    :raise DescriptionError;
+    end
+else (no)
+endif
+
+-[dashed]-> edge sublist;
+|#e8f4ea|edge_parser()|
+
+:Parse edge: \n See edge_parser;
+
+-[dashed]-> parsed edge info dicts;
+|description_parser()|
+
+:make parent dict\n according to node/edge names;
+
+-[dashed]-> node sublist & parent dict;
+|#e8f4ea|node_parser()|
+
+:Parse node: \n See node_parser();
+
+-[dashed]-> parsed nodes info dicts;
+|description_parser()|
+
+
+stop
+@enduml

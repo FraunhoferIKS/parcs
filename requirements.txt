@@ -1,3 +1,4 @@
+# For users
 numpy~=1.22.2
 pandas~=1.3.3
 scipy
@@ -6,3 +7,12 @@ PyYAML~=6.0
 typeguard~=2.13.3
 cycler~=0.11.0
 typing~=3.7.4.3
+python-benedict~=0.32.0
+matplotlib~=3.5.1
+seaborn~=0.12.2
+
+# For developers
+sphinx-rtd-theme~=1.2.0
+sphinx~=6.2.1
+matplotlib~=3.5.1
+pytest~=7.4.0

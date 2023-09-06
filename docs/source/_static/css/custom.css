@@ -1,0 +1,18 @@
+.wy-side-nav-search {
+    background: #179c7d;
+}
+
+.wy-nav-content {
+    max-width: 1000px !important;
+}
+
+div.leftside {
+    width: 500px;
+    padding: 0px 3px 0px 0px;
+    float: left;
+}
+
+div.rightside {
+    margin-left: 425px;
+    padding-top: 10px;
+}

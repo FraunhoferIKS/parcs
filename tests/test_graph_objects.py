@@ -1,26 +1,7 @@
-#  Copyright (c) 2023. Fraunhofer-Gesellschaft zur Foerderung der angewandten Forschung e.V.
-#  acting on behalf of its Fraunhofer-Institut für Kognitive Systeme IKS. All rights reserved.
-#
-#  This program is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU General Public License
-#  as published by the Free Software Foundation; either version 2
-#  of the License, or (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, see <http://www.gnu.org/licenses/>.
-#
-#  https://www.gnu.de/documents/gpl-2.0.de.html
-#
-#  Contact: alireza.zamanian@iks.fraunhofer.de
 import numpy
 import pytest
 import os
-from pyparcs.cdag.graph_objects import *
+from pyparcs.api.graph_objects import *
 
 
 class TestConstantNodes:
@@ -61,7 +42,7 @@ class TestDataNodes:
         ([0.76, 0.85, 0.99], [4, 4, 4]),
     ])
     def test_data_node(err, realization, csv_file):
-        node = DataNode(csv_dir=csv_file, name='Z_1')
+        node = DataNode(csv_dir=csv_file, col='Z_1')
         # error term [0.0, 0.3, 0.6, 0.9] gives 1, 2, 3, 4
         out = node.calculate(pd.Series(err))
         assert numpy.array_equal(out, realization)
@@ -70,12 +51,12 @@ class TestDataNodes:
     @pytest.mark.parametrize('array,error', [
         (np.array([0, 0.2]), TypeError),  # not pandas series
         (pd.Series(['a', 'b']), ValueError),  # non-numeric values
-        (pd.Series([0, 0.4, 1]), ValueError),  # value equal to 1
+        (pd.Series([0, 0.4, 1.1]), ValueError),  # value greater than 1
         (pd.Series([-0.001, 0.2]), ValueError)  # value smaller than zero
     ])
     def test_data_node_raises_error(array, error, csv_file):
         with pytest.raises(error):
-            node = DataNode(csv_dir=csv_file, name='Z_1')
+            node = DataNode(csv_dir=csv_file, col='Z_1')
             node.calculate(array)
 
 

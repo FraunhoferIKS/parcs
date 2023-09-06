@@ -1,0 +1,26 @@
+@startuml
+
+start
+:**input**: adjacency matrix;
+:**initiate**: ordered_list=[], covered_nodes=0;
+
+
+while (covered_nodes < total # nodes)
+    :column=node, row=all parents;
+    ://find node with no parents : assign to N// \n\t columns with sum(rows)=0;
+    if (len N == 0) then (yes\t )
+        :error: acyclic;
+        note left: no parentless\n node
+        end
+    else (    no)
+        :add N to ordered_list;
+        :covered_nodes += len N;
+        ://remove outgoing edges from N//: \n\t set all rows of N to 0;
+        :\t//eliminate N from columns//: \n set N columns to 10 (a large number);
+    endif
+
+endwhile
+:return ordered_list;
+stop
+
+@enduml

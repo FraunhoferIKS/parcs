@@ -1,8 +1,0 @@
-Age: uniform(mu_=10, diff_=20)
-BP: gaussian(mu_=Noise, sigma_=1)
-Drug: bernoulli(p_=BPAge)
-Noise: gaussian(mu_=0, sigma_=1)
-
-Age->Drug: identity()
-Noise->BP: identity()
-BP->Drug: identity()

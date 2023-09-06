@@ -1,0 +1,15 @@
+@startuml
+start
+:from description_parser;
+!startsub BASE
+while (description lines)
+if ('->' in the key?) then (yes)
+    :add to\n edge list;
+else (no)
+    :add to\n the node list;
+endif
+endwhile
+!endsub
+:to description_parser;
+stop
+@enduml

@@ -1,0 +1,15 @@
+@startuml
+
+start
+:**input**: node list, parents list;
+
+
+:create all zero adj matrix;
+
+while (for all nodes)
+    :column=node, row=all parents;
+    :set the row X column to 1;
+endwhile
+
+stop
+@enduml

@@ -1,5 +1,0 @@
-# initial value for blood pressure
-BP_{0}: uniform(mu_=10, diff_=2) 
-# initial values for drug effect
-Drug_{-1}: constant(0)
-Drug_{0}: constant(0)

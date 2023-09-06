@@ -1,0 +1,16 @@
+# nodes
+A: uniform(mu_=1, diff_=2)
+B_{t}: normal(mu_=B_{t-1}, sigma_=1)
+C_{t}: deterministic(customs.py, temporal_custom_func)
+
+# initial values
+B_{-1}: constant(0)
+B_{0}: constant(2)
+C_{0}: constant(1)
+
+# edges
+A->B_{t}: identity()
+B_{t-1}->B_{t}: identity()
+A->C_{t}: identity()
+B_{t-2}->C_{t}: identity()
+C_{t-1}->C_{t}: identity()

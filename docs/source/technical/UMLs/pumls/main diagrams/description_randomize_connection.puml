@@ -1,0 +1,38 @@
+@startuml
+actor User #179c7d
+participant Description as Desc #Application
+participant "outline_splitter()" as splitter
+participant "radom_connection_adj_matrix()" as rndAdj
+participant "get_new_terms()" as getTerms
+participant "augment_line()" as augLine
+participant "description_parser()" as descParser
+
+
+User -> Desc: call .randomize_connections_to()\n\n[child outline, guideline, tags,\n tag, mask]
+Desc -> Desc: child outline \n is valid
+Desc -> Desc: no similar \n parent & child node
+Desc -> splitter: outline
+splitter -> Desc: [nodes, edges]
+Desc -> rndAdj: parent/child nodes, mask, density
+rndAdj -> Desc: adjacency matrix
+
+loop child nodes
+    Desc -> getTerms: new incoming edges
+    getTerms -> Desc: additional terms
+
+    Desc -> augLine: line, additional terms
+    augLine -> Desc: augmented line
+
+    Desc -> Desc: update edge list
+end
+
+Desc -> descParser: new outline
+descParser -> Desc: nodes, edges
+Desc -> Desc: setup attributes
+activate Desc #SkyBlue
+Desc -> Desc: //see Description// \n //instantiation diagram//
+deactivate Desc
+Desc -> Desc: .randomize_parameters()
+activate Desc #SkyBlue
+
+@enduml

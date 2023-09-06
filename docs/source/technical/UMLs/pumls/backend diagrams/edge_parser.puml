@@ -1,0 +1,34 @@
+@startuml
+
+#Lavender:edge line\nfrom description_parser()|
+start
+
+:tag parse;
+if (line='random'?) then (yes)
+    :edge is random;
+else (no)
+    :detect function name;
+    if (valid name found?) then (yes)
+        :extract params;
+        if (all '?' ?) then (yes)
+            :set all params to '?';
+        else (no)
+            while (for all params)
+              :read param & value;
+              if (error reading or \n name invalid?) then (yes)
+                :raise DescriptionError;
+                end
+              else (no)
+              endif
+            endwhile
+        endif
+    else (no)
+        :raise DescriptionError;
+        end
+    endif
+endif
+
+
+#Lavender:edge info dict\n to description_parser();
+stop
+@enduml

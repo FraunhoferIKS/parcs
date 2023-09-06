@@ -1,0 +1,138 @@
+@startuml
+
+actor User #179c7d
+participant Graph as graph #Application
+participant Description as desc
+participant "[Nodes]()" as node
+participant "Edge()" as edge
+participant "topological_sort()" as topo
+
+== Instantiation ==
+User -> graph: description
+graph -> desc: .unwrap()
+note right: create info &\nensure description \n is fully specified
+
+loop all nodes
+    graph -> node: node dicts
+    node -> graph: [Node]() objects
+end
+note right: Including all types of nodes \n see next diagram for details
+
+loop all edges
+    graph -> edge: edge dicts
+    edge -> graph: Edge() objects
+end
+
+alt at least one object\n has correction
+    graph -> graph: .sample(500)
+    activate graph
+    graph -> graph
+    deactivate graph
+end
+note right: burn-out samples
+
+== .sample() ==
+
+User -> graph: size OR errors
+alt size given
+    graph -> graph: ._get_errors(size)
+    activate graph
+    graph -> graph: errors
+    deactivate graph
+end
+
+graph -> desc: get topological sort
+desc -> graph: sorted list
+
+loop all nodes on sorted list
+    graph -> edge: input data
+    edge -> graph: transformed data
+    note right: respective parent
+
+    graph -> node: transformed data & errors
+    node -> graph: samples
+end
+graph -> User: samples & errors
+
+== .do() ==
+
+User -> graph: size OR errors \n interventions
+alt size given
+    graph -> graph: ._get_errors(size)
+    activate graph
+    graph -> graph: errors
+    deactivate graph
+end
+
+graph -> desc: get topological sort
+desc -> graph: sorted list
+
+loop all nodes on sorted list
+    alt node in interventions
+        graph -> graph: samples = intervention
+   else node not in interventions
+    graph -> edge: input data
+    edge -> graph: transformed data
+    note right: respective parent
+
+    graph -> node: transformed data & errors
+    node -> graph: samples
+end
+graph -> User: samples & errors
+
+== .do_functional() ==
+
+User -> graph: size OR errors \n intervened node \n new parents \n do function
+alt size given
+    graph -> graph: ._get_errors(size)
+    activate graph
+    graph -> graph: errors
+    deactivate graph
+end
+
+graph -> graph: revise adjcancey matrix\n based on new parents
+graph -> topo: adjacency matrix
+topo -> graph: sorted list
+note left: requires new sorting \n because new parents\n change the node orders
+
+loop all nodes on sorted list
+    alt intervened node
+        graph -> graph: samples = func(new parents)
+   else node not in interventions
+    graph -> edge: input data
+    edge -> graph: transformed data
+    note right: respective parent
+
+    graph -> node: transformed data & errors
+    node -> graph: samples
+end
+graph -> User: samples & errors
+
+== .do_self() ==
+
+User -> graph: size OR errors \n intervened node \n function
+alt size given
+    graph -> graph: ._get_errors(size)
+    activate graph
+    graph -> graph: errors
+    deactivate graph
+end
+
+graph -> desc: get topological sort
+desc -> graph: sorted list
+
+loop all nodes on sorted list
+    graph -> edge: input data
+    edge -> graph: transformed data
+    note right: respective parent
+
+    graph -> node: transformed data & errors
+    node -> graph: samples
+
+    alt intervened node
+        graph -> graph: samples = func(samples)
+    end
+end
+graph -> User: samples & errors
+
+@enduml

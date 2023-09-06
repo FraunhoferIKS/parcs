@@ -21,10 +21,11 @@
 import pandas as pd
 import numpy as np
 from itertools import combinations
-from pyparcs.exceptions import parcs_assert, DescriptionFileError
+from pyparcs.core.exceptions import parcs_assert, DescriptionError
 
 
-def m_graph_convert(data: pd.DataFrame, missingness_prefix='R', indicator_is_missed=0, shared_subscript=True):
+def m_graph_convert(data: pd.DataFrame, missingness_prefix='R', indicator_is_missed=0,
+                    shared_subscript=True):
     """
     This helper functions converts the synthesized data set of fully-observed variables and missingness indicators
     into a standard observational variable with missing entries.
@@ -53,7 +54,7 @@ def m_graph_convert(data: pd.DataFrame, missingness_prefix='R', indicator_is_mis
 
     Raises
     ------
-    DescriptionFileError
+    DescriptionError
         If the prefix ends with underscore. The function automatically assumes the underscore.
     ValueError
         If missingness indicators are not binary (0, 1)
@@ -61,7 +62,7 @@ def m_graph_convert(data: pd.DataFrame, missingness_prefix='R', indicator_is_mis
     """
     parcs_assert(
         missingness_prefix[-1] != '_',
-        DescriptionFileError,
+        DescriptionError,
         '''
         missing prefix should not end with underscore _.
         The underscore for connecting prefix and subscripts will be considered automatically.
@@ -73,8 +74,9 @@ def m_graph_convert(data: pd.DataFrame, missingness_prefix='R', indicator_is_mis
     # take Rs: it starts with prefix, and subtracting the prefix gives the name of another node
     r_columns = [
         i for i in data.columns if (
-           i[:len_prefix] == missingness_prefix and  # starts with prefix and underscore
-           '{}_{}'.format(missingness_prefix, i) not in data.columns  # this prevents from bug for words starting with R
+                i[:len_prefix] == missingness_prefix and  # starts with prefix and underscore
+                '{}_{}'.format(missingness_prefix, i) not in data.columns
+        # this prevents from bug for words starting with R
         )
     ]
     r_indices = [r.split('_')[1] for r in r_columns]
@@ -94,7 +96,7 @@ def m_graph_convert(data: pd.DataFrame, missingness_prefix='R', indicator_is_mis
     # check if r_columns are binary
     for r in r_columns:
         parcs_assert(
-            set(temp_data[r].unique()) == {0, 1},
+            set(temp_data[r].unique()).issubset({0, 1}),
             ValueError,
             "Miss. indicator column {} is not binary.".format(r)
         )
@@ -118,7 +120,7 @@ def block_conditional_mask(size=None):
 
 def R_adj_matrix(size=None, shuffle=False, density=1.0):
     adj_matrix = np.triu(np.ones(shape=(size, size)), k=1)
-    s = np.random.choice([0, 1], p=[1-density, density], size=(size, size))
+    s = np.random.choice([0, 1], p=[1 - density, density], size=(size, size))
     adj_matrix = np.multiply(s, adj_matrix)
     if shuffle:
         inds = [i for i in range(size)]
@@ -136,8 +138,8 @@ def R_attrition_adj_matrix(size=None, step=None, density=1.0):
     return adj_matrix
 
 
-def indicator_graph_description_file(adj_matrix=None, node_names=None, prefix='R', subscript_only=False,
-                                     file_dir=None, miss_ratio=None, supress_asteriks=False):
+def indicator_outline(adj_matrix=None, node_names=None, prefix='R',
+                      subscript_only=False, miss_ratio=None):
     if subscript_only:
         sub = [n.split('_')[1] for n in node_names]
     else:
@@ -149,22 +151,17 @@ def indicator_graph_description_file(adj_matrix=None, node_names=None, prefix='R
         ratio = ''
     else:
         assert 0 < miss_ratio < 1
-        ratio = 'target_mean={}'.format(1-miss_ratio)
-    if supress_asteriks:
-        asteriks = ''
-    else:
-        asteriks = '*'
-    file = '# nodes\n'
+        ratio = 'target_mean={}'.format(1 - miss_ratio)
+
+    outline = {}
+    # nodes
     for r in r_names:
-        file += '{r}: bernoulli({a}p_=?), correction[{ratio}]\n'.format(r=r, a=asteriks, ratio=ratio)
-    file += '# edges\n'
+        outline[r] = f'bernoulli(p_=?), correction[{ratio}]'
+    # edges
     for r1, r2 in combinations(r_names, 2):
         if adj_matrix.loc[r1, r2] == 1:
-            file += '{}->{}: random\n'.format(r1, r2)
+            outline[f'{r1}->{r2}'] = 'random'
         elif adj_matrix.loc[r2, r1] == 1:
-            file += '{}->{}: random\n'.format(r2, r1)
-    with open(file_dir, 'w') as gdf:
-        gdf.write(file)
-    return None
+            outline[f'{r2}->{r1}'] = 'random'
 
-
+    return outline

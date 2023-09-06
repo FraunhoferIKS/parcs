@@ -1,0 +1,63 @@
+@startuml
+
+|node_parser()|
+start
+-[dashed]-> param equation, possible parents;
+|#D5FFE4|equation_parser()|
+
+:split terms;
+-[dashed]-> for each term;
+
+|#8BE8E5|term_parser()|
+while (for all possible parents: p)
+    if ('p^2' found?) then (yes)
+        :term is quadratic;
+        if (other parents already found?) then (yes)
+            :raise DescriptionError;
+            note right: quad term must be \n the only term
+            end
+        else (no)
+        endif
+        break
+
+        note right: quad term must be \n the only term
+    else (no)
+        if ('p' alone found?) then (yes)
+            :add p to parents list;
+            :delete p from the line string;
+        endif
+    endif
+endwhile
+
+:what remains \n is the coef;
+
+if (remaining = '-' ?) then (yes)
+    :coef is -1;
+elseif (remaining = '' ?) then (yes)
+    :coef is +1;
+elseif (remaining = '?' ?) then (yes)
+    :coef is '?';
+else (no)
+    :coef = float(remaining);
+    if (error?) then (yes)
+        :raise DescriptionError;
+        note right: non-number \n characters
+        end
+    else (no)
+    endif
+endif
+:term parents & coef;
+-[dashed]-> results;
+
+|equation_parser()|
+if (duplicate parent lists\n     among terms?) then (yes)
+    :raise DescriptionError;
+    end
+else (no)
+endif
+-[dashed]-> parsed equation;
+
+|node_parser()|
+
+stop
+@enduml

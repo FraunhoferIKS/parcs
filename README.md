@@ -1,7 +1,10 @@
 [![DOI](https://zenodo.org/badge/592506885.svg)](https://zenodo.org/badge/latestdoi/592506885)
 ![PyPI](https://img.shields.io/pypi/v/pyparcs)
 
-# PARCS: a Python Package for Causal Simulation
+![PARCS logo](./images/parcs_dark.svg#gh-dark-mode-only)
+![PARCS logo](./images/parcs_light.svg#gh-light-mode-only)
+
+# A Python Package for Causal Simulation
 
 **PA**-rtially **R**-andomized **C**-ausal **S**-imulator is a simulation tool for causal 
 methods. This library is designed to facilitate simulation study design and serve as a standard 
@@ -29,57 +32,48 @@ pip install pyparcs
 
 ## Get started (A bare minimum)
 
-To simulate a causal DAG, describe the graph in a _graph description file_:
-
-```yaml
-# === A causal Triangle: Treatment, Outcome, Confounder ===
-# nodes
-C: gaussian(mu_=0, sigma_=1)
-A: gaussian(mu_=2C-1, sigma_=0.1C+1)
-Y: gaussian(mu_=C+A-0.3AC, sigma_=2)
-# edges
-C->A: identity()
-C->Y: identity()
-A->Y: identity()
-```
-
-You can instantiate a graph object and sample from its observational and interventional 
+To simulate a causal DAG, describe the graph by its nodes and edges and instantiate a graph object. You can sample from the graph's observational and interventional 
 distributions:
 
 ```python
-from pyparcs.cdag.graph_objects import Graph
-from pyparcs.graph_builder.parsers import graph_file_parser
+from pyparcs import Description, Graph
 import numpy as np
+np.random.seed(2023)
 
-nodes, edges = graph_file_parser('graph_description.yml')
-g = Graph(nodes=nodes, edges=edges)
-g.sample(size=5)
+description = Description({'C': 'normal(mu_=0, sigma_=1)',
+                           'A': 'normal(mu_=2C-1, sigma_=C^2+1)',
+                           'Y': 'uniform(mu_=A+C, diff_=2)'},
+                          infer_edges=True)
+graph = Graph(description)
+samples, _ = graph.sample(size=5)
 #           C         A         Y
-# 0  1.500622  3.542066  3.928658
-# 1  0.774417  2.115694  3.251244
-# 2 -1.140551 -2.120171 -3.445699
-# 3  0.590632  1.564428  0.109688
-# 4 -0.652315 -2.649744 -6.378569
+# 0  1.228778  0.297618  1.702500
+# 1 -1.074313 -5.610021 -6.748542
+# 2  0.604591 -2.538791 -1.885425
+# 3 -0.109575 -1.104919 -1.211730
+# 4 -1.031419 -3.615304 -4.924973
 
-g.do(size=3, interventions={'A': 2.5})
+samples, _ = graph.do(size=3, interventions={'A': 2.5})
 #           C    A         Y
-# 0 -1.047174  2.5  0.902704
-# 1  0.099876  2.5  1.282226
-# 2 -1.145309  2.5  3.391779
+# 0 -0.418041  2.5  1.442606
+# 1 -1.803585  2.5  0.826138
+# 2 -0.466009  2.5  1.787118
 
-g.do_functional(size=3,
-                intervene_on='Y', inputs=['A', 'C'],
-                func=lambda a,c: (a+c)*10)
+samples, _ = graph.do_functional(size=3,
+                                 intervene_on='Y', inputs=['A', 'C'],
+                                 func=lambda a, c: (a+c)*10)
 #           C         A          Y
-# 0 -0.585768 -3.240235 -38.260031
-# 1 -0.713663 -1.262177 -19.758394
-# 2  1.925642  0.791920  27.175618
+# 0 -1.259351 -5.846128 -71.054782
+# 1 -0.309356 -2.557167 -28.665228
+# 2  0.741366  1.578032  23.193976
 ```
 
 You can describe a graph partially and only up to a level:
 ```yaml
-C: gaussian(mu_=1, sigma_=1)
-A: gaussian(mu_=?, sigma_=1) # mu_ parameter is not specified
+# description_outline.yml
+
+C: normal(mu_=1, sigma_=1)
+A: normal(mu_=?C+2, sigma_=1) # mu_ parameter is not specified
 Y: random # Y conditional distribution is not specified
 
 C->A: identity()
@@ -89,10 +83,12 @@ A->Y: identity()
 
 and let PARCS randomize the free parameters according to a guideline:
 ```yaml
+# guideline_outline.yml
+
 nodes:
   bernoulli:
     p_: [ [f-range, 1, 2] , 0 , [f-range, 2, 3] ]
-  gaussian:
+  normal:
     mu_: [ [f-range, -2, -1] , [f-range, 0.5, 1] , 0 ]
     sigma_: [ [f-range, 1, 3] , 0 , 0 ]
 edges:
@@ -102,20 +98,30 @@ edges:
 In this guideline, randomization ranges are specified (e.g. bias term for `mu_` is sampled 
 from the continuous uniform `[-2, -1]`). 
 ```python
-from pyparcs.graph_builder.randomizer import ParamRandomizer
+from pyparcs import Description, Graph, Guideline
+import numpy as np
+np.random.seed(2023)
 
-rndz = ParamRandomizer(
-    graph_dir='graph_description_1.yml',
-    guideline_dir='simple_guideline.yml'
-)
-nodes, edges = rndz.get_graph_params()
 
-g = Graph(nodes=nodes, edges=edges)
-g.sample(size=3)
+description = Description('description_outline.yml')
+guideline = Guideline('guideline_outline.yml')
+
+description.randomize_parameters(guideline)
+graph = Graph(description)
+samples, _ = graph.sample(size=3)
 #           C         A    Y
-# 0  1.660388  0.410814  1.0
-# 1  1.253973 -2.983480  0.0
-# 2  1.088486 -0.167692  1.0
+# 0  1.434386  1.447402  1.0
+# 1  0.351719  2.092142  1.0
+# 2 -0.026576  1.479390  1.0
+
+# Randomized description for the graph
+description.outline
+# {'A': 'normal(mu_=1.0+0.66C, sigma_=1.0+C^2)',
+#  'C': 'normal(mu_=1, sigma_=1.0)',
+#  'C->A': 'identity()',
+#  'C->Y': 'identity(), correction[]',
+#  'Y': 'bernoulli(p_=1.44+2.67C^2), correction[]'}
+
 ```
 
 ## Documentation & Support
@@ -124,4 +130,5 @@ g.sample(size=3)
 - Raise a development issue [here](https://github.com/FraunhoferIKS/parcs/issues)
 - Contact the authors for theoretical and technical support:
   - [Alireza Zamanian](mailto:alireza.zamanian@iks.fraunhofer.de)
+  - [Ruijie Chen](mailto:ruijie.chen@iks.fraunhofer.de)
   - [Leopold Mareis](mailto:leopold.mareis@iks.fraunhofer.de)

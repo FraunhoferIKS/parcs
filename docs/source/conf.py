@@ -20,11 +20,11 @@ sys.path.insert(0, pathlib.Path(__file__).parents[2].resolve().as_posix())
 # -- Project information -----------------------------------------------------
 
 project = 'PARCS'
-copyright = '2022, Fraunhofer Institute for Cognitive Systems (IKS)'
+copyright = '2023, Fraunhofer Institute for Cognitive Systems (IKS)'
 author = 'Alireza Zamanian, Leopold Mareis'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1'
+release = '1.0.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -43,7 +43,7 @@ extensions = [
 # -- napoleon configuration --------------------------------------------------
 # napoleon_google_docstring = True
 # napoleon_numpy_docstring = True
-# napoleon_include_init_with_doc = False
+napoleon_include_init_with_doc = False
 # napoleon_include_private_with_doc = False
 # napoleon_include_special_with_doc = True
 # napoleon_use_admonition_for_examples = False
@@ -71,8 +71,6 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
-# html_theme = 'sphinxawesome_theme'
-# html_theme = 'classic'
 html_theme_options = {
     'navigation_depth': 3,
 }
@@ -81,3 +79,11 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+html_css_files = [
+    'css/custom.css',
+]
+html_logo = "../../images/parcs_dark_small.svg"
+html_theme_options = {
+    'logo_only': True,
+    'display_version': False,
+}
