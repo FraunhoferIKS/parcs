@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Temporal Graphs &mdash; PARCS 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Missing Graphs" href="m_graphs.html" />
+    <link rel="prev" title="Looping over Randomized Parameters" href="looping.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/parcs_dark_small.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/theoretical_background.html">Theoretical background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/first_graph.html">Creating the First Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/function_list.html">Available Functions and Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/nodes_and_edges.html">Nodes and Edges</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/partial_randomization.html">Partial Randomization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Features</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="interventions.html">Interventions and Counterfactuals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="looping.html">Looping over Randomized Parameters</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Temporal Graphs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#temporal-syntax-in-the-graph-description">Temporal Syntax in the Graph Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parsing-and-calling-temporal-outlines">Parsing and Calling Temporal Outlines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#deterministic-nodes-in-temporal-graphs">Deterministic Nodes in Temporal Graphs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="m_graphs.html">Missing Graphs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Details</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../technical/conventions.html">Rules and Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/diagrams.html">Diagrams</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PARCS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Temporal Graphs</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/features/temporal_graph.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="temporal-graphs">
+<h1>Temporal Graphs<a class="headerlink" href="#temporal-graphs" title="Link to this heading"></a></h1>
+<p>In PARCS, you can define a temporal graph where the nodes and relations are expanded along the
+time axis. This is possible by only making a few small modifications to the current pipeline.
+Let’s imagine the following scenario to explain this feature:
+The goal is to model the interaction between the blood pressure variable <code class="code docutils literal notranslate"><span class="pre">BP</span></code> and the drug
+variable <code class="code docutils literal notranslate"><span class="pre">Drug</span></code>.
+Initially, we let the blood pressure be dependent on gaussian noise <code class="code docutils literal notranslate"><span class="pre">Noise</span></code>, while the drug
+depends on the age variable <code class="code docutils literal notranslate"><span class="pre">Age</span></code> of the patient as well as the blood pressure. This setup
+can be modeled by the non-temporal version of PARCS.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">a static graph description file</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">Age</span><span class="p">:</span> <span class="n">uniform</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">diff_</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="linenos">2</span><span class="n">BP</span><span class="p">:</span> <span class="n">normal</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="n">Noise</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">3</span><span class="n">Drug</span><span class="p">:</span> <span class="n">bernoulli</span><span class="p">(</span><span class="n">p_</span><span class="o">=</span><span class="n">BPAge</span><span class="p">)</span>
+<span class="linenos">4</span><span class="n">Noise</span><span class="p">:</span> <span class="n">normal</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">5</span>
+<span class="linenos">6</span><span class="n">Age</span><span class="o">-&gt;</span><span class="n">Drug</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">7</span><span class="n">Noise</span><span class="o">-&gt;</span><span class="n">BP</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">8</span><span class="n">BP</span><span class="o">-&gt;</span><span class="n">Drug</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<section id="temporal-syntax-in-the-graph-description">
+<span id="configuration-file"></span><h2>Temporal Syntax in the Graph Description<a class="headerlink" href="#temporal-syntax-in-the-graph-description" title="Link to this heading"></a></h2>
+<p>Now we discuss the temporal expansion: every temporal component is marked by a subscript where <code class="code docutils literal notranslate"><span class="pre">_{t}</span></code> indicates the current timestep.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># BLVs</span>
+<span class="linenos"> 2</span><span class="n">Age</span><span class="p">:</span> <span class="n">uniform</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">diff_</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="c1"># temporal recursive</span>
+<span class="linenos"> 5</span><span class="n">BP_</span><span class="p">{</span><span class="mi">0</span><span class="p">}:</span> <span class="n">uniform</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">diff_</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> 
+<span class="linenos"> 6</span><span class="n">BP_</span><span class="p">{</span><span class="n">t</span><span class="p">}:</span> <span class="n">normal</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="n">BP_</span><span class="p">{</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span><span class="o">+</span><span class="n">Noise_</span><span class="p">{</span><span class="n">t</span><span class="p">}</span><span class="o">-</span><span class="n">Drug_</span><span class="p">{</span><span class="n">t</span><span class="o">-</span><span class="mi">2</span><span class="p">},</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="n">Drug_</span><span class="p">{</span><span class="o">-</span><span class="mi">1</span><span class="p">}:</span> <span class="n">constant</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="n">Drug_</span><span class="p">{</span><span class="mi">0</span><span class="p">}:</span> <span class="n">constant</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="n">Drug_</span><span class="p">{</span><span class="n">t</span><span class="p">}:</span> <span class="n">bernoulli</span><span class="p">(</span><span class="n">p_</span><span class="o">=</span><span class="n">BP_</span><span class="p">{</span><span class="n">t</span><span class="p">}</span><span class="o">+</span><span class="n">Drug_</span><span class="p">{</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span><span class="o">+</span><span class="n">Age</span><span class="p">),</span> <span class="n">correction</span><span class="p">[]</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="c1"># temporal non-recursive</span>
+<span class="linenos">12</span><span class="n">Noise_</span><span class="p">{</span><span class="n">t</span><span class="p">}:</span> <span class="n">normal</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span><span class="c1"># interactions BLVs to temporal recursive</span>
+<span class="linenos">15</span><span class="n">Age</span><span class="o">-&gt;</span><span class="n">Drug_</span><span class="p">{</span><span class="n">t</span><span class="p">}:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span><span class="c1"># interactions temporal non-recursive to temporal recursive</span>
+<span class="linenos">18</span><span class="n">Noise_</span><span class="p">{</span><span class="n">t</span><span class="p">}</span><span class="o">-&gt;</span><span class="n">BP_</span><span class="p">{</span><span class="n">t</span><span class="p">}:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">19</span>
+<span class="linenos">20</span><span class="c1"># interactions temporal recursive to temporal recursive</span>
+<span class="linenos">21</span><span class="c1"># 1) update of same node from previous timestep</span>
+<span class="linenos">22</span><span class="n">BP_</span><span class="p">{</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span><span class="o">-&gt;</span><span class="n">BP_</span><span class="p">{</span><span class="n">t</span><span class="p">}:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">23</span><span class="n">Drug_</span><span class="p">{</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span><span class="o">-&gt;</span><span class="n">Drug_</span><span class="p">{</span><span class="n">t</span><span class="p">}:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">24</span><span class="c1"># 2) update of another node from same timestep</span>
+<span class="linenos">25</span><span class="n">BP_</span><span class="p">{</span><span class="n">t</span><span class="p">}</span><span class="o">-&gt;</span><span class="n">Drug_</span><span class="p">{</span><span class="n">t</span><span class="p">}:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">26</span><span class="c1"># 3) update of another node from previous timesteps</span>
+<span class="linenos">27</span><span class="n">Drug_</span><span class="p">{</span><span class="n">t</span><span class="o">-</span><span class="mi">2</span><span class="p">}</span><span class="o">-&gt;</span><span class="n">BP_</span><span class="p">{</span><span class="n">t</span><span class="p">}:</span> <span class="n">identity</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Note, how the <code class="code docutils literal notranslate"><span class="pre">Age</span></code> node lacks the <code class="code docutils literal notranslate"><span class="pre">_{t}</span></code> subscript; it is considered
+a baseline variable (BLV) that is created at the beginning and does not change. Additionally, we make a distinction between
+temporal recursive and temporal non-recursive variables. Both <code class="code docutils literal notranslate"><span class="pre">BP</span></code> and <code class="code docutils literal notranslate"><span class="pre">Drug</span></code> belong to the former class because
+they depend on nodes from previous timesteps. On the other hand, <code class="code docutils literal notranslate"><span class="pre">Noise</span></code> is not conditioned on a previous inputs and
+thus is considered temporal non-recursive.
+In general, variables can exhibit long-range dependencies that go further back than just the previous timestep.
+Therefore, we add another temporal dependency from <code class="code docutils literal notranslate"><span class="pre">Drug</span></code> to <code class="code docutils literal notranslate"><span class="pre">BP</span></code>, where the effect is delayed by two timesteps.</p>
+<p>For all temporal variables the first timestep of the simulation is indexed as <code class="code docutils literal notranslate"><span class="pre">1</span></code>.
+All temporal recursive definitions require a set of initial values that have to be specified.
+In the case of <code class="code docutils literal notranslate"><span class="pre">Drug</span></code>, for example, one has to specify the values for <code class="code docutils literal notranslate"><span class="pre">Drug_-1</span></code> and
+<code class="code docutils literal notranslate"><span class="pre">Drug_0</span></code> because we reference <code class="code docutils literal notranslate"><span class="pre">Drug_-1</span></code> in the definition of <code class="code docutils literal notranslate"><span class="pre">BP_1</span></code>.</p>
+</section>
+<section id="parsing-and-calling-temporal-outlines">
+<span id="parsing-calling"></span><h2>Parsing and Calling Temporal Outlines<a class="headerlink" href="#parsing-and-calling-temporal-outlines" title="Link to this heading"></a></h2>
+<p>To actually parse your temporal outline, all you need to do is to instantiate the <code class="docutils literal notranslate"><span class="pre">TemporalDescription</span></code> class with a temporal outline and a <code class="docutils literal notranslate"><span class="pre">n_timesteps</span></code> argument.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs.temporal</span> <span class="kn">import</span> <span class="n">TemporalDescription</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyparcs</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos"> 4</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="hll"><span class="linenos"> 5</span>
+</span><span class="linenos"> 6</span><span class="n">description</span> <span class="o">=</span> <span class="n">TemporalDescription</span><span class="p">(</span><span class="s1">&#39;temporal_graph_description.yml&#39;</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="n">samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="linenos">10</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">11</span><span class="c1">#          Age       BP_0  Drug_0  Drug_neg1  ...  Drug_1       BP_3  Drug_2  Drug_3</span>
+<span class="linenos">12</span><span class="c1"># 0   4.023505   9.160127     0.0        0.0  ...     1.0   4.571410     1.0     1.0</span>
+<span class="linenos">13</span><span class="c1"># 1  15.981643  10.016958     0.0        0.0  ...     1.0  10.498443     1.0     1.0</span>
+<span class="linenos">14</span><span class="c1"># 2   0.496344  10.670488     0.0        0.0  ...     1.0  12.019636     1.0     1.0</span>
+<span class="linenos">15</span><span class="c1"># 3  12.139462   9.377000     0.0        0.0  ...     1.0   9.942749     1.0     1.0</span>
+<span class="linenos">16</span><span class="c1"># 4  11.713087   9.016991     0.0        0.0  ...     1.0   7.224285     1.0     1.0</span>
+<span class="linenos">17</span><span class="c1">#</span>
+<span class="linenos">18</span><span class="c1"># [5 rows x 13 columns]</span>
+</pre></div>
+</div>
+</section>
+<section id="deterministic-nodes-in-temporal-graphs">
+<span id="temporal-deterministic-nodes"></span><h2>Deterministic Nodes in Temporal Graphs<a class="headerlink" href="#deterministic-nodes-in-temporal-graphs" title="Link to this heading"></a></h2>
+<p>As introduced in <a class="reference internal" href="../getting_started/nodes_and_edges.html#deterministic-nodes"><span class="std std-ref">this section</span></a>, deterministic nodes are declared by a custom user-defined python function. What if the deterministic node is temporal? e.g. instead of having a function like <span class="math notranslate nohighlight">\(C = A^2 + B\)</span>, we have <span class="math notranslate nohighlight">\(C_t = A_{t-2}^2 + B_{t}\)</span>…</p>
+<p>Writing the custom function for a deterministic node is almost the same as writing a static function, with a small modification. Below is the temporal description file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># nodes</span>
+<span class="linenos"> 2</span><span class="n">A</span><span class="p">:</span> <span class="n">uniform</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">diff_</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos"> 3</span><span class="n">B_</span><span class="p">{</span><span class="n">t</span><span class="p">}:</span> <span class="n">normal</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="n">B_</span><span class="p">{</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">},</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos"> 4</span><span class="n">C_</span><span class="p">{</span><span class="n">t</span><span class="p">}:</span> <span class="n">deterministic</span><span class="p">(</span><span class="n">customs</span><span class="o">.</span><span class="n">py</span><span class="p">,</span> <span class="n">temporal_custom_func</span><span class="p">)</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="c1"># initial values</span>
+<span class="linenos"> 7</span><span class="n">B_</span><span class="p">{</span><span class="o">-</span><span class="mi">1</span><span class="p">}:</span> <span class="n">constant</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="n">B_</span><span class="p">{</span><span class="mi">0</span><span class="p">}:</span> <span class="n">constant</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="n">C_</span><span class="p">{</span><span class="mi">0</span><span class="p">}:</span> <span class="n">constant</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="c1"># edges</span>
+<span class="linenos">12</span><span class="n">A</span><span class="o">-&gt;</span><span class="n">B_</span><span class="p">{</span><span class="n">t</span><span class="p">}:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">13</span><span class="n">B_</span><span class="p">{</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span><span class="o">-&gt;</span><span class="n">B_</span><span class="p">{</span><span class="n">t</span><span class="p">}:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">14</span><span class="n">A</span><span class="o">-&gt;</span><span class="n">C_</span><span class="p">{</span><span class="n">t</span><span class="p">}:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">15</span><span class="n">B_</span><span class="p">{</span><span class="n">t</span><span class="o">-</span><span class="mi">2</span><span class="p">}</span><span class="o">-&gt;</span><span class="n">C_</span><span class="p">{</span><span class="n">t</span><span class="p">}:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="linenos">16</span><span class="n">C_</span><span class="p">{</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span><span class="o">-&gt;</span><span class="n">C_</span><span class="p">{</span><span class="n">t</span><span class="p">}:</span> <span class="n">identity</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Firstly, the data columns in the custom function is just as we must expect it, e.g., <code class="code docutils literal notranslate"><span class="pre">data['A_{t-1}']</span></code> or <code class="code docutils literal notranslate"><span class="pre">data['B_{t}']</span></code>. Secondly, you must use the <code class="code docutils literal notranslate"><span class="pre">temporal</span></code> decorator for your custom function. An example is depicted below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">from</span> <span class="nn">pyparcs.temporal</span> <span class="kn">import</span> <span class="n">temporal_deterministic</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="nd">@temporal_deterministic</span><span class="p">([</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">],</span> <span class="s1">&#39;t-2&#39;</span><span class="p">)</span>
+<span class="linenos">5</span><span class="k">def</span> <span class="nf">temporal_custom_func</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="linenos">6</span>    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;B_{t-2}&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;C_{t-1}&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>In this code, the <code class="code docutils literal notranslate"><span class="pre">temporal_deterministic</span></code> decorator receives two inputs:</p>
+<ul class="simple">
+<li><p>list of all temporal nodes <strong>in the function</strong>;</p></li>
+<li><p>the earliest time index that appears <strong>in the function</strong>.</p></li>
+</ul>
+<p>According to this code, the nodes <code class="code docutils literal notranslate"><span class="pre">C_1,</span> <span class="pre">C_2,</span> <span class="pre">C_3</span></code> will be calculated as</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}C_1 &amp;= A+B_{-1}+C_{0}, \\
+C_2 &amp;= A+B_{0}+C_{1}, \\
+C_3 &amp;= A+B_{1}+C_{2}.\end{split}\]</div>
+<p>Finally, here is the PARCS main code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pyparcs.temporal</span> <span class="kn">import</span> <span class="n">TemporalDescription</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos"> 4</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="n">description</span> <span class="o">=</span> <span class="n">TemporalDescription</span><span class="p">(</span><span class="s1">&#39;description.yml&#39;</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="n">samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">[[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B_1&#39;</span><span class="p">,</span> <span class="s1">&#39;B_2&#39;</span><span class="p">,</span> <span class="s1">&#39;B_3&#39;</span><span class="p">,</span> <span class="s1">&#39;C_1&#39;</span><span class="p">,</span> <span class="s1">&#39;C_2&#39;</span><span class="p">,</span> <span class="s1">&#39;C_3&#39;</span><span class="p">]])</span>
+<span class="linenos">11</span><span class="c1">#           A       B_1       B_2       B_3       C_1       C_2       C_3</span>
+<span class="linenos">12</span><span class="c1"># 0  0.749080  2.618855  2.868731  1.857774  1.749080  4.498160  7.866095</span>
+<span class="linenos">13</span><span class="c1"># 1  0.041169  2.963863  2.165531  1.257099  1.041169  3.082338  6.087370</span>
+<span class="linenos">14</span><span class="c1"># 2  1.223706  1.452870  1.111365  1.001025  2.223706  5.447412  8.123987</span>
+<span class="linenos">15</span><span class="c1"># 3  1.215090  0.486305  2.120447  3.940599  2.215090  5.430179  7.131574</span>
+<span class="linenos">16</span><span class="c1"># 4  0.244076  0.180118  1.516700  0.869589  1.244076  3.488153  3.912348</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="nb">print</span><span class="p">((</span><span class="n">samples</span><span class="p">[</span><span class="s1">&#39;C_1&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">samples</span><span class="p">[</span><span class="s1">&#39;B_neg1&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">samples</span><span class="p">[</span><span class="s1">&#39;C_0&#39;</span><span class="p">]))</span>
+<span class="linenos">19</span><span class="nb">print</span><span class="p">((</span><span class="n">samples</span><span class="p">[</span><span class="s1">&#39;C_2&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">samples</span><span class="p">[</span><span class="s1">&#39;B_0&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">samples</span><span class="p">[</span><span class="s1">&#39;C_1&#39;</span><span class="p">]))</span>
+<span class="linenos">20</span><span class="nb">print</span><span class="p">((</span><span class="n">samples</span><span class="p">[</span><span class="s1">&#39;C_3&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">samples</span><span class="p">[</span><span class="s1">&#39;B_1&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">samples</span><span class="p">[</span><span class="s1">&#39;C_2&#39;</span><span class="p">]))</span>
+<span class="linenos">21</span><span class="c1"># True</span>
+<span class="linenos">22</span><span class="c1"># True</span>
+<span class="linenos">23</span><span class="c1"># True</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="looping.html" class="btn btn-neutral float-left" title="Looping over Randomized Parameters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="m_graphs.html" class="btn btn-neutral float-right" title="Missing Graphs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Fraunhofer Institute for Cognitive Systems (IKS).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Creating the First Graph &mdash; PARCS 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Available Functions and Distributions" href="function_list.html" />
+    <link rel="prev" title="Theoretical background" href="theoretical_background.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/parcs_dark_small.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="theoretical_background.html">Theoretical background</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Creating the First Graph</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#graph-outline">Graph Outline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#descriptions">Descriptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#instantiate-a-graph">Instantiate a Graph</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="function_list.html">Available Functions and Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodes_and_edges.html">Nodes and Edges</a></li>
+<li class="toctree-l1"><a class="reference internal" href="partial_randomization.html">Partial Randomization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../features/interventions.html">Interventions and Counterfactuals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/looping.html">Looping over Randomized Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/temporal_graph.html">Temporal Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/m_graphs.html">Missing Graphs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Details</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../technical/conventions.html">Rules and Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/diagrams.html">Diagrams</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PARCS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Creating the First Graph</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/getting_started/first_graph.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="creating-the-first-graph">
+<span id="create-the-first-graph"></span><h1>Creating the First Graph<a class="headerlink" href="#creating-the-first-graph" title="Link to this heading"></a></h1>
+<p>The following PARCS code example creates a simulation graph and samples from it:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">A PARCS code example</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs</span> <span class="kn">import</span> <span class="n">Description</span><span class="p">,</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="linenos"> 3</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="n">outline</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=0, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos"> 6</span>           <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;bernoulli(p_=0.4)&#39;</span><span class="p">,</span>
+<span class="linenos"> 7</span>           <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=2A+B^2-1, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos"> 8</span>           <span class="s1">&#39;A-&gt;C&#39;</span><span class="p">:</span> <span class="s1">&#39;identity()&#39;</span><span class="p">,</span>
+<span class="linenos"> 9</span>           <span class="s1">&#39;B-&gt;C&#39;</span><span class="p">:</span> <span class="s1">&#39;identity()&#39;</span><span class="p">}</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">(</span><span class="n">outline</span><span class="p">,</span> <span class="n">infer_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="linenos">12</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos">13</span><span class="n">samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="c1"># samples:</span>
+<span class="linenos">16</span><span class="c1">#           A    B         C</span>
+<span class="linenos">17</span><span class="c1"># 0 -0.319852  1.0 -0.020850</span>
+<span class="linenos">18</span><span class="c1"># 1  0.249876  0.0 -1.511305</span>
+<span class="linenos">19</span><span class="c1"># 2 -1.571066  1.0 -2.885899</span>
+<span class="linenos">20</span><span class="c1"># 3  0.547763  0.0  1.974996</span>
+<span class="linenos">21</span><span class="c1"># 4  0.963863  0.0  0.019293</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s explore the code part by part.</p>
+<section id="graph-outline">
+<h2>Graph Outline<a class="headerlink" href="#graph-outline" title="Link to this heading"></a></h2>
+<p>As PARCS simulates data based on a causal DAG, the first step in simulation is to describe a graph. For this, PARCS provides an easy and readable way.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">Outline</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">outline</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=0, sigma_=1)&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;bernoulli(p_=0.4)&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=2A+B^2-1, sigma_=1)&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;A-&gt;C&#39;</span><span class="p">:</span> <span class="s1">&#39;identity()&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;B-&gt;C&#39;</span><span class="p">:</span> <span class="s1">&#39;identity()&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>Line 5 of the code defines an <code class="docutils literal notranslate"><span class="pre">outline</span></code> dictionary which is the <em>structural equations</em> of the graph. The first three entries describe three nodes: <span class="math notranslate nohighlight">\(A, B, C\)</span>. Node A follows a standard normal distribution and B follows a Bernoulli distribution with the success probability of <span class="math notranslate nohighlight">\(p(B=1) = 0.4\)</span>. The outline describes node C using another normal distribution with unit standard deviation, whose mean is a function of A and B. In other words, we have <span class="math notranslate nohighlight">\(C = B^2+2A-1 + \epsilon\)</span>, where <span class="math notranslate nohighlight">\(\epsilon \sim \mathcal{N}(0, 1)\)</span>.</p>
+<p>So, what are the rules and conventions of writing a graph outline?</p>
+<ol class="arabic simple">
+<li><p>Each key in the outline dictionary describes a node or an edge. The signature for the edge names is the arrow symbol <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code>. Indeed, if an edge <code class="docutils literal notranslate"><span class="pre">X_i</span> <span class="pre">-&gt;</span> <span class="pre">X_j</span></code> is described, then nodes <code class="docutils literal notranslate"><span class="pre">X_i</span></code> and <code class="docutils literal notranslate"><span class="pre">X_j</span></code> must be described in the outline too. Node names follow a specific set of rules too. For instance, they must start with a letter, and the only allowed special character is the underscore.</p></li>
+<li><p>Nodes are described by a sampling distribution. In this case, the nodes are known as <em>stochastic</em> in PARCS. There are other types of nodes available too, such as deterministic and data nodes. We will explore them in the later sections.</p></li>
+<li><p>The equation describing the distribution parameters of a child node can consist of a bias term, and linear, interaction, and quadratic terms of the parent variables. Thus, valid terms to include for a node with 3 parents A, B and C are: <code class="docutils literal notranslate"><span class="pre">A,</span> <span class="pre">B,</span> <span class="pre">C,</span> <span class="pre">A^2,</span> <span class="pre">AB,</span> <span class="pre">AC,</span> <span class="pre">B^2,</span> <span class="pre">BC,</span> <span class="pre">C^2,</span> <span class="pre">(bias)</span></code>.</p></li>
+<li><p>Edges are described by a so-called <em>edge function</em>. These functions are transformations applied to the parent samples before being passed to the child node. In our example, the functions are identity, thus no transformation is applied. If a non-identity transformation <span class="math notranslate nohighlight">\(E(X)\)</span> is applied, then the input to the child parameters are <span class="math notranslate nohighlight">\(E(X)\)</span> rather than <span class="math notranslate nohighlight">\(X\)</span>, even though in the outline, we still write <code class="docutils literal notranslate"><span class="pre">X</span></code> in the child node entry.</p></li>
+</ol>
+<p>An outline can also be written in a YAML file. For instance, equivalent to the dictionary above, we can have the following file:</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text"><code class="code docutils literal notranslate"><span class="pre">outline.yml</span></code></span><a class="headerlink" href="#id4" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># nodes</span>
+<span class="n">A</span><span class="p">:</span> <span class="n">normal</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">B</span><span class="p">:</span> <span class="n">bernoulli</span><span class="p">(</span><span class="n">p_</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+<span class="n">C</span><span class="p">:</span> <span class="n">normal</span><span class="p">(</span><span class="n">mu_</span><span class="o">=</span><span class="mi">2</span><span class="n">A</span><span class="o">+</span><span class="n">B</span><span class="o">^</span><span class="mi">2</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">sigma_</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="c1"># edges</span>
+<span class="n">A</span><span class="o">-&gt;</span><span class="n">C</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+<span class="n">B</span><span class="o">-&gt;</span><span class="n">C</span><span class="p">:</span> <span class="n">identity</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>If the outline is written in a YAML file, the <code class="docutils literal notranslate"><span class="pre">Description</span></code> object in line 11 receives the path to
+the file as <code class="docutils literal notranslate"><span class="pre">Description('./path/to/outline.yml')</span></code>. Writing the outline separately in a YAML helps
+us with better code separation and cleaner workspace.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p>Read more about <a class="reference internal" href="../technical/conventions.html#conventions-description-outline"><span class="std std-ref">rules and conventions for writing description outlines</span></a>.</p></li>
+<li><p>Find the list of available distributions and edge functions <a class="reference internal" href="function_list.html#function-list"><span class="std std-ref">here</span></a>.</p></li>
+</ul>
+</div>
+</section>
+<section id="descriptions">
+<span id="id1"></span><h2>Descriptions<a class="headerlink" href="#descriptions" title="Link to this heading"></a></h2>
+<p>In the next step, the outline is passed to the <code class="docutils literal notranslate"><span class="pre">Description</span></code> class.</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">Description</span><a class="headerlink" href="#id5" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">(</span><span class="n">outline</span><span class="p">,</span> <span class="n">infer_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>As we will see in later sections, this intermediate step between the outline and the main PARCS graph, helps us do useful preprocessing. For now, let’s study how this object works.</p>
+<p>First, the <code class="docutils literal notranslate"><span class="pre">infer_edges=False</span></code> argument in line 11: You must have noticed that the outline holds sort of a redundancy with respect to describing the edges. As the node names A and B appear in the equation for C, PARCS could have infer the edges <code class="docutils literal notranslate"><span class="pre">A-&gt;C</span></code> and <code class="docutils literal notranslate"><span class="pre">B-&gt;C</span></code>. But if you don’t include the edges in the outline, you will get an error:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">PARCS error due to incomplete outline</span><a class="headerlink" href="#id6" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyparcs</span> <span class="kn">import</span> <span class="n">Description</span><span class="p">,</span> <span class="n">Graph</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="n">outline</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=0, sigma_=1)&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;bernoulli(p_=0.4)&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=2A+B^2-1, sigma_=1)&#39;</span><span class="p">}</span>
+
+<span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">(</span><span class="n">outline</span><span class="p">,</span> <span class="n">infer_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># pyparcs.core.exceptions.DescriptionError: The term 2A in the description file is invalid.</span>
+<span class="c1">#     Another possibility is that a node name exists in another node&#39;s parameter,</span>
+<span class="c1">#     while it is not marked as a parent by the described edges; in this case, check for the</span>
+<span class="c1">#     nodes/edges consistency.</span>
+</pre></div>
+</div>
+</div>
+<p>So what is the rationale for this behavior? Note that edges are described by their edge function, so PARCS needs to know what function you have chosen for an edge in order to sample from the graph. However, since the <code class="docutils literal notranslate"><span class="pre">identity()</span></code> function is a basic function and will probably selected most of the times, you can set the <code class="docutils literal notranslate"><span class="pre">infer_edges=True</span></code> argument and skip the edges in the outline, and <code class="docutils literal notranslate"><span class="pre">Description</span></code> assumes an identity edge for all possibilities:</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">implicit edges are inferred</span><a class="headerlink" href="#id7" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyparcs</span> <span class="kn">import</span> <span class="n">Description</span><span class="p">,</span> <span class="n">Graph</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="n">outline</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=0, sigma_=1)&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;bernoulli(p_=0.4)&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=2A+B^2-1, sigma_=1)&#39;</span><span class="p">}</span>
+
+<span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">(</span><span class="n">outline</span><span class="p">,</span> <span class="n">infer_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="n">samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># samples:</span>
+<span class="c1">#           A    B         C</span>
+<span class="c1"># 0 -0.319852  1.0 -0.020850</span>
+<span class="c1"># 1  0.249876  0.0 -1.511305</span>
+<span class="c1"># 2 -1.571066  1.0 -2.885899</span>
+<span class="c1"># 3  0.547763  0.0  1.974996</span>
+<span class="c1"># 4  0.963863  0.0  0.019293</span>
+</pre></div>
+</div>
+</div>
+<p>If you want to set other edge functions, you must describe them explicitly in the outline.</p>
+<p>Now, let’s briefly check the main attributes of the description object. Firstly, the description object has two <code class="docutils literal notranslate"><span class="pre">nodes</span></code> and <code class="docutils literal notranslate"><span class="pre">edges</span></code> attributes which hold the lists of parsed nodes and edges for the graph:</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">instantiating a <code class="docutils literal notranslate"><span class="pre">Description</span></code> object</span><a class="headerlink" href="#id8" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="n">pprint</span><span class="p">(</span><span class="n">description</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+<span class="linenos"> 4</span><span class="c1"># {&#39;A&#39;: {&#39;correction_config&#39;: {},</span>
+<span class="linenos"> 5</span><span class="c1">#        &#39;dist_params_coefs&#39;: {&#39;mu_&#39;: {&#39;bias&#39;: 0.0,</span>
+<span class="linenos"> 6</span><span class="c1">#                                      &#39;interactions&#39;: [],</span>
+<span class="linenos"> 7</span><span class="c1">#                                      &#39;linear&#39;: []},</span>
+<span class="linenos"> 8</span><span class="c1">#                              &#39;sigma_&#39;: {&#39;bias&#39;: 1.0,</span>
+<span class="linenos"> 9</span><span class="c1">#                                         &#39;interactions&#39;: [],</span>
+<span class="linenos">10</span><span class="c1">#                                         &#39;linear&#39;: []}},</span>
+<span class="linenos">11</span><span class="c1">#        &#39;do_correction&#39;: False,</span>
+<span class="linenos">12</span><span class="c1">#        &#39;output_distribution&#39;: &#39;normal&#39;},</span>
+<span class="linenos">13</span><span class="c1">#  &#39;B&#39;: {&#39;correction_config&#39;: {},</span>
+<span class="linenos">14</span><span class="c1">#        &#39;dist_params_coefs&#39;: {&#39;p_&#39;: {&#39;bias&#39;: 0.4,</span>
+<span class="linenos">15</span><span class="c1">#                                     &#39;interactions&#39;: [],</span>
+<span class="linenos">16</span><span class="c1">#                                     &#39;linear&#39;: []}},</span>
+<span class="linenos">17</span><span class="c1">#        &#39;do_correction&#39;: False,</span>
+<span class="linenos">18</span><span class="c1">#        &#39;output_distribution&#39;: &#39;bernoulli&#39;},</span>
+<span class="linenos">19</span><span class="c1">#  &#39;C&#39;: {&#39;correction_config&#39;: {},</span>
+<span class="linenos">20</span><span class="c1">#        &#39;dist_params_coefs&#39;: {&#39;mu_&#39;: {&#39;bias&#39;: -1.0,</span>
+<span class="linenos">21</span><span class="c1">#                                      &#39;interactions&#39;: [0, 0, 1],</span>
+<span class="linenos">22</span><span class="c1">#                                      &#39;linear&#39;: [2.0, 0]},</span>
+<span class="linenos">23</span><span class="c1">#                              &#39;sigma_&#39;: {&#39;bias&#39;: 1.0,</span>
+<span class="linenos">24</span><span class="c1">#                                         &#39;interactions&#39;: [0, 0, 0],</span>
+<span class="linenos">25</span><span class="c1">#                                         &#39;linear&#39;: [0, 0]}},</span>
+<span class="linenos">26</span><span class="c1">#        &#39;do_correction&#39;: False,</span>
+<span class="linenos">27</span><span class="c1">#        &#39;output_distribution&#39;: &#39;normal&#39;}}</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span><span class="n">pprint</span><span class="p">(</span><span class="n">description</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+<span class="linenos">30</span><span class="c1"># {&#39;A-&gt;C&#39;: {&#39;do_correction&#39;: False,</span>
+<span class="linenos">31</span><span class="c1">#           &#39;function_name&#39;: &#39;identity&#39;,</span>
+<span class="linenos">32</span><span class="c1">#           &#39;function_params&#39;: {}},</span>
+<span class="linenos">33</span><span class="c1">#  &#39;B-&gt;C&#39;: {&#39;do_correction&#39;: False,</span>
+<span class="linenos">34</span><span class="c1">#           &#39;function_name&#39;: &#39;identity&#39;,</span>
+<span class="linenos">35</span><span class="c1">#           &#39;function_params&#39;: {}}}</span>
+<span class="linenos">36</span>
+</pre></div>
+</div>
+</div>
+<p>Each entry in these two attributes describe a node or an edge. As a start, you check the <code class="docutils literal notranslate"><span class="pre">output_distribution</span></code> and <code class="docutils literal notranslate"><span class="pre">function_name</span></code> keys. Next, you can see how the equations in the nodes are reflected in the <code class="docutils literal notranslate"><span class="pre">dist_params_coefs</span></code> key. These coefficient vectors follows the orders of the parent list which is another attribute of the description object.</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">Description</span></code> nodes and edges</span><a class="headerlink" href="#id9" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="nb">print</span><span class="p">(</span><span class="n">description</span><span class="o">.</span><span class="n">parents_list</span><span class="p">)</span>
+<span class="linenos">2</span><span class="c1"># {&#39;A&#39;: [], &#39;B&#39;: [], &#39;C&#39;: [&#39;A&#39;, &#39;B&#39;]}</span>
+</pre></div>
+</div>
+</div>
+<p>Good news is, as a general user of PARCS, you almost never need to dig into these attributes. The interplay between the objects handle the graph definition and data generation for you. This was only a sneak peek into behind the scenes.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p>See <code class="xref py py-class docutils literal notranslate"><span class="pre">pyparcs.Description</span></code> for the class API doc.</p></li>
+<li><p>See the sequence diagram for <a class="reference internal" href="../technical/diagrams.html#uml-description-instantiation"><span class="std std-ref">Description instantiation</span></a></p></li>
+</ul>
+</div>
+</section>
+<section id="instantiate-a-graph">
+<h2>Instantiate a Graph<a class="headerlink" href="#instantiate-a-graph" title="Link to this heading"></a></h2>
+<p>Finally, the description object is passed to the <code class="docutils literal notranslate"><span class="pre">Graph</span></code> class to instantiate a graph object, from which you can sample the generated data. More specifically, the <code class="docutils literal notranslate"><span class="pre">.sample()</span></code> method provides the samples.</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">Description</span><a class="headerlink" href="#id10" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">(</span><span class="n">outline</span><span class="p">,</span> <span class="n">infer_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="n">samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>You probably have noticed that the sampling method returns two values, one of which we ignored in the code example by the underscore symbol. PARCS samples the graph by sampling an <em>error vector</em> from a continuous uniform <span class="math notranslate nohighlight">\(\text{unif}(0, 1)\)</span> for each node and pass it to the inverse CDF of the distribution. In this approach, all the stochasticity of a node is reflected in the error values, as the result of iCDF given the error value is fixed. This means that reproducibility is guaranteed by controlling the error vectors.</p>
+<p>Going back to the sampling method, the second output is the sampled error vectors.</p>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">returning the error vectors</span><a class="headerlink" href="#id11" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs</span> <span class="kn">import</span> <span class="n">Description</span><span class="p">,</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="linenos"> 3</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">(</span><span class="s1">&#39;./outline.yml&#39;</span><span class="p">)</span>
+<span class="linenos"> 6</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="n">samples</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="c1">#           A    B         C</span>
+<span class="linenos">10</span><span class="c1"># 0 -0.319852  1.0 -0.020850</span>
+<span class="linenos">11</span><span class="c1"># 1  0.249876  0.0 -1.511305</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="nb">print</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+<span class="linenos">14</span><span class="c1">#           A         B         C</span>
+<span class="linenos">15</span><span class="c1"># 0  0.374540  0.950714  0.731994</span>
+<span class="linenos">16</span><span class="c1"># 1  0.598658  0.156019  0.155995</span>
+</pre></div>
+</div>
+</div>
+<p>As a quick sanity check, you can compare the error vector for B: <code class="docutils literal notranslate"><span class="pre">[0.95,</span> <span class="pre">0.15]</span></code> with the samples for B: <code class="docutils literal notranslate"><span class="pre">[1.0,</span> <span class="pre">0.0]</span></code>. As we know, the errors give <span class="math notranslate nohighlight">\(1\)</span> if bigger than <span class="math notranslate nohighlight">\(p\)</span>, and <span class="math notranslate nohighlight">\(0\)</span> otherwise.</p>
+<p>The sampling method allows us to reproduce the results by re-using the sampled errors:</p>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">reusing sampled errors</span><a class="headerlink" href="#id12" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs</span> <span class="kn">import</span> <span class="n">Description</span><span class="p">,</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="linenos"> 3</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">(</span><span class="s1">&#39;./outline.yml&#39;</span><span class="p">)</span>
+<span class="linenos"> 6</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="n">samples</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="c1">#           A    B         C</span>
+<span class="linenos">10</span><span class="c1"># 0 -0.319852  1.0 -0.020850</span>
+<span class="linenos">11</span><span class="c1"># 1  0.249876  0.0 -1.511305</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="n">new_samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">use_sampled_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sampled_errors</span><span class="o">=</span><span class="n">errors</span><span class="p">)</span>
+<span class="linenos">14</span><span class="nb">print</span><span class="p">(</span><span class="n">new_samples</span><span class="p">)</span>
+<span class="linenos">15</span><span class="c1">#           A    B         C</span>
+<span class="linenos">16</span><span class="c1"># 0 -0.319852  1.0 -0.020850</span>
+<span class="linenos">17</span><span class="c1"># 1  0.249876  0.0 -1.511305</span>
+</pre></div>
+</div>
+</div>
+<p>Note that when using the sampled errors, we do not set the <code class="docutils literal notranslate"><span class="pre">size</span></code> argument, as the graph object samples according to the length of the error vectors. This was a trivial use of sampled errors. The scenario becomes interesting if you want to compare the generated data of a graph before and after a change. In the example below, we cut an edge and compare one data point specifically:</p>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">reusing sampled errors after changing the graph</span><a class="headerlink" href="#id13" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs</span> <span class="kn">import</span> <span class="n">Description</span><span class="p">,</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="linenos"> 3</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=0, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos"> 6</span>                           <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;exponential(lambda_=A^2+1)&#39;</span><span class="p">},</span>
+<span class="linenos"> 7</span>                          <span class="n">infer_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="n">samples</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">10</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">11</span><span class="c1">#           A         B</span>
+<span class="linenos">12</span><span class="c1"># 0 -0.319852  4.112427</span>
+<span class="linenos">13</span><span class="nb">print</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+<span class="linenos">14</span><span class="c1">#          A         B</span>
+<span class="linenos">15</span><span class="c1"># 0  0.37454  0.950714</span>
+<span class="linenos">16</span><span class="n">new_description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=0, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos">17</span>                               <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;exponential(lambda_=1)&#39;</span><span class="p">})</span>
+<span class="linenos">18</span><span class="n">new_graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">new_description</span><span class="p">)</span>
+<span class="linenos">19</span><span class="n">new_samples</span><span class="p">,</span> <span class="n">new_errors</span> <span class="o">=</span> <span class="n">new_graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">use_sampled_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="linenos">20</span>                                           <span class="n">sampled_errors</span><span class="o">=</span><span class="n">errors</span><span class="p">)</span>
+<span class="linenos">21</span><span class="nb">print</span><span class="p">(</span><span class="n">new_samples</span><span class="p">)</span>
+<span class="linenos">22</span><span class="c1">#           A         B</span>
+<span class="linenos">23</span><span class="c1"># 0 -0.319852  4.010121</span>
+<span class="linenos">24</span><span class="nb">print</span><span class="p">(</span><span class="n">new_errors</span><span class="p">)</span>
+<span class="linenos">25</span><span class="c1">#          A         B</span>
+<span class="linenos">26</span><span class="c1"># 0  0.37454  0.950714</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Read the API doc for the <code class="xref py py-class docutils literal notranslate"><span class="pre">pyparcs.Graph</span></code> class.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="theoretical_background.html" class="btn btn-neutral float-left" title="Theoretical background" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="function_list.html" class="btn btn-neutral float-right" title="Available Functions and Distributions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Fraunhofer Institute for Cognitive Systems (IKS).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

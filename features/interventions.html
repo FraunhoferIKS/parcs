@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interventions and Counterfactuals &mdash; PARCS 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Looping over Randomized Parameters" href="looping.html" />
+    <link rel="prev" title="Partial Randomization" href="../getting_started/partial_randomization.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/parcs_dark_small.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/theoretical_background.html">Theoretical background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/first_graph.html">Creating the First Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/function_list.html">Available Functions and Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/nodes_and_edges.html">Nodes and Edges</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/partial_randomization.html">Partial Randomization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Features</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Interventions and Counterfactuals</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#fixed-value-intervention">Fixed-value Intervention</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#functional-intervention">Functional Intervention</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#self-intervention">Self Intervention</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="looping.html">Looping over Randomized Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temporal_graph.html">Temporal Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="m_graphs.html">Missing Graphs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Details</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../technical/conventions.html">Rules and Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/diagrams.html">Diagrams</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PARCS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Interventions and Counterfactuals</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/features/interventions.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="interventions-and-counterfactuals">
+<h1>Interventions and Counterfactuals<a class="headerlink" href="#interventions-and-counterfactuals" title="Link to this heading"></a></h1>
+<p>In addition to the <code class="code docutils literal notranslate"><span class="pre">.sample()</span></code> method, which allows us to sample from the observational distribution, the graph object provides methods to sample from interventional distributions, defined in different three types.</p>
+<section id="fixed-value-intervention">
+<h2>Fixed-value Intervention<a class="headerlink" href="#fixed-value-intervention" title="Link to this heading"></a></h2>
+<p>This method sets the value of one or more nodes to a fixed value. As this is the most basic type of intervention in causal inference theory, we name the method simply <code class="code docutils literal notranslate"><span class="pre">.do()</span></code>. Below is an example of a causal triangle graph, with fixed-value interventions applied.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">({</span><span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=0, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos"> 2</span>                           <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=2C-1, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos"> 3</span>                           <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=C+0.6A, sigma_=1)&#39;</span><span class="p">},</span>
+<span class="linenos"> 4</span>                          <span class="n">infer_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos"> 5</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="hll"><span class="linenos"> 6</span><span class="n">samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">interventions</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">})</span>
+</span><span class="linenos"> 7</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="c1">#           C    A         Y</span>
+<span class="linenos"> 9</span><span class="c1"># 0  1.651819  2.5  3.770674</span>
+<span class="linenos">10</span><span class="c1"># 1 -1.010956  2.5 -0.522014</span>
+<span class="linenos">11</span><span class="c1"># 2  1.108496  2.5  2.864730</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="c1"># Average Treatment Effect:</span>
+<span class="hll"><span class="linenos">14</span><span class="n">do_1</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">interventions</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+</span><span class="hll"><span class="linenos">15</span><span class="n">do_0</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">interventions</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+</span><span class="linenos">16</span><span class="n">ate</span> <span class="o">=</span> <span class="p">(</span><span class="n">do_1</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">]</span><span class="o">-</span><span class="n">do_0</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="linenos">17</span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ATE is:&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ate</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="linenos">18</span><span class="c1"># ATE is: 0.61</span>
+<span class="linenos">19</span>
+<span class="linenos">20</span><span class="c1"># intervening on two variables</span>
+<span class="hll"><span class="linenos">21</span><span class="n">samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">interventions</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="o">/</span><span class="mf">0.6</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">})</span>
+</span><span class="linenos">22</span><span class="n">y_fixed</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">]</span>
+<span class="linenos">23</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;mean: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">y_fixed</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s1">, variance: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">y_fixed</span><span class="o">.</span><span class="n">var</span><span class="p">(),</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">24</span><span class="c1"># mean: -0.08, variance: 1.03</span>
+</pre></div>
+</div>
+</section>
+<section id="functional-intervention">
+<span id="id1"></span><h2>Functional Intervention<a class="headerlink" href="#functional-intervention" title="Link to this heading"></a></h2>
+<p>In this type of intervention which you do via <code class="code docutils literal notranslate"><span class="pre">.do_functional()</span></code>, you can set a node’s value to a deterministic function of other nodes. The function is a Python function (defined by <code class="code docutils literal notranslate"><span class="pre">def</span></code> keyword or as a <code class="code docutils literal notranslate"><span class="pre">lambda</span></code> function). Using this method, you can induce the <em>soft (parametric) intervention</em> scenario, where the inputs of the intervention function are the parents of the node in the original DAG. Nevertheless, the inputs of the function can be any subset of the nodes, except for the descendants of the intervened node.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">({</span><span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=0, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos"> 2</span>                           <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=2C-1, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos"> 3</span>                           <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=C+0.6A, sigma_=1)&#39;</span><span class="p">},</span>
+<span class="linenos"> 4</span>                          <span class="n">infer_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos"> 5</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos"> 6</span>
+<span class="hll"><span class="linenos"> 7</span><span class="n">samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">do_functional</span><span class="p">(</span>
+</span><span class="hll"><span class="linenos"> 8</span>    <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos"> 9</span>    <span class="n">intervene_on</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">],</span>
+</span><span class="hll"><span class="linenos">10</span>    <span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="mi">10</span>
+</span><span class="hll"><span class="linenos">11</span><span class="p">)</span>
+</span><span class="linenos">12</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">13</span><span class="c1">#           C         A          Y</span>
+<span class="linenos">14</span><span class="c1"># 0  1.651819  1.983786  36.356056</span>
+<span class="linenos">15</span><span class="c1"># 1 -1.010956 -2.772037 -37.829930</span>
+<span class="linenos">16</span><span class="c1"># 2  1.108496 -0.354075   7.544213</span>
+</pre></div>
+</div>
+</section>
+<section id="self-intervention">
+<span id="id2"></span><h2>Self Intervention<a class="headerlink" href="#self-intervention" title="Link to this heading"></a></h2>
+<p>Imagine the following causal question: <em>what if for every patient, we administer 1 unit of drug less than what we normally administer</em>. The “do” term for this intervention would be <span class="math notranslate nohighlight">\(\text{do}(A=f(A_\text{old}))\)</span>. To simulate data for this type of intervention, we use the method <code class="code docutils literal notranslate"><span class="pre">.do_self()</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">({</span><span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=0, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos"> 2</span>                           <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=2C-1, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos"> 3</span>                           <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=C+0.6A, sigma_=1)&#39;</span><span class="p">},</span>
+<span class="linenos"> 4</span>                          <span class="n">infer_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos"> 5</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="n">samples</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="c1">#           C         A         Y</span>
+<span class="linenos">10</span><span class="c1"># 0  1.651819  1.983786  3.460946</span>
+<span class="linenos">11</span><span class="c1"># 1 -1.010956 -2.772037 -3.685236</span>
+<span class="linenos">12</span><span class="c1"># 2  1.108496 -0.354075  1.152285</span>
+<span class="linenos">13</span>
+<span class="hll"><span class="linenos">14</span><span class="n">intrv_samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">do_self</span><span class="p">(</span>
+</span><span class="hll"><span class="linenos">15</span>    <span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">intervene_on</span><span class="o">=</span><span class="s1">&#39;A&#39;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">16</span>    <span class="n">use_sampled_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sampled_errors</span><span class="o">=</span><span class="n">errors</span>
+</span><span class="hll"><span class="linenos">17</span><span class="p">)</span>
+</span><span class="linenos">18</span><span class="nb">print</span><span class="p">(</span><span class="n">intrv_samples</span><span class="p">)</span>
+<span class="linenos">19</span><span class="c1">#           C         A         Y</span>
+<span class="linenos">20</span><span class="c1"># 0  1.651819  2.983786  4.060946</span>
+<span class="linenos">21</span><span class="c1"># 1 -1.010956 -1.772037 -3.085236</span>
+<span class="linenos">22</span><span class="c1"># 2  1.108496  0.645925  1.752285</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In the example above, line 16 tells the method to reuse the samples. This decision can be made in previous types of intervention as well. Using this feature, we can simulate <strong>counterfactual</strong>  scenarios: <em>what would have happened had we changed our actions?</em> In this case, the intervention must be applied to the same sampled dataset, and this can be done by reusing the sampled errors.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../getting_started/partial_randomization.html" class="btn btn-neutral float-left" title="Partial Randomization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="looping.html" class="btn btn-neutral float-right" title="Looping over Randomized Parameters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Fraunhofer Institute for Cognitive Systems (IKS).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

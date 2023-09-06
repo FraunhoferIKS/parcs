@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nodes and Edges &mdash; PARCS 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Partial Randomization" href="partial_randomization.html" />
+    <link rel="prev" title="Available Functions and Distributions" href="function_list.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/parcs_dark_small.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="theoretical_background.html">Theoretical background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="first_graph.html">Creating the First Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="function_list.html">Available Functions and Distributions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Nodes and Edges</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#node-types">Node Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#stochastic-nodes">Stochastic Nodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deterministic-nodes">Deterministic Nodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-nodes">Data Nodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#constant-nodes">Constant Nodes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#edge-correction">Edge Correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nodes-and-edges-tags">Nodes and Edges Tags</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="partial_randomization.html">Partial Randomization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../features/interventions.html">Interventions and Counterfactuals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/looping.html">Looping over Randomized Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/temporal_graph.html">Temporal Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/m_graphs.html">Missing Graphs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Details</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../technical/conventions.html">Rules and Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/diagrams.html">Diagrams</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PARCS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Nodes and Edges</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/getting_started/nodes_and_edges.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="nodes-and-edges">
+<h1>Nodes and Edges<a class="headerlink" href="#nodes-and-edges" title="Link to this heading"></a></h1>
+<p>This section explains the details of nodes and edges, their different types, and other
+information that can be useful when simulating data using PARCS.</p>
+<section id="node-types">
+<h2>Node Types<a class="headerlink" href="#node-types" title="Link to this heading"></a></h2>
+<section id="stochastic-nodes">
+<span id="id1"></span><h3>Stochastic Nodes<a class="headerlink" href="#stochastic-nodes" title="Link to this heading"></a></h3>
+<p>In the previous section we saw how a node is described by its sampling distribution. This type of
+node is named <em>stochastic</em> node in PARCS. For a distribution with many parameters, the general
+description of these nodes follows this pattern:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">N</span><span class="p">:</span> <span class="n">outputDistribution</span><span class="p">(</span><span class="n">param1_</span><span class="o">=...</span><span class="p">,</span> <span class="n">param2_</span><span class="o">=...</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>As explained in the <a class="reference internal" href="theoretical_background.html#theoretical-background"><span class="std std-ref">theoretical background</span></a>, parameters accept
+bias, linear, interactions, and quadratic terms of the parents. For example, if a node has 3
+parents A, B and C, possible terms are:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">A</span><span class="o">^</span><span class="mi">2</span><span class="p">,</span> <span class="n">AB</span><span class="p">,</span> <span class="n">AC</span><span class="p">,</span> <span class="n">B</span><span class="o">^</span><span class="mi">2</span><span class="p">,</span> <span class="n">BC</span><span class="p">,</span> <span class="n">C</span><span class="o">^</span><span class="mi">2</span>
+</pre></div>
+</div>
+<p>and hence, a possible combination looks something like <code class="docutils literal notranslate"><span class="pre">A^2</span> <span class="pre">+</span> <span class="pre">2A</span> <span class="pre">+</span> <span class="pre">BC</span> <span class="pre">-1</span></code>.</p>
+<p>Stochastic nodes can be marked with a feature called <em>Correction</em>. To explain this feature, look
+at the graph below:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">a simple PARCS graph</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs</span> <span class="kn">import</span> <span class="n">Description</span><span class="p">,</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=0, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos"> 4</span>                           <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;bernoulli(p_=0.3)&#39;</span><span class="p">})</span>
+<span class="linenos"> 5</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos"> 6</span><span class="n">samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="c1">#           A    B</span>
+<span class="linenos"> 9</span><span class="c1"># 0 -1.527236  0.0</span>
+<span class="linenos">10</span><span class="c1"># 1  0.385980  1.0</span>
+<span class="linenos">11</span><span class="c1"># 2 -0.217019  0.0</span>
+<span class="linenos">12</span><span class="c1"># 3 -0.137873  0.0</span>
+<span class="linenos">13</span><span class="c1"># 4  0.462656  1.0</span>
+</pre></div>
+</div>
+</div>
+<p>This is a normal simulation graph. Now what happens if we describe B as a child of A?</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">a graph that raises an error!</span><a class="headerlink" href="#id4" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">from</span> <span class="nn">pyparcs</span> <span class="kn">import</span> <span class="n">Description</span><span class="p">,</span> <span class="n">Graph</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=0, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos">4</span>                           <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;bernoulli(p_=2A)&#39;</span><span class="p">,</span>
+<span class="linenos">5</span>                           <span class="s1">&#39;A-&gt;B&#39;</span><span class="p">:</span> <span class="s1">&#39;identity()&#39;</span><span class="p">})</span>
+<span class="linenos">6</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos">7</span><span class="n">samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="linenos">8</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">9</span><span class="c1"># pyparcs.core.exceptions.DistributionError: Bern(p) probabilities are out of [0, 1] range</span>
+</pre></div>
+</div>
+</div>
+<p>Of course the range of <code class="docutils literal notranslate"><span class="pre">2A</span></code> is bigger than <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1]</span></code>; therefore, the bernoulli distribution
+receives invalid success probabilities for some of the samples. For distribution parameters with
+a valid range smaller than real range, PARCS provide a simple sigmoid transformation, such that
+it maps the real range to a custom range. For the bernoulli parameter, a standard sigmoid
+transformation does the job, as it maps the values to <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1]</span></code>. For other parameters such as
+the normal’s standard deviation, or the exponential’s rate, we can obtain wider ranges by customizing the
+sigmoid function. This function is activated by putting a <code class="docutils literal notranslate"><span class="pre">correction[]</span></code> after the distribution:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">Using node correction</span><a class="headerlink" href="#id5" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=0, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="hll"><span class="linenos"> 2</span>                           <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;bernoulli(p_=2A), correction[]&#39;</span><span class="p">,</span>
+</span><span class="linenos"> 3</span>                           <span class="s1">&#39;A-&gt;B&#39;</span><span class="p">:</span> <span class="s1">&#39;identity()&#39;</span><span class="p">})</span>
+<span class="linenos"> 4</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos"> 5</span><span class="n">samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="linenos"> 6</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="c1">#           A    B</span>
+<span class="linenos"> 8</span><span class="c1"># 0 -0.135696  0.0</span>
+<span class="linenos"> 9</span><span class="c1"># 1  0.085163  0.0</span>
+<span class="linenos">10</span><span class="c1"># 2  0.428591  1.0</span>
+<span class="linenos">11</span><span class="c1"># 3 -0.586112  0.0</span>
+<span class="linenos">12</span><span class="c1"># 4  1.222686  0.0</span>
+</pre></div>
+</div>
+</div>
+<p>the correction function has three parameters: <code class="docutils literal notranslate"><span class="pre">lower,</span> <span class="pre">upper,</span> <span class="pre">target_mean</span></code>. As a default, lower
+and upper parameters are 0 and 1. If we want to impose a certain mean on the corrected
+parameter, we can set the <code class="docutils literal notranslate"><span class="pre">target_mean</span></code> parameter also. This parameter is useful, for example,
+when we want to simulate a bernoulli node to have certain expected values.</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">Using node correction</span><a class="headerlink" href="#id6" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=0, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos">2</span>                           <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;bernoulli(p_=2A), correction[lower=0, upper=1, target_mean=0.3]&#39;</span><span class="p">,</span>
+<span class="linenos">3</span>                           <span class="s1">&#39;A-&gt;B&#39;</span><span class="p">:</span> <span class="s1">&#39;identity()&#39;</span><span class="p">})</span>
+<span class="linenos">4</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos">5</span><span class="n">samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+<span class="linenos">6</span>
+<span class="linenos">7</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="linenos">8</span><span class="c1"># 0.319</span>
+</pre></div>
+</div>
+</div>
+<p>Note that by using correction, the given argument to the corrected parameter is wrapped with a
+sigmoid function, and the target mean achieved by updating the bias value. So it is better to
+read carefully the formula of correction in order to include it in your simulations. Overall,
+this feature can be useful as researchers often use this trick to sample from the distributions
+with restricted parameters.</p>
+</section>
+<section id="deterministic-nodes">
+<span id="id2"></span><h3>Deterministic Nodes<a class="headerlink" href="#deterministic-nodes" title="Link to this heading"></a></h3>
+<p>How to describe a simulation variable as <span class="math notranslate nohighlight">\(Y = a_0 + a_1X_1 + a_2\sin{(X_2)} - a_3\log
+(X_3^3)\)</span>? Clearly, we cannot use the stochastic nodes. Apart from the fact that only bias,
+linear, interaction and quadratic terms are allowed, the described variable is not a random
+variable, but a deterministic one.  You can use <code class="docutils literal notranslate"><span class="pre">deterministic(_,</span> <span class="pre">_)</span></code> nodes to implement such
+nodes in the graph. First argument points to a python script which consists of custom python
+functions, and second argument specifies the name of the function:</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">Node C is deterministic</span><a class="headerlink" href="#id7" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs</span> <span class="kn">import</span> <span class="n">Description</span><span class="p">,</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos"> 3</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;bernoulli(p_=0.3)&#39;</span><span class="p">,</span>
+<span class="linenos"> 6</span>                           <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=0, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos"> 7</span>                           <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;deterministic(./custom_functions.py, log_sin)&#39;</span><span class="p">,</span>
+<span class="linenos"> 8</span>                           <span class="s1">&#39;A-&gt;C&#39;</span><span class="p">:</span> <span class="s1">&#39;identity()&#39;</span><span class="p">,</span> <span class="s1">&#39;B-&gt;C&#39;</span><span class="p">:</span> <span class="s1">&#39;identity()&#39;</span><span class="p">})</span>
+<span class="linenos"> 9</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos">10</span><span class="n">samples</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos">11</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">12</span><span class="c1">#      A         B         C</span>
+<span class="linenos">13</span><span class="c1"># 0  0.0  1.651819  2.204312</span>
+<span class="linenos">14</span><span class="c1"># 1  0.0 -1.010956  3.559511</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="nb">print</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+<span class="linenos">17</span><span class="c1">#           A         B         C</span>
+<span class="linenos">18</span><span class="c1"># 0  0.374540  0.950714  0.731994</span>
+<span class="linenos">19</span><span class="c1"># 1  0.598658  0.156019  0.155995</span>
+</pre></div>
+</div>
+</div>
+<p>and the <code class="docutils literal notranslate"><span class="pre">custom_functions.py</span></code> file is:</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">custom_functions.py</span></code></span><a class="headerlink" href="#id8" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="k">def</span> <span class="nf">log_sin</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="linenos">5</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;some custom functions&quot;&quot;&quot;</span>
+<span class="linenos">6</span>    <span class="k">return</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Some remarks:</p>
+<ol class="arabic simple">
+<li><p>The parents of the deterministic edge are only specified by the edges in the outline, and the columns that we read from the <code class="docutils literal notranslate"><span class="pre">data</span></code> object in the custom function.</p></li>
+<li><p>Because of (1) the <code class="docutils literal notranslate"><span class="pre">infer_edges</span></code> option then does not work for deterministic nodes</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">data</span></code> object which the function receives, is a pandas DataFrame. Note that the edge functions are already applied on the data, before being passed to the node.</p></li>
+<li><p>Even though not needed, the error vector is sampled for the deterministic node too. Apart from the consistency, this will help us later if we want to compare two graphs over a unique datapoint when a deterministic node is replaced by a stochastic one.</p></li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>PARCS identifies the custom function by appending the given path to the file, to the python
+directory. Therefore, be careful not to have a name conflict with other functions in your python
+path. A good cautionary measure is to always use a unique prefix for the functions such as
+<code class="docutils literal notranslate"><span class="pre">parcs_custom_...</span></code></p>
+</div>
+<p>What if we wanted to create a stochastic node (e.g. normally distributed variable) but with
+custom equation for its parameters? Currently, this is not immediately possible; but with as a
+quick workaround, you can first create a dummy deterministic node and pass it to the stochastic node:</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">A dummy node to simulate more complex stochastic nodes</span><a class="headerlink" href="#id9" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs</span> <span class="kn">import</span> <span class="n">Description</span><span class="p">,</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos"> 3</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;bernoulli(p_=0.3)&#39;</span><span class="p">,</span>
+<span class="linenos"> 6</span>                           <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=0, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos"> 7</span>                           <span class="s1">&#39;C_dummy&#39;</span><span class="p">:</span> <span class="s1">&#39;deterministic(./custom_functions.py, log_sin)&#39;</span><span class="p">,</span>
+<span class="linenos"> 8</span>                           <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=C_dummy, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos"> 9</span>                           <span class="s1">&#39;A-&gt;C_dummy&#39;</span><span class="p">:</span> <span class="s1">&#39;identity()&#39;</span><span class="p">,</span> <span class="s1">&#39;B-&gt;C_dummy&#39;</span><span class="p">:</span> <span class="s1">&#39;identity()&#39;</span><span class="p">,</span>
+<span class="linenos">10</span>                           <span class="s1">&#39;C_dummy-&gt;C&#39;</span><span class="p">:</span> <span class="s1">&#39;identity()&#39;</span><span class="p">})</span>
+<span class="linenos">11</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos">12</span><span class="n">samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos">13</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">14</span><span class="c1">#      A         B   C_dummy         C</span>
+<span class="linenos">15</span><span class="c1"># 0  0.0  1.651819  2.204312  2.823166</span>
+<span class="linenos">16</span><span class="c1"># 1  0.0 -1.011057  3.559830  1.988763</span>
+</pre></div>
+</div>
+</div>
+<p>Later we introduce a small feature to better represent and filter out the dummy nodes from the
+last samples data frame.</p>
+</section>
+<section id="data-nodes">
+<h3>Data Nodes<a class="headerlink" href="#data-nodes" title="Link to this heading"></a></h3>
+<p>In many simulation studies, it is desirable to augment a real dataset with some simulated nodes;
+an example is simulating a missing data scenario where a <em>missingness mask</em> is simulated for a
+given dataset. Data nodes allow us to read an external CSV file to sample a node. The argument of
+data nodes are the CSV file path and name of the variable in the CSV file.</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">dataset.csv</span></code></span><a class="headerlink" href="#id10" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">B</span>
+<span class="linenos">2</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">100</span>
+<span class="linenos">3</span><span class="mi">1</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">101</span>
+<span class="linenos">4</span><span class="mi">2</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">102</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">main file</span><a class="headerlink" href="#id11" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">pyparcs</span> <span class="kn">import</span> <span class="n">Description</span><span class="p">,</span> <span class="n">Graph</span>
+<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos"> 3</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;data(./dataset.csv, A)&#39;</span><span class="p">,</span>
+<span class="linenos"> 6</span>                           <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;data(./dataset.csv, B)&#39;</span><span class="p">,</span>
+<span class="linenos"> 7</span>                           <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=A+B, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos"> 8</span>                           <span class="s1">&#39;A-&gt;C&#39;</span><span class="p">:</span> <span class="s1">&#39;identity()&#39;</span><span class="p">,</span>
+<span class="linenos"> 9</span>                           <span class="s1">&#39;B-&gt;C&#39;</span><span class="p">:</span> <span class="s1">&#39;identity()&#39;</span><span class="p">})</span>
+<span class="linenos">10</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos">11</span><span class="n">samples</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">14</span><span class="c1">#     A    B           C</span>
+<span class="linenos">15</span><span class="c1"># 0  11  101  112.618855</span>
+<span class="linenos">16</span><span class="c1"># 1  11  101  110.988943</span>
+<span class="linenos">17</span><span class="c1"># 2  10  100  110.256234</span>
+<span class="linenos">18</span><span class="c1"># 3  12  102  115.879470</span>
+<span class="linenos">19</span><span class="c1"># 4  12  102  113.091568</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="nb">print</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+<span class="linenos">22</span><span class="c1">#           A         B         C</span>
+<span class="linenos">23</span><span class="c1"># 0  0.374540  0.374540  0.731994</span>
+<span class="linenos">24</span><span class="c1"># 1  0.598658  0.598658  0.155995</span>
+<span class="linenos">25</span><span class="c1"># 2  0.058084  0.058084  0.601115</span>
+<span class="linenos">26</span><span class="c1"># 3  0.708073  0.708073  0.969910</span>
+<span class="linenos">27</span><span class="c1"># 4  0.832443  0.832443  0.181825</span>
+</pre></div>
+</div>
+</div>
+<p>Some remarks:</p>
+<ol class="arabic simple">
+<li><p>The error vectors for A and B are identical. This is because we are sampling from the joint <span class="math notranslate nohighlight">\((A, B)\)</span> distribution. In other words, the <em>rows</em> of the CSV file are being sampled, rather than the single elements.</p></li>
+<li><p>The length of the dataset is 3, but in the example, we sampled 5 data points. Because of that, we have duplicate samples for <span class="math notranslate nohighlight">\((A, B)\)</span>. The interpretation of this behavior is that we are sampling from a <em>distribution</em> which is determined by the dataset. Just like a parametric distribution such as Bernoulli, realizations may repeat.</p></li>
+<li><p>We can sample the entire dataset once, using the <code class="docutils literal notranslate"><span class="pre">full_data=True</span></code> in the sample method. This way, the size of the sample is determined by the length of the dataset, and every data point is sampled once.</p></li>
+</ol>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">sampling using <code class="docutils literal notranslate"><span class="pre">full_data</span></code></span><a class="headerlink" href="#id12" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1">#     A    B           C</span>
+<span class="linenos">2</span><span class="c1"># 0  10  100  110.618855</span>
+<span class="linenos">3</span><span class="c1"># 1  11  101  110.988943</span>
+<span class="linenos">4</span><span class="c1"># 2  12  102  114.256234</span>
+<span class="linenos">5</span>
+<span class="linenos">6</span><span class="nb">print</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+<span class="linenos">7</span><span class="c1">#      A    B         C</span>
+<span class="linenos">8</span><span class="c1"># 0  0.0  0.0  0.731994</span>
+<span class="linenos">9</span><span class="c1"># 1  0.5  0.5  0.155995</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Data nodes must have no incoming edges in the outline</p>
+</div>
+</section>
+<section id="constant-nodes">
+<h3>Constant Nodes<a class="headerlink" href="#constant-nodes" title="Link to this heading"></a></h3>
+<p>This class of nodes provides a simple way of adding a constant-value node to the graph. The syntax in the description file is as simple as creating a node by <code class="docutils literal notranslate"><span class="pre">constant(&lt;value&gt;)</span></code></p>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">sampling constant nodes</span><a class="headerlink" href="#id13" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;constant(2)&#39;</span><span class="p">,</span>
+<span class="linenos">2</span>                           <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;constant(3)&#39;</span><span class="p">})</span>
+<span class="linenos">3</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos">4</span><span class="n">samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos">5</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos">6</span><span class="c1">#      A    B</span>
+<span class="linenos">7</span><span class="c1"># 0  2.0  3.0</span>
+<span class="linenos">8</span><span class="c1"># 1  2.0  3.0</span>
+<span class="linenos">9</span><span class="c1"># 2  2.0  3.0</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We can simulate deterministic and constant nodes by <cite>hacking</cite> stochastic <code class="docutils literal notranslate"><span class="pre">normal</span></code> node with <code class="docutils literal notranslate"><span class="pre">mu_</span></code> being a desired constant or determinist term, and <code class="docutils literal notranslate"><span class="pre">sigma_</span></code> being 0. Using the deterministic and constant nodes, however, adds more to the clarity of the simulation and the description file.</p>
+</div>
+</section>
+</section>
+<section id="edge-correction">
+<h2>Edge Correction<a class="headerlink" href="#edge-correction" title="Link to this heading"></a></h2>
+<p>Similar to the concept of distribution parameter correction for <a class="reference internal" href="#stochastic-nodes"><span class="std std-ref">stochastic nodes</span></a>, edges can also be marked for a correction. For edges, this is equal to normalization of the input values using the mean and standard deviation of the parent node distribution.</p>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text">sampling constant nodes</span><a class="headerlink" href="#id14" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=100, sigma_=10)&#39;</span><span class="p">,</span>
+<span class="linenos"> 2</span>                           <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=A, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="linenos"> 3</span>                           <span class="s1">&#39;A-&gt;B&#39;</span><span class="p">:</span> <span class="s1">&#39;identity()&#39;</span><span class="p">})</span>
+<span class="linenos"> 4</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos"> 5</span><span class="n">samples</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos"> 6</span><span class="c1">#             A           B</span>
+<span class="linenos"> 7</span><span class="c1"># 0   96.801476   98.453296</span>
+<span class="linenos"> 8</span><span class="c1"># 1  106.188546  106.438423</span>
+<span class="linenos"> 9</span><span class="c1"># 2   89.890436   88.879378</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=100, sigma_=10)&#39;</span><span class="p">,</span>
+<span class="linenos">12</span>                           <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=A, sigma_=1)&#39;</span><span class="p">,</span>
+<span class="hll"><span class="linenos">13</span>                           <span class="s1">&#39;A-&gt;B&#39;</span><span class="p">:</span> <span class="s1">&#39;identity(), correction[]&#39;</span><span class="p">})</span>
+</span><span class="linenos">14</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos">15</span><span class="n">samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">use_sampled_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="linenos">16</span>                          <span class="n">sampled_errors</span><span class="o">=</span><span class="n">errors</span><span class="p">)</span>
+<span class="linenos">17</span><span class="c1">#             A         B</span>
+<span class="linenos">18</span><span class="c1"># 0   96.801476  1.445580</span>
+<span class="linenos">19</span><span class="c1"># 1  106.188546  0.967103</span>
+<span class="linenos">20</span><span class="c1"># 2   89.890436 -1.897181</span>
+</pre></div>
+</div>
+</div>
+<p>Edge correction for other edge function also has the same effect. The difference is, after normalization, the input values go through the transformation defined by the edge function.</p>
+</section>
+<section id="nodes-and-edges-tags">
+<h2>Nodes and Edges Tags<a class="headerlink" href="#nodes-and-edges-tags" title="Link to this heading"></a></h2>
+<p>Last piece of information to complete the PARCS outlines syntax is the nodes and edges tags. There are a couple of occasions when we want to tag some nodes and edges to control the simulation behavior. This can be done by introducing a <code class="docutils literal notranslate"><span class="pre">tags[]</span></code> expression in the line.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">A</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">poisson(lambda_=2), tags[T1, T2]</span>
+<span class="nt">B</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">normal(mu_=A^2, sigma_=A+1), correction[], tags[T3]</span>
+<span class="nt">A-&gt;B</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sigmoid(alpha=1, beta=0, gamma=0, tau=1), tags[T4, T5]</span>
+</pre></div>
+</div>
+<p>First use of the tags that we introduce is to suppress returning the dummy nodes in the samples using the <code class="docutils literal notranslate"><span class="pre">D</span></code> tag:</p>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text">sampling constant nodes</span><a class="headerlink" href="#id15" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">description</span> <span class="o">=</span> <span class="n">Description</span><span class="p">({</span><span class="s1">&#39;A_dummy&#39;</span><span class="p">:</span> <span class="s1">&#39;normal(mu_=0, sigma_=1), tags[D]&#39;</span><span class="p">,</span>
+<span class="linenos"> 2</span>                           <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;poisson(lambda_=A_dummy^2+1)&#39;</span><span class="p">,</span>
+<span class="linenos"> 3</span>                           <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;bernoulli(p_=A), correction[]&#39;</span><span class="p">,</span>
+<span class="linenos"> 4</span>                           <span class="s1">&#39;A_dummy-&gt;A&#39;</span><span class="p">:</span> <span class="s1">&#39;identity()&#39;</span><span class="p">,</span>
+<span class="linenos"> 5</span>                           <span class="s1">&#39;A-&gt;B&#39;</span><span class="p">:</span> <span class="s1">&#39;identity()&#39;</span><span class="p">})</span>
+<span class="linenos"> 6</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="n">samples</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="c1">#      A    B</span>
+<span class="linenos">10</span><span class="c1"># 0  1.0  0.0</span>
+<span class="linenos">11</span><span class="c1"># 1  2.0  1.0</span>
+<span class="linenos">12</span><span class="c1"># 2  5.0  1.0</span>
+<span class="linenos">13</span><span class="nb">print</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+<span class="linenos">14</span><span class="c1">#           A   A_dummy         B</span>
+<span class="linenos">15</span><span class="c1"># 0  0.539704  0.723826  0.236487</span>
+<span class="linenos">16</span><span class="c1"># 1  0.829672  0.600388  0.479554</span>
+<span class="linenos">17</span><span class="c1"># 2  0.476101  0.977471  0.635977</span>
+</pre></div>
+</div>
+</div>
+<p>As shown in the code, the error vector for the dummy node is still included in the returned errors, but the samples do only have <code class="docutils literal notranslate"><span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">B</span></code>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="function_list.html" class="btn btn-neutral float-left" title="Available Functions and Distributions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="partial_randomization.html" class="btn btn-neutral float-right" title="Partial Randomization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Fraunhofer Institute for Cognitive Systems (IKS).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

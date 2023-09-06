@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Theoretical background &mdash; PARCS 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Creating the First Graph" href="first_graph.html" />
+    <link rel="prev" title="PARCS Documentation" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/parcs_dark_small.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Theoretical background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="first_graph.html">Creating the First Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="function_list.html">Available Functions and Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodes_and_edges.html">Nodes and Edges</a></li>
+<li class="toctree-l1"><a class="reference internal" href="partial_randomization.html">Partial Randomization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../features/interventions.html">Interventions and Counterfactuals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/looping.html">Looping over Randomized Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/temporal_graph.html">Temporal Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/m_graphs.html">Missing Graphs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Details</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../technical/conventions.html">Rules and Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../technical/diagrams.html">Diagrams</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PARCS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Theoretical background</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/getting_started/theoretical_background.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="theoretical-background">
+<span id="id1"></span><h1>Theoretical background<a class="headerlink" href="#theoretical-background" title="Link to this heading"></a></h1>
+<p>The underlying causal mechanism of a data distribution can be specified using causal Directed Acyclic Graphs (DAGs). A causal DAG includes nodes which represent variables, and directed edges which represent a causal flow from the parent to child nodes. A data distribution <span class="math notranslate nohighlight">\((X_1, \dots, X_D)\)</span> is factorized with respect to a causal graph <span class="math notranslate nohighlight">\(\mathcal{G}\)</span> as</p>
+<div class="math notranslate nohighlight" id="equation-dag-factorization">
+<span class="eqno">(1)<a class="headerlink" href="#equation-dag-factorization" title="Link to this equation"></a></span>\[\begin{align}
+p(X_1, \dots, X_D) = \prod_{d=1}^{D} p(X_d|\text{PA}_{\mathcal{G}}(X_d)).
+\end{align}\]</div>
+<p>Eq. <a class="reference internal" href="#equation-dag-factorization">(1)</a> has two implications:</p>
+<ul class="simple">
+<li><p>Each node is a function of its parents in the associating causal DAG.</p></li>
+<li><p>In order to sample from the full data distribution, we can start with sampling the source nodes (nodes without parents), then sampling their child nodes, and continuing the process according to the topological ordering of the graph, until all nodes are sampled.</p></li>
+</ul>
+<p>Simulation in PARCS follows this formulation, and in addition to that, 4 more design ideas:</p>
+<ol class="arabic simple">
+<li><p><strong>Each node is identified by a specific univariate distribution</strong> <span class="math notranslate nohighlight">\(\mathcal{P}\)</span> which is parameterized by <span class="math notranslate nohighlight">\(\Theta = (\theta_1, \dots, \theta_K)\)</span>. For instance, <span class="math notranslate nohighlight">\(\mathcal{P}\)</span> can be the Gaussian normal distribution <span class="math notranslate nohighlight">\(\mathcal{N}(\Theta)\)</span>, parameterized by <span class="math notranslate nohighlight">\(\Theta = (\theta_1=\mu, \theta_2=\sigma)\)</span>. Consequently, <strong>to sample a node means to sample from its distribution.</strong></p></li>
+<li><p><strong>Distribution parameters are functions of the parents of the node</strong>, i.e. <span class="math notranslate nohighlight">\(\Theta = \Theta\big(\text{PA(X_i)}\big)\)</span>. Continuing the above example, if a node <span class="math notranslate nohighlight">\(X_3\)</span> with an associating Gaussian normal distribution has two parents <span class="math notranslate nohighlight">\(X_1\)</span> and <span class="math notranslate nohighlight">\(X_2\)</span>, then <span class="math notranslate nohighlight">\(\mu = \mu(X_1, X_2)\)</span> and <span class="math notranslate nohighlight">\(\sigma = \sigma(X_1, X_2)\)</span>.</p></li>
+<li><p>In PARCS, the <strong>functions of distribution parameters are limited to bias, linear and interaction terms</strong>. Interactions are defined as multiplication of all <em>parents pairs</em>. In our example, the mean of the Gaussian normal, can be <span class="math notranslate nohighlight">\(X_1 -2.5X_2 + 0.7X_1X_2 + 1\)</span>, but not <span class="math notranslate nohighlight">\(X_1 - 2X_1X_2^3\)</span>. Therefore, assuming a <em>variables dictionary</em> which includes bias, linear, and all interaction terms, <strong>each parameter equation can be defined as the dot product of a coefficient vector and the variables dictionary</strong>. Subsequently, each distribution parameter has a unique coefficient vector.</p></li>
+<li><p>The causal flow of edges can be subjected to a deterministic transformation, meaning that <strong>instead of the parent variables, functions of the parent variables are inputs of distribution parameters</strong>. In our example, it is possible that <span class="math notranslate nohighlight">\(\mu = X_1 + g(X_2)\)</span> where <span class="math notranslate nohighlight">\(g(.)\)</span> is an arbitrary transformation (which we call <em>edge function</em>). <strong>These functions are placed on edges, are applied to individual parents, and thus are parent-child specific</strong>.</p></li>
+</ol>
+<p>In summary, to fully declare a graph, the causal DAG structure alongside all the mentioned functions and parameters must be determined. However, you can <em>partially</em> declare a graph and leave the remaining parameters to be randomized. This is done based on a randomization guideline that you provide as the user. For example, you can tell PARCS to randomly set the type of edge functions per each simulation iteration. The figure bellow depicts a schematic of the internal structure of PARCS simulation.</p>
+<img alt="../_images/schematic.PNG" src="../_images/schematic.PNG" />
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="PARCS Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="first_graph.html" class="btn btn-neutral float-right" title="Creating the First Graph" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Fraunhofer Institute for Cognitive Systems (IKS).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

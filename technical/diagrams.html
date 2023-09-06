@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diagrams &mdash; PARCS 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="API" href="api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/parcs_dark_small.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/theoretical_background.html">Theoretical background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/first_graph.html">Creating the First Graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/function_list.html">Available Functions and Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/nodes_and_edges.html">Nodes and Edges</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/partial_randomization.html">Partial Randomization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../features/interventions.html">Interventions and Counterfactuals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/looping.html">Looping over Randomized Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/temporal_graph.html">Temporal Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/m_graphs.html">Missing Graphs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Details</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="conventions.html">Rules and Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Diagrams</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#main-classes-and-functions">Main Classes and Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#description-instantiation">Description: Instantiation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#description-parameter-randomization">Description: Parameter Randomization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#description-randomize-connection">Description: Randomize Connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#graph">Graph</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#parcs-backend">PARCS Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#adjacency-matrix">Adjacency Matrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#augment-line">Augment Line</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#description-parser">Description Parser</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#main-function">Main Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#node-parser">Node Parser</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edge-parser">Edge Parser</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#graph-objects-schemas">Graph Objects Schemas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#topological-sort">Topological Sort</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PARCS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Diagrams</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/technical/diagrams.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="diagrams">
+<h1>Diagrams<a class="headerlink" href="#diagrams" title="Link to this heading"></a></h1>
+<section id="main-classes-and-functions">
+<h2>Main Classes and Functions<a class="headerlink" href="#main-classes-and-functions" title="Link to this heading"></a></h2>
+<section id="description-instantiation">
+<span id="uml-description-instantiation"></span><h3>Description: Instantiation<a class="headerlink" href="#description-instantiation" title="Link to this heading"></a></h3>
+<img alt="../_images/description_instantiation.svg" src="../_images/description_instantiation.svg" /><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#uml-description-parser"><span class="std std-ref">description_parser() sequence diagram</span></a></p></li>
+<li><p><a class="reference internal" href="#flowchart-get-adj-matrix"><span class="std std-ref">get_adj_matrix() flowchart</span></a></p></li>
+<li><p><a class="reference internal" href="#flowchart-topological-sort"><span class="std std-ref">topological_sort() flowchart</span></a></p></li>
+</ul>
+</div>
+</section>
+<section id="description-parameter-randomization">
+<h3>Description: Parameter Randomization<a class="headerlink" href="#description-parameter-randomization" title="Link to this heading"></a></h3>
+<img alt="../_images/description_randomize_parameters.svg" src="../_images/description_randomize_parameters.svg" /></section>
+<section id="description-randomize-connection">
+<span id="uml-description-randomize-connection"></span><h3>Description: Randomize Connection<a class="headerlink" href="#description-randomize-connection" title="Link to this heading"></a></h3>
+<img alt="../_images/description_randomize_connection.svg" src="../_images/description_randomize_connection.svg" /><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#flowchart-augment-line"><span class="std std-ref">augment_line() flowchart</span></a></p></li>
+</ul>
+</div>
+</section>
+<section id="graph">
+<h3>Graph<a class="headerlink" href="#graph" title="Link to this heading"></a></h3>
+<img alt="../_images/graph.svg" src="../_images/graph.svg" /></section>
+</section>
+<section id="parcs-backend">
+<h2>PARCS Backend<a class="headerlink" href="#parcs-backend" title="Link to this heading"></a></h2>
+<section id="adjacency-matrix">
+<span id="flowchart-get-adj-matrix"></span><h3>Adjacency Matrix<a class="headerlink" href="#adjacency-matrix" title="Link to this heading"></a></h3>
+<p>Flowchart for <code class="xref py py-func docutils literal notranslate"><span class="pre">pyparcs.api.utils.get_adj_matrix()</span></code></p>
+<img alt="../_images/adj_matrix.svg" src="../_images/adj_matrix.svg" /></section>
+<section id="augment-line">
+<span id="flowchart-augment-line"></span><h3>Augment Line<a class="headerlink" href="#augment-line" title="Link to this heading"></a></h3>
+<p>This function adds extra parents to the parameter equations in the process of <code class="xref py py-func docutils literal notranslate"><span class="pre">pyparcs.Description.randomize_connection_to()</span></code></p>
+<img alt="../_images/augment_line.svg" src="../_images/augment_line.svg" /><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#uml-description-randomize-connection"><span class="std std-ref">Description.randomize_connection_to() sequence diagram</span></a></p></li>
+</ul>
+</div>
+</section>
+<section id="description-parser">
+<h3>Description Parser<a class="headerlink" href="#description-parser" title="Link to this heading"></a></h3>
+<section id="main-function">
+<span id="uml-description-parser"></span><h4>Main Function<a class="headerlink" href="#main-function" title="Link to this heading"></a></h4>
+<img alt="../_images/description_parser.svg" src="../_images/description_parser.svg" /></section>
+<section id="node-parser">
+<h4>Node Parser<a class="headerlink" href="#node-parser" title="Link to this heading"></a></h4>
+<img alt="../_images/node_parser.svg" src="../_images/node_parser.svg" /><p>To parse stochastic nodes, the distribution parameters are parsed according to the following:</p>
+<img alt="../_images/equation_parser.svg" src="../_images/equation_parser.svg" /></section>
+<section id="edge-parser">
+<h4>Edge Parser<a class="headerlink" href="#edge-parser" title="Link to this heading"></a></h4>
+<img alt="../_images/edge_parser.svg" src="../_images/edge_parser.svg" /><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#graph-objects-schemas"><span class="std std-ref">Node and Edge dictionaries schemas</span></a></p></li>
+</ul>
+</div>
+</section>
+</section>
+<section id="graph-objects-schemas">
+<span id="id1"></span><h3>Graph Objects Schemas<a class="headerlink" href="#graph-objects-schemas" title="Link to this heading"></a></h3>
+<img alt="../_images/graph_objects.svg" src="../_images/graph_objects.svg" /></section>
+<section id="topological-sort">
+<span id="flowchart-topological-sort"></span><h3>Topological Sort<a class="headerlink" href="#topological-sort" title="Link to this heading"></a></h3>
+<p>Flowchart for <code class="xref py py-func docutils literal notranslate"><span class="pre">pyparcs.api.utils.topological_sort()</span></code></p>
+<img alt="../_images/topological_sort.svg" src="../_images/topological_sort.svg" /></section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api.html" class="btn btn-neutral float-left" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Fraunhofer Institute for Cognitive Systems (IKS).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
