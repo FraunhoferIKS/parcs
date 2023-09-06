@@ -1,0 +1,8 @@
+# nodes
+Y_1: normal(mu_=?, sigma_=1), correction[]
+Y_2: bernoulli(?), correction[]
+Y_3: random
+# edges
+Y_1->Y_2: arctan(?), tags[P1]
+Y_1->Y_3: random
+Y_2->Y_3: random

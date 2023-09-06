@@ -17,4 +17,6 @@
 #  https://www.gnu.de/documents/gpl-2.0.de.html
 #
 #  Contact: alireza.zamanian@iks.fraunhofer.de
-
+from pyparcs.core.description import Description, RandomDescription
+from pyparcs.core.guideline import Guideline, GuidelineIterator
+from pyparcs.core.graph import Graph

@@ -1,51 +1,65 @@
 API
 ===
 
-Graph objects
--------------
+Descriptions
+------------
 
-.. autoclass:: pyparcs.cdag.graph_objects.Edge
+.. _description_api_doc:
+
+Description
+~~~~~~~~~~~
+
+.. autoclass:: pyparcs.Description
     :members:
 
-------------------------------------------
+Random Description
+~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: pyparcs.cdag.graph_objects.Node
+.. autoclass:: pyparcs.RandomDescription
+    :show-inheritance:
     :members:
 
-------------------------------------------
+Temporal Description
+~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: pyparcs.cdag.graph_objects.Graph
-    :members:
+.. autoclass:: pyparcs.temporal.TemporalDescription
+    :show-inheritance:
 
-Mapping functions
------------------
+Guidelines
+----------
 
-.. autoclass:: pyparcs.cdag.mapping_functions.edge_identity
+Guideline
+~~~~~~~~~
 
-------------------------------------------
+.. autoclass:: pyparcs.Guideline
 
-.. autoclass:: pyparcs.cdag.mapping_functions.edge_sigmoid
+Guideline Iterator
+~~~~~~~~~~~~~~~~~~
 
-------------------------------------------
+.. autoclass:: pyparcs.GuidelineIterator
+    :members: get_guidelines
 
-.. autoclass:: pyparcs.cdag.mapping_functions.edge_gaussian_rbf
-
-------------------------------------------
-
-.. autoclass:: pyparcs.cdag.mapping_functions.edge_arctan
-
-Corrections
------------
-
-.. autoclass:: pyparcs.cdag.utils.SigmoidCorrection
-    :members:
-
-------------------------------------------
-
-.. autoclass:: pyparcs.cdag.utils.EdgeCorrection
-    :members:
-
-Utils
+Graph
 -----
 
-.. autoclass:: pyparcs.cdag.utils.get_interactions
+.. autoclass:: pyparcs.Graph
+    :members:
+
+
+Misc
+----
+
+The following API doc describes the misc functions and classes, used in the backend of PARCS. They will not be directly used in PARCS codes. The API doc is provided as a support for understanding the PARCS algorithm.
+
+
+Distribution Parameter
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: pyparcs.api.output_distributions.DistParam
+    :members:
+
+PARCS Distribution
+~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: pyparcs.api.output_distributions.PARCSDistribution
+    :members:

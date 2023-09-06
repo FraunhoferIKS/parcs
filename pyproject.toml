@@ -1,9 +1,10 @@
 [project]
 name = "pyparcs"
-version = "0.2.0"
+version = "1.0.0"
 description = "A simulation package for causal methods"
 authors = [
     {name = "Alireza Zamanian", email = "alireza.zamanian@iks.fraunhofer.de"},
+    {name = "Ruijie Chen", email = "ruijie.chen@iks.fraunhofer.de"},
     {name = "Leopold Mareis", email = "leopold.mareis@iks.fraunhofer.de"}
 ]
 maintainers = [
@@ -11,7 +12,7 @@ maintainers = [
 ]
 license = {file = "LICENSE.txt"}
 readme = "README.md"
-requires-python = ">=3.5"
+requires-python = ">=3.8"
 keywords = ["simulation", "causal inference", "directed acyclic graphs"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -25,11 +26,13 @@ dependencies = [
     "numpy~=1.22.2",
     "pandas~=1.3.3",
     "scipy",
-    "matplotlib~=3.5.1",
     "scikit-learn~=1.0.2",
     "PyYAML~=6.0",
+    "typeguard~=2.13.3",
     "cycler~=0.11.0",
-    "typeguard"
+    "typing~=3.7.4.3",
+    "python-benedict~=0.32.0",
+    "matplotlib~=3.5.1",
 ]
 [project.optional-dependencies]
 test = ["pytest"]
@@ -42,3 +45,6 @@ repository = "https://github.com/FraunhoferIKS/parcs"
 
 [project.scripts]
 flit = "flit:main"
+
+[tool.setuptools.packages.find]
+exclude = ["paper_codes"]

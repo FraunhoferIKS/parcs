@@ -1,0 +1,54 @@
+@startuml
+actor User #179c7d
+participant Description as Desc #Application
+participant "is_eligible()" as Eligible
+participant "randomize_functions()" as RndF
+participant "randomize_parameters()" as RndP
+
+note over Eligible
+    checks if a line
+    must be addressed
+    by the randomizers
+end note
+
+note over RndF
+    alias for the following functions:
+
+    randomize_edge_function()
+    randomize_node_distribution()
+end note
+
+note over RndP
+    alias for the following functions:
+
+    randomize_edge_function_parameters()
+    randomize_node_distribution_parameters()
+end note
+
+User -> Desc: call .randomize_parameters(guideline, tags)
+
+loop edges
+    Desc -> Eligible: edge, edge_tag
+    Eligible -> Desc: is eligible?
+    alt eligible
+        Desc -> RndF: edge, guideline
+        RndF --> Desc: edge function filled (inplace)
+
+        Desc -> RndP: edge, guideline
+        RndP --> Desc: edge function parameters filled (inplace)
+    end
+end
+
+loop nodes
+    Desc -> Eligible: node, node_type, node_tag
+    Eligible -> Desc: is eligible?
+    alt eligible
+        Desc -> RndF: node, guideline
+        RndF --> Desc: node distribution filled (inplace)
+
+        Desc -> RndP: node, guideline
+        RndP --> Desc: node distribution parameters (inplace)
+    end
+end
+
+@enduml

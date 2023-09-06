@@ -1,0 +1,50 @@
+@startuml
+
+package "pyparcs.api.graph_objects" as core {
+    class "Node, detNode, ConstNode, dataNode" as Node {
+        .calculate()
+    }
+    class Edge {
+        .map()
+    }
+
+}
+
+json "Stochastic node dict" as stochNode {
+        "output_distribution": "distribution name",
+        "do_correction": "bool",
+        "correction_config": {"lower": "float", "upper": "float", "target_mean": "float"},
+        "dist_params_coefs": {
+            "param_1": {"bias": "int", "linear": "list(int)", "interactions": "list(int)}"
+            },
+            "param_2": "..."}
+}
+
+json "Constant node dict" as constNode {
+    "value": "float"
+}
+
+json "Deterministic node dict" as detNode {
+    "function": "callable"
+}
+
+json "Data node dict" as dataNode {
+    "csv_dir": "path str",
+    "col": "column name str"
+}
+
+stochNode -> Node
+detNode --> Node
+dataNode --> Node
+constNode --> Node
+
+json "Edge dict" as edgeDict {
+    "function_name": "edge function name str",
+    "function_params": "parameters of the function",
+    "do_correction": "bool",
+    "correction_config": "{}"
+}
+
+edgeDict --> Edge
+
+@enduml

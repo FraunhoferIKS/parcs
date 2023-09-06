@@ -1,8 +1,0 @@
-# nodes
-Z_1: data(some_data.csv)
-Z_2: data(some_data.csv)
-Z_3: gaussian(mu_=Z_1+Z_2, sigma_=0.1)
-
-# edges
-Z_1->Z_3: identity()
-Z_2->Z_3: identity()

@@ -1,0 +1,8 @@
+# nodes
+Y_1: normal(mu_=?, sigma_=1), correction[]
+Y_2: bernoulli(?), correction[]
+Y_3: bernoulli(?), correction[]
+# edges
+Y_1->Y_2: identity()
+Y_1->Y_3: identity()
+Y_2->Y_3: identity()

@@ -1,8 +1,0 @@
-# nodes
-Z_1: gaussian(mu_=0, sigma_=1)
-Z_2: bernoulli(p_=0.4)
-Z_3: deterministic(customs.py, expon)
-
-# edges
-Z_2->Z_3: identity()
-Z_1->Z_3: identity()

@@ -1,0 +1,5 @@
+edges:
+  arctan:
+    alpha: [f-range, 1, 5]
+    beta: [f-range, -0.8, 0.8]
+    gamma: 0

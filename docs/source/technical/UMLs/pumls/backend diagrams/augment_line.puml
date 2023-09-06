@@ -1,0 +1,22 @@
+@startuml
+
+start
+:**input**: line, term to add, to limit?;
+
+
+if (Node is non-stochastic or random?) then (yes)
+    :no change, return line;
+    stop
+else (no)
+    :find the end of index\n of the end of the params;
+endif
+while (for all params)
+    if (param is blocked and\n augment must be limited?) then (no)
+        :add term to the \n end of parameter;
+    else (yes)
+        :skip the parameter;
+    endif
+endwhile
+
+stop
+@enduml

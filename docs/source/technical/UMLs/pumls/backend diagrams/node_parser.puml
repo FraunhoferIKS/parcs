@@ -1,0 +1,98 @@
+@startuml
+|description_parser()|
+start
+-[dashed]-> node line;
+|#78C1F3|node_parser()|
+
+:tag parse;
+
+|#9BE8D8|parse_random_node()|
+-[dashed]-> node line;
+
+if ('random' in str?) then (yes)
+    :return all\n '?' stochastic node dict;
+else (no)
+    :not random;
+endif
+
+-[dashed]-> result;
+|node_parser()|
+
+if (was random node?) then (no)
+    :check if data;
+
+    |parse_data_node()|
+    -[dashed]-> node line;
+
+    if ('data(...)' in str?) then (yes)
+        :parse csv_dir &\n column name;
+    else (no)
+        :not data;
+    endif
+
+    -[dashed]-> result;
+    |node_parser()|
+
+    if (was data node?) then (no)
+        :check if constant;
+
+        |parse_constant_node()|
+        -[dashed]-> node line;
+
+        if ('constant()' in str?) then (yes)
+            :parse value;
+        else (no)
+            :not constant;
+        endif
+
+        -[dashed]-> result;
+        |node_parser()|
+
+        if (was constant node?) then (no)
+            :check if deterministic;
+
+            |parse_deterministic_node()|
+            -[dashed]-> node line;
+
+            if ('deterministic()' in str?) then (yes)
+                :read py function\n from module;
+            else (no)
+                :not deterministic;
+            endif
+
+            -[dashed]-> result;
+            |node_parser()|
+
+            if (was deterministic node?) then (no)
+                :check if stochastic;
+
+                |parse_stochastic_node()|
+                -[dashed]-> node line;
+
+                if (a distribution\n name in str?) then (yes)
+                    :read dist params;
+                    :extract coef vectors;
+                else (no)
+                    :not stochastic;
+                endif
+
+                -[dashed]-> result;
+                |node_parser()|
+
+                if (was stochastic node?) then (no)
+                    :raise Description Error;
+                    end
+                else (yes)
+                endif
+            else (yes)
+            endif
+        else (yes)
+        endif
+    else (yes)
+    endif
+else (yes)
+endif
+-[dashed]-> node dict;
+|description_parser()|
+stop
+@enduml

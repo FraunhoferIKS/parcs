@@ -1,0 +1,25 @@
+@startuml
+
+actor User #179c7d
+participant Description as Desc #Application
+participant "digest_outline()" as digest
+participant "description_parser()" as desc_parser
+participant "get_adj_matrix()" as adj
+participant "topological_sort()" as topo
+
+User -> Desc: outline (dict or path)
+
+Desc -> digest: send outline
+digest -> Desc: send dict
+Desc -> desc_parser: [outline dict , infer_edges arg]
+desc_parser -> Desc: [nodes, edges]
+Desc -> Desc: setup attributes
+activate Desc #SkyBlue
+Desc -> Desc: extract node types, tags
+Desc -> Desc: sorted node list, parents list
+Desc -> adj: [nodes, parents]
+adj -> Desc: adjacency matrix
+Desc -> topo: adjacency matrix
+topo -> Desc: topological sorting of the nodes
+
+@enduml
