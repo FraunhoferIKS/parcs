@@ -1,8 +1,9 @@
 [![DOI](https://zenodo.org/badge/592506885.svg)](https://zenodo.org/badge/latestdoi/592506885)
 ![PyPI](https://img.shields.io/pypi/v/pyparcs)
 
-![PARCS logo](./images/parcs_dark.svg#gh-dark-mode-only)
-![PARCS logo](./images/parcs_light.svg#gh-light-mode-only)
+<h1 align="center">
+<img src="https://raw.githubusercontent.com/FraunhoferIKS/parcs/9027c844fb1a46cacfdc55af5f54bf090ba8f707/images/parcs_light.svg" width="300">
+</h1><br>
 
 # A Python Package for Causal Simulation
 
