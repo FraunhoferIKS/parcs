@@ -130,6 +130,6 @@ description.outline
 - The PARCS documentation can be found [here](https://fraunhoferiks.github.io/parcs/).
 - Raise a development issue [here](https://github.com/FraunhoferIKS/parcs/issues)
 - Contact the authors for theoretical and technical support:
-  - [Alireza Zamanian](mailto:alireza.zamanian@iks.fraunhofer.de)
-  - [Ruijie Chen](mailto:ruijie.chen@iks.fraunhofer.de)
-  - [Leopold Mareis](mailto:leopold.mareis@iks.fraunhofer.de)
+  - [Alireza Zamanian](<https://orcid.org/0000-0001-7412-6755>)
+  - [Ruijie Chen]()
+  - [Leopold Mareis](<https://orcid.org/0000-0002-2624-6522>)
