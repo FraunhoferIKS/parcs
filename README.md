@@ -21,7 +21,7 @@ Regional Development and
 **_Cite this work:_** The supporting research paper for PARCS will be announced here soon for 
 citation and reference.
 
-> **_NOTE:_** This project is under active development.
+> **_NOTE:_** This project is not under active development anymore. It remains here for reference only.
 
 ## Installation
 
@@ -128,7 +128,6 @@ description.outline
 ## Documentation & Support
 
 - The PARCS documentation can be found [here](https://fraunhoferiks.github.io/parcs/).
-- Raise a development issue [here](https://github.com/FraunhoferIKS/parcs/issues)
 - Contact the authors for theoretical and technical support:
   - [Alireza Zamanian](<https://orcid.org/0000-0001-7412-6755>)
   - [Ruijie Chen]()
